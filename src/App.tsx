@@ -49,85 +49,85 @@ const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
 
 function AnimatedRoutes() {
-  const location = useLocation();
-  return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<RootLayout />}>
-          {/* Public Landing & Role Selection */}
-          <Route index element={<LandingPage />} />
-          <Route path="roles" element={<RoleSelection />} />
-          
-          {/* Authentication Routes */}
-          <Route path="farmer/login" element={<FarmerLogin />} />
-          <Route path="operator/login" element={<OperatorLogin />} />
-          <Route path="admin/login" element={<AdminLogin />} />
-          <Route path="farmer/register" element={<FarmerRegistration />} />
-          
-          {/* Farmer Portal with Layout */}
-          <Route path="farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
-            <Route index element={<Navigate to="/farmer/dashboard" replace />} />
-            <Route path="dashboard" element={<FarmerDashboard />} />
-            <Route path="bookings" element={<FarmerBookings />} />
-            <Route path="centres" element={<CentreDiscovery />} />
-            <Route path="book" element={<SlotBooking />} />
-            <Route path="queue" element={<LiveQueue />} />
-            <Route path="payments" element={<FarmerPayments />} />
-            <Route path="profile" element={<FarmerProfile />} />
-            <Route path="notifications" element={<FarmerNotifications />} />
-            <Route path="support" element={<FarmerSupport />} />
-          </Route>
-          
-          {/* Mandi Operator Console with Layout */}
-          <Route path="operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
-            <Route index element={<Navigate to="/operator/dashboard" replace />} />
-            <Route path="dashboard" element={<OperatorDashboard />} />
-            <Route path="queue" element={<OperatorQueue />} />
-            <Route path="quality" element={<QualityCheck />} />
-            <Route path="weighment" element={<Weighment />} />
-          </Route>
-          
-          {/* State Admin Routes */}
-          <Route path="admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminOverview />} />
-            <Route path="centres" element={<AdminCentres />} />
-            <Route path="slots" element={<AdminSlots />} />
-            <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="transactions" element={<AdminTransactions />} />
-          </Route>
+ const location = useLocation();
+ return (
+ <AnimatePresence mode="wait">
+ <Routes location={location} key={location.pathname}>
+ <Route path="/" element={<RootLayout />}>
+ {/* Public Landing & Role Selection */}
+ <Route index element={<LandingPage />} />
+ <Route path="roles" element={<RoleSelection />} />
+ 
+ {/* Authentication Routes */}
+ <Route path="farmer/login" element={<FarmerLogin />} />
+ <Route path="operator/login" element={<OperatorLogin />} />
+ <Route path="admin/login" element={<AdminLogin />} />
+ <Route path="farmer/register" element={<FarmerRegistration />} />
+ 
+ {/* Farmer Portal with Layout */}
+ <Route path="farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
+ <Route index element={<Navigate to="/farmer/dashboard" replace />} />
+ <Route path="dashboard" element={<FarmerDashboard />} />
+ <Route path="bookings" element={<FarmerBookings />} />
+ <Route path="centres" element={<CentreDiscovery />} />
+ <Route path="book" element={<SlotBooking />} />
+ <Route path="queue" element={<LiveQueue />} />
+ <Route path="payments" element={<FarmerPayments />} />
+ <Route path="profile" element={<FarmerProfile />} />
+ <Route path="notifications" element={<FarmerNotifications />} />
+ <Route path="support" element={<FarmerSupport />} />
+ </Route>
+ 
+ {/* Mandi Operator Console with Layout */}
+ <Route path="operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
+ <Route index element={<Navigate to="/operator/dashboard" replace />} />
+ <Route path="dashboard" element={<OperatorDashboard />} />
+ <Route path="queue" element={<OperatorQueue />} />
+ <Route path="quality" element={<QualityCheck />} />
+ <Route path="weighment" element={<Weighment />} />
+ </Route>
+ 
+ {/* State Admin Routes */}
+ <Route path="admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
+ <Route index element={<Navigate to="/admin/dashboard" replace />} />
+ <Route path="dashboard" element={<AdminOverview />} />
+ <Route path="centres" element={<AdminCentres />} />
+ <Route path="slots" element={<AdminSlots />} />
+ <Route path="analytics" element={<AdminAnalytics />} />
+ <Route path="transactions" element={<AdminTransactions />} />
+ </Route>
 
-          {/* User-friendly Route Aliases */}
-          <Route path="login" element={<Navigate to="/roles" replace />} />
-          <Route path="register" element={<Navigate to="/farmer/register" replace />} />
-          <Route path="dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
-          <Route path="centres" element={<Navigate to="/farmer/centres" replace />} />
-          <Route path="mandis" element={<Navigate to="/farmer/centres" replace />} />
-          <Route path="book" element={<Navigate to="/farmer/book" replace />} />
-          <Route path="queue" element={<Navigate to="/farmer/queue" replace />} />
-          <Route path="quality" element={<Navigate to="/operator/quality" replace />} />
-          <Route path="weighment" element={<Navigate to="/operator/weighment" replace />} />
-          
-          {/* 404 Route Not Found Page */}
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </AnimatePresence>
-  );
+ {/* User-friendly Route Aliases */}
+ <Route path="login" element={<Navigate to="/roles" replace />} />
+ <Route path="register" element={<Navigate to="/farmer/register" replace />} />
+ <Route path="dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
+ <Route path="centres" element={<Navigate to="/farmer/centres" replace />} />
+ <Route path="mandis" element={<Navigate to="/farmer/centres" replace />} />
+ <Route path="book" element={<Navigate to="/farmer/book" replace />} />
+ <Route path="queue" element={<Navigate to="/farmer/queue" replace />} />
+ <Route path="quality" element={<Navigate to="/operator/quality" replace />} />
+ <Route path="weighment" element={<Navigate to="/operator/weighment" replace />} />
+ 
+ {/* 404 Route Not Found Page */}
+ <Route path="*" element={<NotFound />} />
+ </Route>
+ </Routes>
+ </AnimatePresence>
+ );
 }
 
 function App() {
-  return (
-    <Router>
-      <ScrollToTop />
-      <Toaster position="top-right" richColors closeButton />
-      <ReloadPrompt />
-      
-      <Suspense fallback={<PageLoader />}>
-        <AnimatedRoutes />
-      </Suspense>
-    </Router>
-  );
+ return (
+ <Router>
+ <ScrollToTop />
+ <Toaster position="top-right" richColors closeButton />
+ <ReloadPrompt />
+ 
+ <Suspense fallback={<PageLoader />}>
+ <AnimatedRoutes />
+ </Suspense>
+ </Router>
+ );
 }
 
 export default App;

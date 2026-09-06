@@ -8,19 +8,19 @@ import React from 'react';
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 
 const createSvgIcon = (color: string) => {
-  return new L.DivIcon({
-    className: 'custom-leaflet-icon',
-    html: renderToStaticMarkup(
-      React.createElement(
-        'div',
-        { style: { color, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.4))' } },
-        React.createElement(MapPin, { size: 36, fill: color, color: 'white', strokeWidth: 1.5 })
-      )
-    ),
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-    popupAnchor: [0, -36],
-  });
+ return new L.DivIcon({
+ className: 'custom-leaflet-icon',
+ html: renderToStaticMarkup(
+ React.createElement(
+ 'div',
+ { style: { color, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.4))' } },
+ React.createElement(MapPin, { size: 36, fill: color, color: 'white', strokeWidth: 1.5 })
+ )
+ ),
+ iconSize: [36, 36],
+ iconAnchor: [18, 36],
+ popupAnchor: [0, -36],
+ });
 };
 
 export const defaultMapIcon = createSvgIcon('#3b82f6'); // Blue

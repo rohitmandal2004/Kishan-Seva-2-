@@ -48,6 +48,8 @@ CREATE TABLE public.farmer_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   farmer_code VARCHAR(50) UNIQUE NOT NULL,
+  clerk_user_id VARCHAR(255),
+  role VARCHAR(50) DEFAULT 'FARMER',
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   email VARCHAR(255),
@@ -71,9 +73,11 @@ CREATE TABLE public.farmer_profiles (
 CREATE TABLE public.operator_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  clerk_user_id VARCHAR(255),
   operator_code VARCHAR(50) UNIQUE NOT NULL,
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20) NOT NULL,
+  email VARCHAR(255),
   centre_id UUID,
   role_designation VARCHAR(100) DEFAULT 'Quality & Weighbridge In-charge',
   status VARCHAR(50) DEFAULT 'ACTIVE',
@@ -84,6 +88,7 @@ CREATE TABLE public.operator_profiles (
 CREATE TABLE public.admin_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  clerk_user_id VARCHAR(255),
   admin_code VARCHAR(50) UNIQUE NOT NULL,
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -560,9 +565,9 @@ VALUES
 
 -- 3. Demo Farmer Profile: Rohit Mandal (4.3 Acres)
 INSERT INTO public.farmer_profiles
-  (id, farmer_code, full_name, phone, aadhaar_last_four, state, district, village, latitude, longitude, land_area_acres, bank_name, account_number_masked, ifsc_code, verification_status)
+  (id, farmer_code, full_name, phone, email, aadhaar_last_four, state, district, village, latitude, longitude, land_area_acres, bank_name, account_number_masked, ifsc_code, verification_status)
 VALUES
-  ('f1111111-1111-1111-1111-111111111111', 'KIS-FMR-00001', 'Rohit Mandal', '9876543210', '8842', 'West Bengal', 'North 24 Parganas', 'Basirhat', 22.6168, 88.4369, 4.30, 'State Bank of India', 'XXXX-XXXX-4591', 'SBIN0001245', 'VERIFIED');
+  ('f1111111-1111-1111-1111-111111111111', 'KIS-FMR-00001', 'Rohit Mandal', '9876543210', 'rohitmandal0804@gmail.com', '8842', 'West Bengal', 'North 24 Parganas', 'Basirhat', 22.6168, 88.4369, 4.30, 'State Bank of India', 'XXXX-XXXX-4591', 'SBIN0001245', 'VERIFIED');
 
 -- 4. Demo Farmer Crops
 INSERT INTO public.farmer_crops (farmer_id, crop_id, season, area_acres, expected_quantity, status)
@@ -577,9 +582,9 @@ FROM public.crops
 WHERE name IN ('Paddy (Grade A)', 'Wheat', 'Mustard');
 
 -- 5. Operators & Admins
-INSERT INTO public.operator_profiles (id, operator_code, full_name, phone, centre_id, role_designation) VALUES
-  ('e1111111-1111-1111-1111-111111111111', 'OP-001', 'Pradip Ghosh', '9830012345', 'c1111111-1111-1111-1111-111111111111', 'Weighbridge Senior Operator'),
-  ('e2222222-2222-2222-2222-222222222222', 'OP-002', 'Subhasish Das', '9830067890', 'c1111111-1111-1111-1111-111111111111', 'Chief Quality Assay Inspector');
+INSERT INTO public.operator_profiles (id, operator_code, full_name, phone, email, centre_id, role_designation) VALUES
+  ('e1111111-1111-1111-1111-111111111111', 'OP-001', 'Pradip Ghosh', '9830012345', 'operator@kishanseva.gov.in', 'c1111111-1111-1111-1111-111111111111', 'Weighbridge Senior Operator'),
+  ('e2222222-2222-2222-2222-222222222222', 'OP-002', 'Subhasish Das', '9830067890', 'inspector@kishanseva.gov.in', 'c1111111-1111-1111-1111-111111111111', 'Chief Quality Assay Inspector');
 
 INSERT INTO public.admin_profiles (id, admin_code, full_name, phone, email, jurisdiction_state) VALUES
   ('a1111111-1111-1111-1111-111111111111', 'ADMIN', 'State Directorate Admin', '9830000000', 'admin@kishanseva.gov.in', 'West Bengal');
