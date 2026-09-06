@@ -186,6 +186,20 @@ $$ LANGUAGE plpgsql STABLE;
 -- Atomic weighment submission: updates booking status + inserts quality_check +
 -- inserts weighment in a single database transaction. If any step fails, all
 -- changes are rolled back.
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN (
+    SELECT p.proname, pg_catalog.pg_get_function_identity_arguments(p.oid) AS args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname = 'submit_weighment_transaction'
+  ) LOOP
+    EXECUTE 'DROP FUNCTION IF EXISTS public.' || quote_ident(r.proname) || '(' || r.args || ') CASCADE;';
+  END LOOP;
+END $$;
+
 CREATE OR REPLACE FUNCTION submit_weighment_transaction(
   p_booking_id UUID,
   p_status TEXT,
@@ -310,7 +324,7 @@ BEGIN
     WHERE id = (SELECT centre_id FROM public.bookings WHERE id = p_booking_id);
   END IF;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -338,11 +352,33 @@ CREATE POLICY centres_public_read ON public.procurement_centres
   FOR SELECT
   USING (true);
 
--- Grant execute on RPCs to anon and authenticated users
-GRANT EXECUTE ON FUNCTION find_nearest_centres TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION get_queue_prediction TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION submit_weighment_transaction TO anon, authenticated;
+-- Grant execute on RPCs to anon and authenticated users dynamically
+DO $$
+DECLARE
+  r RECORD;
+BEGIN
+  FOR r IN (
+    SELECT p.proname, pg_catalog.pg_get_function_identity_arguments(p.oid) AS args
+    FROM pg_proc p
+    JOIN pg_namespace n ON p.pronamespace = n.oid
+    WHERE n.nspname = 'public' AND p.proname IN (
+      'find_nearest_centres',
+      'get_queue_prediction',
+      'submit_weighment_transaction'
+    )
+  ) LOOP
+    EXECUTE 'GRANT EXECUTE ON FUNCTION public.' || quote_ident(r.proname) || '(' || r.args || ') TO anon, authenticated;';
+  END LOOP;
+END $$;
 
--- Grant select on the view
-GRANT SELECT ON public.v_centre_queue_metrics TO anon, authenticated;
+-- Grant select on the view safely
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.views 
+    WHERE table_schema = 'public' AND table_name = 'v_centre_queue_metrics'
+  ) THEN
+    EXECUTE 'GRANT SELECT ON public.v_centre_queue_metrics TO anon, authenticated;';
+  END IF;
+END $$;
 

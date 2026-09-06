@@ -3,40 +3,23 @@
 -- Migration: 20260906000002_fix_permissions_and_rpcs.sql
 -- ==============================================================================
 
--- 1. Ensure operator_profiles and admin_profiles have clerk_user_id and email
-DO $$
-BEGIN
-  -- operator_profiles: clerk_user_id
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'operator_profiles' AND column_name = 'clerk_user_id'
-  ) THEN
-    ALTER TABLE public.operator_profiles ADD COLUMN clerk_user_id VARCHAR(255);
-  END IF;
-
-  -- operator_profiles: email
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'operator_profiles' AND column_name = 'email'
-  ) THEN
-    ALTER TABLE public.operator_profiles ADD COLUMN email VARCHAR(255);
-  END IF;
-
-  -- admin_profiles: clerk_user_id
-  IF NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_schema = 'public' AND table_name = 'admin_profiles' AND column_name = 'clerk_user_id'
-  ) THEN
-    ALTER TABLE public.admin_profiles ADD COLUMN clerk_user_id VARCHAR(255);
-  END IF;
-END $$;
+-- 1. Ensure operator_profiles, admin_profiles, and farmer_profiles have clerk_user_id and email
+ALTER TABLE public.operator_profiles ADD COLUMN IF NOT EXISTS clerk_user_id VARCHAR(255);
+ALTER TABLE public.operator_profiles ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE public.admin_profiles ADD COLUMN IF NOT EXISTS clerk_user_id VARCHAR(255);
+ALTER TABLE public.admin_profiles ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE public.farmer_profiles ADD COLUMN IF NOT EXISTS clerk_user_id VARCHAR(255);
+ALTER TABLE public.farmer_profiles ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE public.farmer_profiles ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'FARMER';
 
 CREATE INDEX IF NOT EXISTS idx_operator_profiles_clerk_id ON public.operator_profiles(clerk_user_id);
 CREATE INDEX IF NOT EXISTS idx_operator_profiles_email ON public.operator_profiles(email);
 CREATE INDEX IF NOT EXISTS idx_admin_profiles_clerk_id ON public.admin_profiles(clerk_user_id);
 CREATE INDEX IF NOT EXISTS idx_admin_profiles_email ON public.admin_profiles(email);
+CREATE INDEX IF NOT EXISTS idx_farmer_profiles_clerk_id ON public.farmer_profiles(clerk_user_id);
+CREATE INDEX IF NOT EXISTS idx_farmer_profiles_email ON public.farmer_profiles(email);
 
--- 2. Update default operator profiles with known emails
+-- 2. Update default operator, admin, and farmer profiles with known emails
 UPDATE public.operator_profiles
 SET email = 'operator@kishanseva.gov.in'
 WHERE operator_code = 'OP-001' AND (email IS NULL OR email = '');
@@ -45,7 +28,17 @@ UPDATE public.operator_profiles
 SET email = 'inspector@kishanseva.gov.in'
 WHERE operator_code = 'OP-002' AND (email IS NULL OR email = '');
 
--- 3. Update submit_weighment_transaction with SECURITY DEFINER and p_rejection_reason
+UPDATE public.farmer_profiles
+SET email = 'rohitmandal0804@gmail.com'
+WHERE farmer_code = 'KIS-FMR-00001' AND (email IS NULL OR email = '');
+
+-- 3. Drop all previous overloaded variants of submit_weighment_transaction
+DROP FUNCTION IF EXISTS public.submit_weighment_transaction(UUID, TEXT, DECIMAL, DECIMAL, DECIMAL, TEXT, TEXT, TEXT, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, TEXT, TEXT, TEXT, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS public.submit_weighment_transaction(UUID, TEXT, DECIMAL, DECIMAL, DECIMAL, TEXT, TEXT, TEXT, TEXT, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, DECIMAL, TEXT, TEXT, TEXT, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS public.submit_weighment_transaction(UUID, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT) CASCADE;
+DROP FUNCTION IF EXISTS public.submit_weighment_transaction(UUID, TEXT, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, NUMERIC, TEXT, TEXT, TEXT, TEXT) CASCADE;
+
+-- 3.1 Create canonical submit_weighment_transaction RPC with SECURITY DEFINER
 CREATE OR REPLACE FUNCTION public.submit_weighment_transaction(
   p_booking_id UUID,
   p_status TEXT,
@@ -172,7 +165,11 @@ BEGIN
 END;
 $$;
 
--- 4. Create robust create_booking function supporting Clerk IDs & UUIDs
+-- 4. Drop all previous overloaded variants of create_booking
+DROP FUNCTION IF EXISTS public.create_booking(UUID, UUID, VARCHAR, DECIMAL, DATE, VARCHAR, VARCHAR, VARCHAR) CASCADE;
+DROP FUNCTION IF EXISTS public.create_booking(TEXT, UUID, VARCHAR, DECIMAL, DATE, VARCHAR, VARCHAR, VARCHAR) CASCADE;
+
+-- 4.1 Create robust create_booking function supporting Clerk IDs & UUIDs
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_farmer_id TEXT,
   p_centre_id UUID,
@@ -278,9 +275,84 @@ CREATE POLICY bookings_all_update ON public.bookings
   FOR UPDATE
   USING (true);
 
--- 6. Grant execute on RPCs to both anon and authenticated
-GRANT EXECUTE ON FUNCTION public.find_nearest_centres TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.get_queue_prediction TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.submit_weighment_transaction TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.create_booking(TEXT, UUID, VARCHAR, DECIMAL, DATE, VARCHAR, VARCHAR, VARCHAR) TO anon, authenticated;
-GRANT SELECT ON public.v_centre_queue_metrics TO anon, authenticated;
+-- 6. Ensure Queue Metrics View and Queue Prediction RPC exist
+CREATE OR REPLACE VIEW public.v_centre_queue_metrics AS
+SELECT
+  b.centre_id,
+  COUNT(*) FILTER (WHERE b.status IN ('CHECKED_IN', 'WAITING'))        AS checked_in_count,
+  COUNT(*) FILTER (WHERE b.status IN ('QUALITY_TESTING', 'WEIGHMENT')) AS processing_count,
+  COUNT(*) FILTER (WHERE b.status = 'BOOKED')                          AS prebooked_count,
+  COUNT(*) FILTER (WHERE b.status NOT IN ('COMPLETED', 'CANCELLED'))   AS total_active,
+  -- Predicted wait: (checked_in + processing + 40% of prebooked) * 4.5 mins avg
+  GREATEST(5, ROUND(
+    (
+      COUNT(*) FILTER (WHERE b.status IN ('CHECKED_IN', 'WAITING'))
+      + COUNT(*) FILTER (WHERE b.status IN ('QUALITY_TESTING', 'WEIGHMENT'))
+      + ROUND(COUNT(*) FILTER (WHERE b.status = 'BOOKED') * 0.4 * 0.95)
+    ) * 4.5
+  ))::INTEGER AS predicted_wait_mins,
+  -- Processing rate: ~13 vehicles/hour at 4.5 mins avg
+  13 AS processing_rate_per_hour,
+  -- Confidence tier
+  CASE
+    WHEN COUNT(*) < 3 THEN 'LOW'
+    WHEN COUNT(*) FILTER (WHERE b.status = 'BOOKED') > 20 THEN 'MEDIUM'
+    ELSE 'HIGH'
+  END AS confidence
+FROM public.bookings b
+WHERE b.slot_date = CURRENT_DATE
+GROUP BY b.centre_id;
+
+-- 6.1 Drop and recreate get_queue_prediction RPC
+DROP FUNCTION IF EXISTS public.get_queue_prediction(UUID) CASCADE;
+
+CREATE OR REPLACE FUNCTION public.get_queue_prediction(p_centre_id UUID)
+RETURNS TABLE (
+  centre_id UUID,
+  checked_in_count BIGINT,
+  processing_count BIGINT,
+  prebooked_count BIGINT,
+  total_active BIGINT,
+  predicted_wait_mins INTEGER,
+  processing_rate_per_hour INTEGER,
+  confidence TEXT
+)
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    m.centre_id,
+    m.checked_in_count,
+    m.processing_count,
+    m.prebooked_count,
+    m.total_active,
+    m.predicted_wait_mins,
+    m.processing_rate_per_hour,
+    m.confidence
+  FROM public.v_centre_queue_metrics m
+  WHERE m.centre_id = p_centre_id;
+
+  IF NOT FOUND THEN
+    RETURN QUERY SELECT
+      p_centre_id,
+      0::BIGINT,
+      0::BIGINT,
+      0::BIGINT,
+      0::BIGINT,
+      5::INTEGER,
+      13::INTEGER,
+      'LOW'::TEXT;
+  END IF;
+END;
+$$;
+
+-- 7. Universal clean grant on schema public (no procedural loops, 100% standard SQL)
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO anon, authenticated;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO anon, authenticated;

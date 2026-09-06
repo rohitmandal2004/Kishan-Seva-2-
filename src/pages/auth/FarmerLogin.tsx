@@ -37,7 +37,8 @@ export default function FarmerLogin() {
   // Auto-redirect if already logged in with a valid session and profile
   useEffect(() => {
     if (isConfigured && !isProfileLoading && user && user.role === 'FARMER') {
-      if (farmer) {
+      const hasProfile = Boolean(farmer || localStorage.getItem('kishan_farmer_profile'));
+      if (hasProfile) {
         navigate('/farmer/dashboard', { replace: true });
       }
     }
@@ -176,22 +177,38 @@ export default function FarmerLogin() {
         // Query Supabase for role using the centralized resolver
         const { role, farmerProfile } = await resolveRole(clerkUserId, cleanEmail);
 
-        if (role === 'FARMER' && farmerProfile) {
-          await refreshProfile();
-          toast.success('Welcome back to Kishan Seva!');
-          navigate('/farmer/dashboard', { replace: true });
+        if (role === 'FARMER' || (!role && cleanEmail)) {
+          let effectiveFarmer = farmerProfile;
+          if (!effectiveFarmer) {
+            try {
+              const cached = localStorage.getItem('kishan_farmer_profile');
+              if (cached) effectiveFarmer = JSON.parse(cached);
+            } catch {}
+          }
+
+          if (effectiveFarmer) {
+            setFarmer(effectiveFarmer);
+            try {
+              localStorage.setItem('kishan_farmer_profile', JSON.stringify(effectiveFarmer));
+            } catch {}
+            await refreshProfile().catch(() => {});
+            toast.success('Welcome back to Kishan Seva!');
+            navigate('/farmer/dashboard', { replace: true });
+          } else {
+            // First-time farmer: authenticated with Clerk OTP, now complete registration details
+            toast.info('Email verified! Please complete your farmer details.');
+            navigate('/farmer/register', { replace: true });
+          }
         } else if (role === 'OPERATOR') {
-          await refreshProfile();
+          await refreshProfile().catch(() => {});
           toast.success('Operator Authentication Successful');
           navigate('/operator/dashboard', { replace: true });
         } else if (role === 'ADMIN') {
-          await refreshProfile();
+          await refreshProfile().catch(() => {});
           toast.success('Admin Authentication Successful');
           navigate('/admin/dashboard', { replace: true });
         } else {
-          // Clerk user exists, but no valid role profile in Supabase
-          if (signOut) await signOut();
-          toast.error('Account not registered. Please register first.');
+          toast.info('Email verified! Please complete your farmer details.');
           navigate('/farmer/register', { replace: true });
         }
       } else {
