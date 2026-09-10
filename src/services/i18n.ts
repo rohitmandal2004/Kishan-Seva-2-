@@ -657,7 +657,198 @@ export const translations: Translations = {
  hi: 'भुगतान व पर्चियां',
  bn: 'পেমেন্ট ও রসিদ',
  },
+
+    // Additional Farmer Dashboard
+    total_procured: {
+        en: 'Total Procured',
+        hi: 'कुल खरीद',
+        bn: 'মোট সংগ্রহ',
+    },
+    historical_sales: {
+        en: 'Historical sales',
+        hi: 'पिछली बिक्री',
+        bn: 'পূর্ববর্তী বিক্রয়',
+    },
+    dbt_disbursed: {
+        en: 'DBT Disbursed',
+        hi: 'डीबीटी भुगतान',
+        bn: 'ডিবিটি পেমেন্ট',
+    },
+    yield_estimator: {
+        en: 'Yield Estimator',
+        hi: 'उपज अनुमानक',
+        bn: 'ফসল অনুমানকারী',
+    },
+    est_harvest: {
+        en: 'est. harvest',
+        hi: 'अनुमानित फसल',
+        bn: 'আনুমানিক ফসল',
+    },
+    est_msp_value: {
+        en: 'Est. MSP Value:',
+        hi: 'अनुमानित एमएसपी मूल्य:',
+        bn: 'আনুমানিক এমএসপি মূল্য:',
+    },
+    rate_advantage: {
+        en: 'Rate Advantage',
+        hi: 'मूल्य लाभ',
+        bn: 'মূল্যের সুবিধা',
+    },
+    local_market_rate: {
+        en: 'Local Market Rate:',
+        hi: 'स्थानीय बाजार दर:',
+        bn: 'স্থানীয় বাজারের দর:',
+    },
+    active_pass: {
+        en: 'YOUR ACTIVE PROCUREMENT PASS',
+        hi: 'आपका सक्रिय खरीद पास',
+        bn: 'আপনার সক্রিয় সংগ্রহ পাস',
+    },
+    track_queue: {
+        en: 'Track in Live Queue',
+        hi: 'लाइव कतार में ट्रैक करें',
+        bn: 'লাইভ কিউ তে ট্র্যাক করুন',
+    },
+    book_new_slot: {
+        en: 'Book New Slot',
+        hi: 'नया स्लॉट बुक करें',
+        bn: 'নতুন স্লট বুক করুন',
+    },
+    download_receipt: {
+        en: 'Download Receipt',
+        hi: 'रसीद डाउनलोड करें',
+        bn: 'রসিদ ডাউনলোড করুন',
+    },
+    
+    // Slot Booking & Queue
+    book_slot_title: {
+        en: 'Book Procurement Slot',
+        hi: 'खरीद स्लॉट बुक करें',
+        bn: 'সংগ্রহ স্লট বুক করুন',
+    },
+    select_mandi: {
+        en: 'Select Mandi',
+        hi: 'मंडी चुनें',
+        bn: 'মন্ডি নির্বাচন করুন',
+    },
+    distance: {
+        en: 'Distance',
+        hi: 'दूरी',
+        bn: 'দূরত্ব',
+    },
+    select_date: {
+        en: 'Select Date',
+        hi: 'तारीख चुनें',
+        bn: 'তারিখ নির্বাচন করুন',
+    },
+    select_crop: {
+        en: 'Select Crop',
+        hi: 'फसल चुनें',
+        bn: 'ফসল নির্বাচন করুন',
+    },
+    expected_qty: {
+        en: 'Expected Quantity (Quintals)',
+        hi: 'अनुमानित मात्रा (क्विंटल)',
+        bn: 'আনুমানিক পরিমাণ (কুইন্টাল)',
+    },
+    vehicle_no: {
+        en: 'Vehicle Number',
+        hi: 'वाहन संख्या',
+        bn: 'গাড়ির নম্বর',
+    },
+    confirm_booking: {
+        en: 'Confirm Booking',
+        hi: 'बुकिंग की पुष्टि करें',
+        bn: 'বুকিং নিশ্চিত করুন',
+    },
+    live_queue_status: {
+        en: 'Live Queue Status',
+        hi: 'लाइव कतार स्थिति',
+        bn: 'লাইভ কিউ পরিস্থিতি',
+    },
+
+  // ─── Notifications Page ─────────────────────────────────────────────────
+  notifications: { en: 'Notifications', hi: 'सूचनाएं', bn: 'বিজ্ঞপ্তি' },
+  notifications_subtitle: { en: 'Updates on your slot bookings and payments.', hi: 'आपकी स्लॉट बुकिंग और भुगतान पर अपडेट।', bn: 'আপনার স্লট বুকিং ও পেমেন্টের আপডেট।' },
+  mark_all_read: { en: 'Mark all as read', hi: 'सभी पढ़ा हुआ चिह्नित करें', bn: 'সব পঠিত হিসেবে চিহ্নিত করুন' },
+  no_notifications: { en: 'No notifications yet.', hi: 'कोई सूचना नहीं।', bn: 'কোনো বিজ্ঞপ্তি নেই।' },
+  notifications_empty_sub: { en: 'You will be notified about queue updates, payments, and slot confirmations.', hi: 'कतार, भुगतान, और स्लॉट पुष्टि पर सूचित किया जाएगा।', bn: 'কিউ, পেমেন্ট এবং স্লট নিশ্চিতকরণের বিষয়ে জানানো হবে।' },
+  just_now: { en: 'Just now', hi: 'अभी', bn: 'এইমাত্র' },
+  notifications_footer: { en: 'Tap a notification to mark it as read.', hi: 'पढ़ा हुआ चिह्नित करने के लिए सूचना पर टैप करें।', bn: 'পড়া হিসেবে চিহ্নিত করতে বিজ্ঞপ্তিতে ট্যাপ করুন।' },
+
+  // ─── Support Page ───────────────────────────────────────────────────────
+  help_support: { en: 'Help & Support', hi: 'सहायता और समर्थन', bn: 'সহায়তা ও সমর্থন' },
+  support_subtitle: { en: 'Need assistance with your procurement process? We\'re here to help.', hi: 'खरीद प्रक्रिया में सहायता चाहिए? हम यहाँ हैं।', bn: 'ক্রয় প্রক্রিয়ায় সহায়তা দরকার? আমরা এখানে আছি।' },
+  kishan_helpline: { en: 'Kishan Helpline', hi: 'किसान हेल्पलाइन', bn: 'কিষাণ হেল্পলাইন' },
+  helpline_subtitle: { en: 'Toll-free 24/7 support in local languages.', hi: '24/7 टोल-फ्री सहायता स्थानीय भाषाओं में।', bn: '২৪/৭ টোল-ফ্রি সহায়তা আঞ্চলিক ভাষায়।' },
+  toll_free_24x7: { en: 'Toll-Free · 24×7', hi: 'टोल-फ्री · 24×7', bn: 'টোল-ফ্রি · ২৪×৭' },
+  whatsapp_support: { en: 'WhatsApp Support', hi: 'व्हाट्सऐप सहायता', bn: 'হোয়াটসঅ্যাপ সহায়তা' },
+  whatsapp_support_subtitle: { en: 'Chat with our AI assistant for quick answers.', hi: 'त्वरित उत्तर के लिए हमारे AI सहायक से चैट करें।', bn: 'দ্রুত উত্তরের জন্য আমাদের AI সহায়কের সাথে চ্যাট করুন।' },
+  start_whatsapp: { en: 'Start WhatsApp Chat', hi: 'व्हाट्सऐप चैट शुरू करें', bn: 'হোয়াটসঅ্যাপ চ্যাট শুরু করুন' },
+  faq_title: { en: 'Frequently Asked Questions', hi: 'अक्सर पूछे जाने वाले प्रश्न', bn: 'সচরাচর জিজ্ঞাসিত প্রশ্ন' },
+  support_footer_text: { en: 'Still need help? Email us at', hi: 'और मदद चाहिए? ईमेल करें:', bn: 'আরো সাহায্য দরকার? ইমেইল করুন:' },
+  // FAQs
+  faq_q1: { en: 'How is the MSP calculated?', hi: 'MSP की गणना कैसे होती है?', bn: 'MSP কীভাবে গণনা করা হয়?' },
+  faq_a1: { en: 'The Minimum Support Price (MSP) is set by the Government of India for each crop per quintal. Mandi handling charges are deducted before the final DBT payout.', hi: 'MSP भारत सरकार द्वारा प्रति क्विंटल निर्धारित होता है। मंडी शुल्क काटने के बाद DBT भुगतान किया जाता है।', bn: 'MSP ভারত সরকার কর্তৃক প্রতি কুইন্টাল নির্ধারিত হয়। মান্ডি চার্জ কেটে DBT প্রদান করা হয়।' },
+  faq_q2: { en: 'What happens if my crop fails the moisture test?', hi: 'यदि फसल नमी परीक्षण में विफल हो तो क्या होगा?', bn: 'আমার ফসল আর্দ্রতা পরীক্ষায় ব্যর্থ হলে কী হবে?' },
+  faq_a2: { en: 'If moisture is above 17%, the produce may be rejected or subject to deductions. You will need to dry it and rebook a new slot.', hi: 'यदि नमी 17% से अधिक है, तो उपज अस्वीकार या कटौती के अधीन हो सकती है। सुखाकर नया स्लॉट बुक करें।', bn: 'আর্দ্রতা ১৭%-এর বেশি হলে ফসল প্রত্যাখ্যাত বা কর্তন সাপেক্ষ হতে পারে। শুকিয়ে নতুন স্লট বুক করুন।' },
+  faq_q3: { en: 'When will the money reach my bank account?', hi: 'पैसे मेरे खाते में कब पहुंचेंगे?', bn: 'টাকা আমার ব্যাংক অ্যাকাউন্টে কখন আসবে?' },
+  faq_a3: { en: 'Once the e-J-Form is generated at the weighbridge, DBT payout is initiated and typically reflects in your Aadhaar-linked account within 24–48 hours.', hi: 'धर्मकांटे पर e-J-Form बनने के बाद DBT भुगतान 24-48 घंटे में आपके आधार-लिंक्ड खाते में जाता है।', bn: 'ধর্মকাটায় e-J-Form তৈরির পরে DBT পেমেন্ট ২৪-৪৮ ঘণ্টার মধ্যে আপনার আধার-লিঙ্কড অ্যাকাউন্টে আসে।' },
+  faq_q4: { en: 'Can I reschedule my booked slot?', hi: 'क्या मैं अपना बुक किया हुआ स्लॉट बदल सकता हूं?', bn: 'আমি কি আমার বুক করা স্লট পরিবর্তন করতে পারি?' },
+  faq_a4: { en: 'Yes. Cancel your current booking from the "My Bookings" page and rebook a new slot. Cancellations are allowed up to 2 hours before the slot time.', hi: 'हाँ। "मेरी बुकिंग" से वर्तमान बुकिंग रद्द करें और नया स्लॉट बुक करें। स्लॉट से 2 घंटे पहले रद्द किया जा सकता है।', bn: 'হ্যাঁ। "আমার বুকিং" থেকে বর্তমান বুকিং বাতিল করুন এবং নতুন স্লট বুক করুন। স্লট সময়ের ২ ঘণ্টা আগে বাতিল করা যাবে।' },
+  faq_q5: { en: 'What documents should I bring to the Mandi?', hi: 'मंडी में कौन से दस्तावेज लाने चाहिए?', bn: 'মান্ডিতে কোন কাগজপত্র আনতে হবে?' },
+  faq_a5: { en: 'Bring your Digital E-Gate Pass (QR code), Aadhaar card, RoR/Khatian land record, bank passbook, and vehicle registration certificate.', hi: 'डिजिटल E-Gate Pass (QR कोड), आधार कार्ड, RoR/खतियान, बैंक पासबुक और वाहन पंजीकरण प्रमाणपत्र लाएं।', bn: 'ডিজিটাল E-Gate Pass (QR কোড), আধার কার্ড, RoR/খতিয়ান, ব্যাংক পাসবুক এবং যানবাহন নিবন্ধন সনদ আনুন।' },
+  faq_q6: { en: 'What if I arrive late for my slot?', hi: 'यदि मैं अपने स्लॉट के लिए देर से पहुंचूं तो?', bn: 'আমি যদি স্লটের জন্য দেরিতে পৌঁছাই?' },
+  faq_a6: { en: 'A 30-minute grace period is allowed. After that, your token may be moved to the end of the queue or marked as a no-show. Please contact the helpline immediately.', hi: '30 मिनट की छूट दी जाती है। उसके बाद टोकन कतार के अंत में जा सकता है। तुरंत हेल्पलाइन से संपर्क करें।', bn: '৩০ মিনিটের অনুগ্রহ সময় দেওয়া হয়। তারপরে টোকেন কিউয়ের শেষে যেতে পারে। অবিলম্বে হেল্পলাইনে যোগাযোগ করুন।' },
+  faq_q7: { en: 'How do I raise a dispute about my payment amount?', hi: 'भुगतान राशि के बारे में विवाद कैसे दर्ज करें?', bn: 'পেমেন্ট পরিমাণ নিয়ে কীভাবে অভিযোগ করব?' },
+  faq_a7: { en: 'Call the Kisan Helpline (1800-180-1551) within 7 working days of the weighment. Provide your token number and J-Form slip number for quick resolution.', hi: 'तुलाई के 7 कार्य दिवसों के भीतर किसान हेल्पलाइन (1800-180-1551) पर कॉल करें। टोकन नंबर और J-Form स्लिप नंबर दें।', bn: 'ওজনের ৭ কার্যদিবসের মধ্যে কিষাণ হেল্পলাইনে (1800-180-1551) ফোন করুন। টোকেন এবং J-Form স্লিপ নম্বর দিন।' },
+  faq_q8: { en: 'What vehicle types are accepted at procurement centres?', hi: 'खरीद केंद्रों पर कौन से वाहन स्वीकार किए जाते हैं?', bn: 'ক্রয় কেন্দ্রে কোন ধরনের যানবাহন গ্রহণযোগ্য?' },
+  faq_a8: { en: 'Tractors with trolleys, mini trucks (up to 5 tons), and cargo tempos are accepted. Two-wheelers and bullock carts are not permitted inside the weighbridge area.', hi: 'ट्रॉली वाले ट्रैक्टर, मिनी ट्रक (5 टन तक), और कार्गो टेम्पो स्वीकार किए जाते हैं। धर्मकांटा क्षेत्र में दोपहिया और बैलगाड़ी की अनुमति नहीं है।', bn: 'ট্রলি সহ ট্র্যাক্টর, মিনি ট্রাক (৫ টন পর্যন্ত), এবং কার্গো টেম্পো গ্রহণযোগ্য। ধর্মকাটা এলাকায় দুই চাকার গাড়ি ও গরুর গাড়ি অনুমোদিত নয়।' },
+
+  // ─── Payments Page ──────────────────────────────────────────────────────
+  payments_dbt: { en: 'Payments & DBT', hi: 'भुगतान और DBT', bn: 'পেমেন্ট ও DBT' },
+  payments_subtitle: { en: 'Track your Direct Benefit Transfers for all official procurements.', hi: 'सभी सरकारी खरीद के लिए DBT भुगतान ट्रैक करें।', bn: 'সকল সরকারি ক্রয়ের জন্য আপনার DBT ট্র্যাক করুন।' },
+  primary_dbt_account: { en: 'Primary DBT Account', hi: 'प्राथमिक DBT खाता', bn: 'প্রাথমিক DBT অ্যাকাউন্ট' },
+  verified: { en: 'Verified', hi: 'सत्यापित', bn: 'যাচাইকৃত' },
+  manage_details: { en: 'Manage Details', hi: 'विवरण प्रबंधित करें', bn: 'বিবরণ পরিচালনা করুন' },
+  update_bank_details: { en: 'Update Bank Details', hi: 'बैंक विवरण अपडेट करें', bn: 'ব্যাংক বিবরণ আপডেট করুন' },
+  update_bank_details_desc: { en: 'Update your account for receiving Direct Benefit Transfers (DBT).', hi: 'DBT प्राप्त करने के लिए खाता अपडेट करें।', bn: 'DBT পাওয়ার জন্য অ্যাকাউন্ট আপডেট করুন।' },
+  bank_name: { en: 'Bank Name', hi: 'बैंक का नाम', bn: 'ব্যাংকের নাম' },
+  account_no: { en: 'Account No.', hi: 'खाता संख्या', bn: 'অ্যাকাউন্ট নম্বর' },
+  ifsc_code: { en: 'IFSC Code', hi: 'IFSC कोड', bn: 'IFSC কোড' },
+  upi_id_optional: { en: 'UPI ID (Optional)', hi: 'UPI ID (वैकल्पिक)', bn: 'UPI ID (ঐচ্ছিক)' },
+  save_changes: { en: 'Save Changes', hi: 'बदलाव सहेजें', bn: 'পরিবর্তন সংরক্ষণ করুন' },
+  cancel: { en: 'Cancel', hi: 'रद्द करें', bn: 'বাতিল করুন' },
+  payment_details_saved: { en: 'Payment details updated successfully.', hi: 'भुगतान विवरण सफलतापूर्वक अपडेट किया गया।', bn: 'পেমেন্ট বিবরণ সফলভাবে আপডেট হয়েছে।' },
+  total_remitted: { en: 'Total Remitted', hi: 'कुल प्रेषित', bn: 'মোট প্রদত্ত' },
+  direct_to_bank: { en: 'Direct to Bank', hi: 'बैंक में सीधे', bn: 'সরাসরি ব্যাংকে' },
+  transactions: { en: 'Transactions', hi: 'लेन-देन', bn: 'লেনদেন' },
+  completed_disbursals: { en: 'Completed Disbursals', hi: 'पूर्ण वितरण', bn: 'সম্পন্ন বিতরণ' },
+  avg_msp_rate: { en: 'Avg. MSP Rate', hi: 'औसत MSP दर', bn: 'গড় MSP হার' },
+  per_quintal_avg: { en: 'Per Quintal (Avg.)', hi: 'प्रति क्विंटल (औसत)', bn: 'প্রতি কুইন্টাল (গড়)' },
+  seasonal_earnings: { en: 'Seasonal Earnings', hi: 'मौसमी आय', bn: 'মৌসুমী আয়' },
+  earnings_chart_note: { en: 'Most recent month highlighted in green', hi: 'सबसे हालिया महीना हरे रंग में दिखाया गया', bn: 'সবচেয়ে সাম্প্রতিক মাস সবুজে হাইলাইট করা হয়েছে' },
+  recent_disbursements: { en: 'Recent Disbursements', hi: 'हालिया वितरण', bn: 'সাম্প্রতিক বিতরণ' },
+  no_payments_yet: { en: 'No Payments Yet', hi: 'अभी कोई भुगतान नहीं', bn: 'এখনো কোনো পেমেন্ট নেই' },
+  no_payments_desc: { en: 'Your DBT disbursements appear here once a procurement slot is completed and weighment is certified.', hi: 'DBT भुगतान यहाँ तब दिखेगा जब स्लॉट पूरा हो और तुलाई प्रमाणित हो।', bn: 'DBT বিতরণ এখানে দেখাবে যখন একটি ক্রয় স্লট সম্পন্ন হবে এবং ওজন প্রত্যয়িত হবে।' },
+  no_payments_note: { en: 'Payments are typically credited within 24–48 hours of weighment.', hi: 'भुगतान आमतौर पर तुलाई के 24-48 घंटे के भीतर जमा होता है।', bn: 'পেমেন্ট সাধারণত ওজনের ২৪-৪৮ ঘণ্টার মধ্যে জমা হয়।' },
+  book_slot: { en: 'Book a Procurement Slot', hi: 'खरीद स्लॉट बुक करें', bn: 'ক্রয় স্লট বুক করুন' },
+  quintals: { en: 'Quintals', hi: 'क्विंटल', bn: 'কুইন্টাল' },
+  token: { en: 'Token', hi: 'टोकन', bn: 'টোকেন' },
+  date: { en: 'Date', hi: 'तारीख', bn: 'তারিখ' },
+  ref: { en: 'Ref', hi: 'संदर्भ', bn: 'রেফ' },
+  settled_amount: { en: 'Settled Amount', hi: 'निपटाई राशि', bn: 'নিষ্পত্তিকৃত পরিমাণ' },
+  credited_to_bank: { en: 'Credited to Bank', hi: 'बैंक में जमा', bn: 'ব্যাংকে জমা' },
+  listen_payment_audio: { en: 'Listen to payment confirmation', hi: 'भुगतान पुष्टि सुनें', bn: 'পেমেন্ট নিশ্চিতকরণ শুনুন' },
+  net_payable: { en: 'Net Payable', hi: 'शुद्ध देय', bn: 'নেট প্রদেয়' },
+
+  // ─── Offline / Push ─────────────────────────────────────────────────────
+  offline_banner: { en: 'Offline — Showing cached Gate Pass. Connect to internet for live queue updates.', hi: 'ऑफलाइन — कैश्ड गेट पास दिखाया जा रहा है। लाइव अपडेट के लिए इंटरनेट से जुड़ें।', bn: 'অফলাইন — ক্যাশড গেট পাস দেখানো হচ্ছে। লাইভ আপডেটের জন্য ইন্টারনেটে সংযুক্ত হোন।' },
+  push_banner_text: { en: 'Enable slot reminders to get notified 2 hours before your procurement appointment.', hi: 'खरीद अपॉइंटमेंट से 2 घंटे पहले सूचना पाने के लिए स्लॉट अनुस्मारक सक्षम करें।', bn: 'ক্রয় অ্যাপয়েন্টমেন্টের ২ ঘণ্টা আগে সূচিত হতে স্লট রিমাইন্ডার সক্রিয় করুন।' },
+  enable: { en: 'Enable', hi: 'सक्षम करें', bn: 'সক্রিয় করুন' },
+
 };
+
 
 export class LanguageManager {
  private currentLang: Language = 'en';

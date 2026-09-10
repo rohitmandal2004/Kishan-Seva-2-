@@ -55,7 +55,7 @@ export function LanguageSelector({ variant = 'pill', className = '' }: LanguageS
 
  return (
  <div className={`flex items-center gap-1 bg-slate-100/90 hover:bg-slate-100 border border-slate-200/80 p-0.5 rounded-full text-xs shadow-xs ${className}`}>
- <span className="pl-2 pr-1 text-slate-400">
+ <span className="pl-2 pr-1 text-slate-500">
  <Globe className="w-3.5 h-3.5" />
  </span>
  {LANGUAGES.map((l) => (

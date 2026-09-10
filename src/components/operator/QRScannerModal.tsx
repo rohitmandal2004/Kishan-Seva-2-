@@ -9,7 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { Booking } from '@/types';
 import {
  QrCode,
@@ -35,8 +35,8 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
  onClose,
  onScanSuccess,
 }) => {
- const store = useMockStore();
- const bookings = store.getBookings();
+ const store = useKishanData();
+ const bookings = store.bookings;
 
  const [manualToken, setManualToken] = useState('');
  const [isScanningActive, setIsScanningActive] = useState(true);

@@ -15,6 +15,7 @@ import {
  NotificationItem,
  UserRole
 } from '@/types';
+import { get, set } from 'idb-keyval';
 
 export type { FarmerProfile, ProcurementCentre, QualityCheck, Weighment, Booking, BookingStatus, NotificationItem, UserRole };
 
@@ -200,56 +201,57 @@ interface StoreState {
  notifications: NotificationItem[];
 }
 
-class AppStore {
+export class AppStore {
  private state: StoreState;
  private listeners: Set<() => void> = new Set();
+ /** Monotonically-increasing counter — changes on every mutation so
+ * useSyncExternalStore can detect that something changed and re-render. */
+ private _version = 0;
 
  constructor() {
- this.state = this.loadState();
+    this.state = {
+      farmers: {},
+      centres: [...SEED_CENTRES],
+      bookings: [],
+      notifications: []
+    };
+    
+    // Load state asynchronously from IndexedDB
+    this._loadStateAsync();
+ }
 
- if (typeof window !== 'undefined') {
- window.addEventListener('storage', (e) => {
- if (e.key === STORAGE_KEY) {
- this.state = this.loadState();
- this.notify();
- }
- });
- }
- }
-
- private loadState(): StoreState {
- try {
- const stored = localStorage.getItem(STORAGE_KEY);
- if (stored) {
- const parsed = JSON.parse(stored);
- if (!parsed.centres || parsed.centres.length === 0) parsed.centres = SEED_CENTRES;
- if (!parsed.farmers) parsed.farmers = {};
- if (!parsed.bookings) parsed.bookings = [];
- if (!parsed.notifications) parsed.notifications = [];
- return parsed;
- }
- } catch (e) {
- console.warn('Failed to load store:', e);
- }
- // Fresh state — no demo data
- return {
- farmers: {},
- centres: [...SEED_CENTRES],
- bookings: [],
- notifications: []
- };
+ private async _loadStateAsync(): Promise<void> {
+    try {
+      const stored = await get<StoreState>(STORAGE_KEY);
+      if (stored) {
+        if (!stored.centres || stored.centres.length === 0) stored.centres = SEED_CENTRES;
+        if (!stored.farmers) stored.farmers = {};
+        if (!stored.bookings) stored.bookings = [];
+        if (!stored.notifications) stored.notifications = [];
+        this.state = stored;
+        this._version++;
+        this.notify();
+      }
+    } catch (e) {
+      console.warn('Failed to load store from IndexedDB:', e);
+    }
  }
 
  private saveState(): void {
- try { localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state)); } catch {}
- this.notify();
+    set(STORAGE_KEY, this.state).catch(e => console.warn('Failed to save to IndexedDB', e));
+    this._version++;
+    this.notify();
  }
-
-
 
  public subscribe(listener: () => void): () => void {
  this.listeners.add(listener);
  return () => this.listeners.delete(listener);
+ }
+
+ /** Snapshot for useSyncExternalStore — returns the version counter so
+ * React can detect mutations and schedule re-renders. */
+ public getSnapshot(): number {
+ return this._version;
  }
 
  private notify(): void {
@@ -350,7 +352,8 @@ class AppStore {
  * Universal booking lookup by any farmer identity attribute:
  * (id, clerk_user_id, farmer_code, email, phone, user email, user id)
  */
- public getActiveFarmerBookingForFarmer(farmer: Partial<FarmerProfile> | null, userEmail?: string, userId?: string): BookingRecord | undefined {
+ public getActiveFarmerBookingForFarmer(farmerOrId: string | Partial<FarmerProfile> | null | undefined, userEmail?: string, userId?: string): BookingRecord | undefined {
+  const farmer = typeof farmerOrId === 'string' ? { id: farmerOrId } : farmerOrId;
  // 1. Try finding matching booking by identifiers
  const matched = this.state.bookings.find(b => {
  if (b.status === 'COMPLETED' || b.status === 'CANCELLED') return false;
@@ -371,7 +374,8 @@ class AppStore {
  return undefined;
  }
 
- public getFarmerBookingsForFarmer(farmer: Partial<FarmerProfile> | null, userEmail?: string, userId?: string): BookingRecord[] {
+ public getFarmerBookingsForFarmer(farmerOrId: string | Partial<FarmerProfile> | null | undefined, userEmail?: string, userId?: string): BookingRecord[] {
+  const farmer = typeof farmerOrId === 'string' ? { id: farmerOrId } : farmerOrId;
  const matched = this.state.bookings.filter(b => {
  if (farmer?.id && (b.farmer_id === farmer.id || (b as any).farmerId === farmer.id)) return true;
  if (farmer?.clerk_user_id && (b.farmer_id === farmer.clerk_user_id || (b as any).clerk_user_id === farmer.clerk_user_id)) return true;
@@ -412,6 +416,17 @@ class AppStore {
  this.state.notifications = this.state.notifications.map(n =>
  n.id === id ? { ...n, read: true } : n
  );
+ this.saveState();
+ this.notify();
+ }
+
+ public addNotification(n: Omit<NotificationItem, 'id' | 'created_at'>): void {
+ const full: NotificationItem = {
+ ...n,
+ id: `notif-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+ created_at: new Date().toISOString(),
+ };
+ this.state = { ...this.state, notifications: [full, ...this.state.notifications] };
  this.saveState();
  this.notify();
  }

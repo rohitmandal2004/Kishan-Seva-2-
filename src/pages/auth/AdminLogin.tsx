@@ -283,7 +283,7 @@ export default function AdminLogin() {
  autoFocus
  className="h-11 rounded-xl text-sm font-semibold tracking-wide"
  />
- <p className="text-[10px] text-slate-400">A 6-digit one-time security code will be sent to this email inbox.</p>
+ <p className="text-[10px] text-slate-500">A 6-digit one-time security code will be sent to this email inbox.</p>
  </div>
  
  <Button 
@@ -334,7 +334,7 @@ export default function AdminLogin() {
  disabled={resendCooldown > 0 || loading}
  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition ${
  resendCooldown > 0 
- ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+ ? 'bg-slate-100 text-slate-500 cursor-not-allowed' 
  : 'bg-purple-50 text-purple-700 hover:bg-purple-100 cursor-pointer border border-purple-100'
  }`}
  >
@@ -377,7 +377,7 @@ export default function AdminLogin() {
  </div>
  </Card>
  
- <p className="text-[11px] text-slate-400 mt-6 text-center max-w-sm">
+ <p className="text-[11px] text-slate-500 mt-6 text-center max-w-sm">
  {t('login_gov_footer')}
  </p>
  </div>

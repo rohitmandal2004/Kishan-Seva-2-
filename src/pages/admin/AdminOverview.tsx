@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp } from 'lucide-react';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useSupabase } from '@/context/SupabaseContext';
@@ -10,10 +10,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { greenMapIcon, orangeMapIcon } from '@/lib/leaflet-icons';
 
 export default function AdminOverview() {
- const store = useMockStore();
+ const store = useKishanData();
  const westBengalCenter: [number, number] = [22.9868, 87.8550];
 
- const centres = store.getCentres();
+ const centres = store.centres;
  const stats = store.getStats();
 
  const { isProfileLoading } = useSupabase();
@@ -38,7 +38,7 @@ export default function AdminOverview() {
  {/* Top Command Banner */}
  <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3 mb-6">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Apex State Command Console</span>
+ <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Apex State Command Console</span>
  <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">State Agricultural Procurement Command</h2>
  <p className="text-xs text-slate-500 mt-0.5">Live real-time monitoring across {centres.length} procurement centres in West Bengal.</p>
  </div>
@@ -52,7 +52,7 @@ export default function AdminOverview() {
  {/* Top KPI Cards */}
  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Procured Today</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Procured Today</span>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{stats.totalProcuredQuintals.toLocaleString('en-IN')}</h3>
  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Q</span>
@@ -63,7 +63,7 @@ export default function AdminOverview() {
  </Card>
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Mandis</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Mandis</span>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{stats.activeCentres}</h3>
  <span className="text-[11px] sm:text-xs font-bold text-slate-500">/ {centres.length} Mandis</span>
@@ -74,7 +74,7 @@ export default function AdminOverview() {
  </Card>
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Vehicles In Yard</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vehicles In Yard</span>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{stats.inQueueCount}</h3>
  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Tokens</span>
@@ -85,7 +85,7 @@ export default function AdminOverview() {
  </Card>
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total DBT Disbursed</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total DBT Disbursed</span>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">₹{stats.totalDisbursedCrores}</h3>
  <span className="text-[11px] sm:text-xs font-bold text-slate-500">Cr</span>
@@ -142,8 +142,8 @@ export default function AdminOverview() {
  <p className="text-[10px] text-slate-500 mt-0.5">{c.address}, {c.district}</p>
  
  <div className="mt-2 grid grid-cols-2 gap-1 text-[10px] bg-slate-50 p-2 rounded border border-slate-100 text-center">
- <div><p className="text-slate-400 font-semibold mb-0.5">Queue</p><p className="font-bold text-slate-900">{c.current_queue_length} Veh</p></div>
- <div className="border-l border-slate-200"><p className="text-slate-400 font-semibold mb-0.5">Capacity</p><p className="font-bold text-slate-900">{c.daily_capacity_quintals} Q</p></div>
+ <div><p className="text-slate-500 font-semibold mb-0.5">Queue</p><p className="font-bold text-slate-900">{c.current_queue_length} Veh</p></div>
+ <div className="border-l border-slate-200"><p className="text-slate-500 font-semibold mb-0.5">Capacity</p><p className="font-bold text-slate-900">{c.daily_capacity_quintals} Q</p></div>
  </div>
  </div>
  </Popup>

@@ -15,7 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import { FarmerProfile } from '@/types';
-import { getCoordinatesForVillage, getDistrictForVillage, POPULAR_VILLAGES } from '@/services/locationNames';
+import { getCoordinatesForVillage, getDistrictForVillage } from '@/services/locationNames';
 
 const OTP_RESEND_COOLDOWN = 30;
 
@@ -541,7 +541,7 @@ export default function FarmerRegistration() {
  type="button"
  onClick={() => sendRegistrationOtp(true)}
  disabled={resendCooldown > 0 || loading}
- className="text-xs text-emerald-700 font-bold hover:underline disabled:text-slate-400 disabled:no-underline"
+ className="text-xs text-emerald-700 font-bold hover:underline disabled:text-slate-500 disabled:no-underline"
  >
  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
  </button>
@@ -623,7 +623,7 @@ export default function FarmerRegistration() {
  
  {/* Popular West Bengal agricultural villages quick chips */}
  <div className="flex flex-wrap gap-1.5 pt-1">
- <span className="text-[10px] text-slate-400 font-bold self-center mr-1">Quick Select:</span>
+ <span className="text-[10px] text-slate-500 font-bold self-center mr-1">Quick Select:</span>
  {['Basirhat', 'Diamond Harbour', 'Barasat', 'Habra', 'Baruipur', 'Canning', 'Singur', 'Bongaon'].map((vName) => (
  <button
  type="button"

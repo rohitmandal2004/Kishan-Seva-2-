@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { X, ScanLine, Camera, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 
 interface QRScannerModalProps {
   isOpen: boolean;
@@ -12,7 +12,7 @@ interface QRScannerModalProps {
 
 export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
   const navigate = useNavigate();
-  const store = useMockStore();
+  const store = useKishanData();
   const [isScanning, setIsScanning] = useState(true);
   const [manualToken, setManualToken] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +20,7 @@ export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
 
   // Simulate scanning for demonstration purposes
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
     if (isOpen && isScanning) {
       // In a real app, this would be tied to a barcode scanner hardware or camera stream
       timer = setTimeout(() => {
@@ -119,7 +119,7 @@ export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
                   <span className="w-full border-t border-slate-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 text-slate-400 font-bold tracking-wider">Or Enter Manually</span>
+                  <span className="bg-white px-3 text-slate-500 font-bold tracking-wider">Or Enter Manually</span>
                 </div>
               </div>
 
@@ -137,10 +137,10 @@ export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
                       setManualToken(e.target.value);
                       setError('');
                     }}
-                    className="flex-1 font-mono uppercase text-sm h-11"
+                    className="flex-1 font-mono uppercase text-sm h-14 rounded-xl"
                     autoFocus={false}
                   />
-                  <Button type="submit" className="h-11 px-6 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg shadow-md">
+                  <Button type="submit" className="h-14 px-8 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-md">
                     Verify
                   </Button>
                 </div>

@@ -16,7 +16,7 @@ import {
  AlertTriangle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { triggerWhatsAppNotification } from '@/services/soundAndSpeech';
 import { OFFICIAL_MSP_RATES, BookingRecord } from '@/services/mockStore';
 import { SupabaseDataService } from '@/services/supabaseData.service';
@@ -42,7 +42,7 @@ type WeighmentFormData = z.infer<typeof weighmentSchema>;
 
 export default function Weighment() {
  const navigate = useNavigate();
- const store = useMockStore();
+ const store = useKishanData();
  const bookings = store
  .getBookings()
  .filter((b) => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
@@ -381,17 +381,34 @@ export default function Weighment() {
  </div>
  </div>
 
- {/* Anomaly Detection Banner */}
+ {/* Anomaly Detection Banner — color-coded by severity */}
  {anomalyReport.isSuspicious && (
- <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-start gap-2.5">
- <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
- <div className="text-xs text-amber-900">
- <strong className="block font-bold">Scale Sensor Anomaly Detected:</strong>
- <ul className="list-disc list-inside mt-0.5 space-y-0.5 text-[11px] text-amber-800">
+ <div className={`mb-4 p-3 rounded-2xl flex items-start gap-2.5 border ${
+ anomalyReport.severity === 'CRITICAL'
+ ? 'bg-red-50 border-red-300'
+ : 'bg-amber-50 border-amber-200'
+ }`}>
+ <AlertTriangle className={`w-4 h-4 shrink-0 mt-0.5 ${
+ anomalyReport.severity === 'CRITICAL' ? 'text-red-600' : 'text-amber-600'
+ }`} />
+ <div className="text-xs">
+ <strong className={`block font-bold ${
+ anomalyReport.severity === 'CRITICAL' ? 'text-red-900' : 'text-amber-900'
+ }`}>
+ {anomalyReport.severity === 'CRITICAL'
+ ? '🚫 CRITICAL — Weighbridge Anomaly: Submission Blocked'
+ : `⚠️ ${anomalyReport.severity} — Scale Anomaly Detected`}
+ </strong>
+ <ul className={`list-disc list-inside mt-0.5 space-y-0.5 text-[11px] ${
+ anomalyReport.severity === 'CRITICAL' ? 'text-red-800' : 'text-amber-800'
+ }`}>
  {anomalyReport.reasons.map((r, i) => (
  <li key={i}>{r}</li>
  ))}
  </ul>
+ <p className={`text-[10px] mt-1 font-semibold ${
+ anomalyReport.severity === 'CRITICAL' ? 'text-red-700' : 'text-amber-700'
+ }`}>{anomalyReport.recommendation}</p>
  </div>
  </div>
  )}
@@ -462,11 +479,11 @@ export default function Weighment() {
  <div className="pt-2">
  <Button
  type="submit"
- disabled={loading || !selectedBooking || net <= 0 || !!errors.tare || !!errors.gross}
- className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-12 rounded-xl text-xs shadow-md gap-2"
+ disabled={loading || !selectedBooking || net <= 0 || !!errors.tare || !!errors.gross || anomalyReport.severity === 'CRITICAL'}
+ className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold h-12 rounded-xl text-xs shadow-md gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
- Confirm Weight &amp; Issue Official e-J-Form Slip <ArrowRight className="w-4 h-4" />
+ {anomalyReport.severity === 'CRITICAL' ? 'Submission Blocked — Resolve Anomaly First' : 'Confirm Weight & Issue Official e-J-Form Slip'} <ArrowRight className="w-4 h-4" />
  </Button>
  </div>
  </form>

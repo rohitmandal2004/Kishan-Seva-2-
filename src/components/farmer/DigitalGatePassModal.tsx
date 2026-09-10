@@ -94,7 +94,7 @@ export const DigitalGatePassModal: React.FC<DigitalGatePassModalProps> = ({
  </div>
 
  <div className="text-center sm:text-left space-y-1.5 w-full">
- <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+ <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
  Mandi Token ID
  </span>
  <div className="font-mono text-2xl sm:text-3xl font-black text-emerald-900 tracking-tight">
@@ -124,7 +124,7 @@ export const DigitalGatePassModal: React.FC<DigitalGatePassModalProps> = ({
  {/* Details Grid */}
  <div className="grid grid-cols-2 gap-3 text-xs">
  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
- <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+ <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
  <Building2 className="w-3 h-3" /> Designated Mandi
  </span>
  <span className="font-extrabold text-slate-900 block mt-1">
@@ -136,7 +136,7 @@ export const DigitalGatePassModal: React.FC<DigitalGatePassModalProps> = ({
  </div>
 
  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
- <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+ <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
  <Calendar className="w-3 h-3" /> Scheduled Window
  </span>
  <span className="font-extrabold text-slate-900 block mt-1">
@@ -148,7 +148,7 @@ export const DigitalGatePassModal: React.FC<DigitalGatePassModalProps> = ({
  </div>
 
  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
- <span className="text-[10px] font-bold text-slate-400 uppercase">
+ <span className="text-[10px] font-bold text-slate-500 uppercase">
  Farmer Beneficiary
  </span>
  <span className="font-extrabold text-slate-900 block mt-1">
@@ -160,7 +160,7 @@ export const DigitalGatePassModal: React.FC<DigitalGatePassModalProps> = ({
  </div>
 
  <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
- <span className="text-[10px] font-bold text-slate-400 uppercase flex items-center gap-1">
+ <span className="text-[10px] font-bold text-slate-500 uppercase flex items-center gap-1">
  <Truck className="w-3 h-3" /> Declared Quantity
  </span>
  <span className="font-extrabold text-slate-900 block mt-1">

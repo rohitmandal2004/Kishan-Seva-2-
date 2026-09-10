@@ -322,7 +322,7 @@ export default function FarmerLogin() {
  autoFocus
  className="h-11 rounded-xl text-sm font-semibold tracking-wide"
  />
- <p className="text-[10px] text-slate-400">A 6-digit one-time security code will be sent to this email inbox.</p>
+ <p className="text-[10px] text-slate-500">A 6-digit one-time security code will be sent to this email inbox.</p>
  </div>
  
  <Button 
@@ -371,7 +371,7 @@ export default function FarmerLogin() {
  type="button"
  onClick={handleResendOtp}
  disabled={resendCooldown > 0 || loading}
- className="text-[11px] text-emerald-700 font-bold hover:underline disabled:text-slate-400 disabled:no-underline"
+ className="text-[11px] text-emerald-700 font-bold hover:underline disabled:text-slate-500 disabled:no-underline"
  >
  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
  </button>
@@ -412,7 +412,7 @@ export default function FarmerLogin() {
  </div>
  </Card>
  
- <p className="text-[11px] text-slate-400 mt-6 text-center max-w-sm">
+ <p className="text-[11px] text-slate-500 mt-6 text-center max-w-sm">
  {t('login_gov_footer')}
  </p>
  </div>

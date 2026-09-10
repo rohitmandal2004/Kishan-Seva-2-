@@ -48,7 +48,7 @@ export default function AdminLayout() {
  </div>
  <div className="min-w-0">
  <span className="font-extrabold text-white text-sm leading-none block truncate">Kishan Seva</span>
- <p className="text-[10px] text-slate-400 font-semibold truncate mt-0.5">State Admin Portal</p>
+ <p className="text-[10px] text-slate-500 font-semibold truncate mt-0.5">State Admin Portal</p>
  </div>
  </div>
  
@@ -72,7 +72,7 @@ export default function AdminLayout() {
  <img src="/logo.svg" alt="Kishan Seva" className="h-10 w-10 object-contain drop-shadow-md" />
  <div>
  <span className="font-black text-white text-lg tracking-tight leading-tight block">Kishan Seva</span>
- <p className="text-slate-400 text-[10px] font-bold tracking-wide">State Admin</p>
+ <p className="text-slate-500 text-[10px] font-bold tracking-wide">State Admin</p>
  </div>
  </div>
 
@@ -101,7 +101,7 @@ export default function AdminLayout() {
  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition duration-200 group relative overflow-hidden ${
  isActive 
  ? 'text-white shadow-md bg-indigo-600' 
- : 'text-slate-400 hover:text-white hover:bg-white/5'
+ : 'text-slate-500 hover:text-white hover:bg-white/5'
  }`}
  >
  <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-slate-300'}`} />
@@ -169,7 +169,7 @@ export default function AdminLayout() {
  <img src="/logo.svg" alt="Kishan Seva" className="h-8 w-8 object-contain" />
  <span className="font-extrabold text-white text-sm">Kishan Seva</span>
  </div>
- <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-slate-400 hover:bg-slate-800 rounded-full">
+ <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-slate-500 hover:bg-slate-800 rounded-full">
  <X className="w-5 h-5" />
  </button>
  </div>
@@ -180,7 +180,7 @@ export default function AdminLayout() {
  </div>
  <div className="min-w-0">
  <p className="text-sm font-bold text-white truncate">Admin User</p>
- <p className="text-[10px] text-slate-400 font-mono truncate">{user?.email || 'admin@wb.gov.in'}</p>
+ <p className="text-[10px] text-slate-500 font-mono truncate">{user?.email || 'admin@wb.gov.in'}</p>
  </div>
  </div>
  
@@ -197,7 +197,7 @@ export default function AdminLayout() {
  className={`flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-colors ${
  isActive 
  ? 'text-white bg-indigo-600/20 border-r-4 border-indigo-500' 
- : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+ : 'text-slate-500 hover:bg-slate-800 hover:text-slate-200'
  }`}
  >
  <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : 'text-slate-500'}`} />

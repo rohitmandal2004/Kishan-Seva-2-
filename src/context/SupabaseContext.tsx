@@ -183,39 +183,6 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
  }
  }
 
- // 3. Fallback: Check localStorage for cached farmer profile
- try {
- const cached = localStorage.getItem('kishan_farmer_profile');
- if (cached) {
- const parsed = JSON.parse(cached);
- if (parsed && (parsed.id || parsed.full_name)) {
- setProfileError(null);
- return { ...parsed, role: 'FARMER' } as FarmerProfile;
- }
- }
- } catch {}
-
- // 4. Fallback: If only 1 farmer profile exists in database (e.g. initial demo seed), link to it
- try {
- const { data: allFarmers } = await supabase
- .from('farmer_profiles')
- .select('*')
- .limit(2);
- if (allFarmers && allFarmers.length === 1) {
- const primary = allFarmers[0];
- if (cleanEmail && primary.email !== cleanEmail) {
- try {
- await supabase
- .from('farmer_profiles')
- .update({ email: cleanEmail })
- .eq('id', primary.id);
- } catch {}
- }
- setProfileError(null);
- return { ...primary, email: cleanEmail || primary.email, role: 'FARMER' } as FarmerProfile;
- }
- } catch {}
-
  // data is null if no row found — this is "profile not found", NOT an error
  setProfileError(null);
  return null;

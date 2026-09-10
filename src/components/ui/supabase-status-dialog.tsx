@@ -36,7 +36,7 @@ export function SupabaseStatusBadge() {
  <Card className="max-w-md w-full p-6 bg-white rounded-3xl shadow-2xl border border-slate-200 relative animate-in fade-in zoom-in-95 duration-200">
  <button
  onClick={() => setIsOpen(false)}
- className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700"
+ className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-700"
  >
  <X className="w-5 h-5" />
  </button>

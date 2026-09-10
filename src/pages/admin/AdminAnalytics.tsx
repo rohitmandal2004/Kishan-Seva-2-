@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Card } from '@/components/ui/card';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { 
  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
  BarChart, Bar, Legend,
@@ -10,9 +10,9 @@ import { TrendingUp, Users, Sprout, Building2, Calendar } from 'lucide-react';
 import { format, subDays } from 'date-fns';
 
 export default function AdminAnalytics() {
- const store = useMockStore();
+ const store = useKishanData();
  const stats = store.getStats();
- const centres = store.getCentres();
+ const centres = store.centres;
 
  // Generate stable timeline data for the last 7 days
  const timelineData = useMemo(() => {
@@ -48,7 +48,7 @@ export default function AdminAnalytics() {
  <p className="text-slate-500 text-sm mt-1">Statewide procurement insights and financial disbursals.</p>
  </div>
  <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 shadow-sm">
- <Calendar className="w-4 h-4 text-slate-400" />
+ <Calendar className="w-4 h-4 text-slate-500" />
  Last 7 Days
  </div>
  </div>
@@ -60,7 +60,7 @@ export default function AdminAnalytics() {
  <Sprout className="w-6 h-6" />
  </div>
  <div>
- <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Procured</p>
+ <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Procured</p>
  <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
  </div>
  </Card>
@@ -70,7 +70,7 @@ export default function AdminAnalytics() {
  <TrendingUp className="w-6 h-6" />
  </div>
  <div>
- <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">DBT Disbursed</p>
+ <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">DBT Disbursed</p>
  <h3 className="text-2xl font-black text-slate-900 font-mono">₹{stats.totalDisbursedCrores} Cr</h3>
  </div>
  </Card>
@@ -80,7 +80,7 @@ export default function AdminAnalytics() {
  <Users className="w-6 h-6" />
  </div>
  <div>
- <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Farmers</p>
+ <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Farmers</p>
  <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.totalFarmers.toLocaleString()}</h3>
  </div>
  </Card>
@@ -90,7 +90,7 @@ export default function AdminAnalytics() {
  <Building2 className="w-6 h-6" />
  </div>
  <div>
- <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Mandis</p>
+ <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Mandis</p>
  <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.activeCentres} / {centres.length}</h3>
  </div>
  </Card>

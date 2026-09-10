@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, Scale, FileCheck, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { useLanguage } from '@/services/i18n';
 import { useSupabase } from '@/context/SupabaseContext';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -12,7 +12,7 @@ export default function OperatorLayout() {
  const location = useLocation();
  const navigate = useNavigate();
  const currentPath = location.pathname;
- const store = useMockStore();
+ const store = useKishanData();
  const { t } = useLanguage();
  const { user, signOut } = useSupabase();
 
@@ -41,7 +41,7 @@ export default function OperatorLayout() {
  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
  <button 
  onClick={() => setMobileMenuOpen(true)}
- className="p-1.5 -ml-1 text-slate-400 hover:bg-white/10 rounded-lg transition-colors"
+ className="p-1.5 -ml-1 text-slate-500 hover:bg-white/10 rounded-lg transition-colors"
  >
  <Menu className="w-5 h-5 text-white" />
  </button>
@@ -85,7 +85,7 @@ export default function OperatorLayout() {
  </div>
 
  <div className="px-5 py-3.5 bg-white/5 border-b border-white/10">
- <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Station Centre</p>
+ <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Station Centre</p>
  <p className="font-bold text-xs text-white mt-0.5">Krishnapur Centre (KSP-001)</p>
  <div className="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -121,7 +121,7 @@ export default function OperatorLayout() {
 
  <div className="p-4 border-t border-white/10 space-y-3">
  <div className="flex items-center justify-between px-1">
- <span className="text-[11px] text-slate-400 font-semibold">Language / ভাষা</span>
+ <span className="text-[11px] text-slate-500 font-semibold">Language / ভাষা</span>
  <LanguageSelector variant="compact" />
  </div>
  <Button 
@@ -147,7 +147,7 @@ export default function OperatorLayout() {
  <LanguageSelector variant="compact" />
  <div className="text-right hidden sm:block">
  <p className="text-xs font-bold text-slate-800">Ramesh Kumar</p>
- <p className="text-[10px] text-slate-400 font-mono">Senior Weighbridge Officer (EMP-421)</p>
+ <p className="text-[10px] text-slate-500 font-mono">Senior Weighbridge Officer (EMP-421)</p>
  </div>
  <div className="w-9 h-9 rounded-xl bg-blue-100 border border-blue-200 text-blue-800 font-extrabold text-xs flex items-center justify-center shadow-xs">
  RK
@@ -170,7 +170,7 @@ export default function OperatorLayout() {
  <Link 
  key={item.path} 
  to={item.path}
- className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-colors min-w-[60px] ${isActive ? 'text-blue-700 font-bold' : 'text-slate-400 hover:text-slate-600'}`}
+ className={`flex flex-col items-center py-1 px-2.5 rounded-xl transition-colors min-w-[60px] ${isActive ? 'text-blue-700 font-bold' : 'text-slate-500 hover:text-slate-600'}`}
  >
  <Icon className="w-5 h-5 mb-0.5" />
  <span className="text-[9px] leading-tight">{item.label}</span>
@@ -190,12 +190,12 @@ export default function OperatorLayout() {
  <img src="/logo.svg" alt="Kishan Seva" className="h-8 w-8 object-contain" />
  <span className="font-extrabold text-white text-sm">Kishan Seva</span>
  </div>
- <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-slate-400 hover:bg-white/10 rounded-full">
+ <button onClick={() => setMobileMenuOpen(false)} className="p-2 -mr-2 text-slate-500 hover:bg-white/10 rounded-full">
  <X className="w-5 h-5" />
  </button>
  </div>
  <div className="px-5 py-3.5 bg-white/5 border-b border-white/10">
- <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Station Centre</p>
+ <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Station Centre</p>
  <p className="font-bold text-xs text-white mt-0.5">Krishnapur Centre (KSP-001)</p>
  <div className="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -217,7 +217,7 @@ export default function OperatorLayout() {
  : 'text-slate-300 hover:bg-white/10'
  }`}
  >
- <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+ <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
  <span className="flex-1">{item.label}</span>
  {item.badge !== undefined && (
  <span className="px-2 py-0.5 bg-amber-500 text-slate-950 text-[10px] font-extrabold rounded-full">

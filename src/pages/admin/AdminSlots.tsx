@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import {
  Clock,
  CloudRain,
@@ -26,8 +26,8 @@ import {
 import { toast } from 'sonner';
 
 export default function AdminSlots() {
- const store = useMockStore();
- const centres = store.getCentres();
+ const store = useKishanData();
+ const centres = store.centres;
 
  const [selectedCentreId, setSelectedCentreId] = useState<string>(
  centres[0]?.id || 'centre-wb-01'
@@ -100,7 +100,7 @@ export default function AdminSlots() {
  {/* Header Banner */}
  <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+ <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
  Gate Intake & Scheduling Algorithms
  </span>
  <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
@@ -139,7 +139,7 @@ export default function AdminSlots() {
  <Building2 className="w-5 h-5" />
  </div>
  <div>
- <label className="text-[10px] uppercase font-bold text-slate-400 block">Target Mandi</label>
+ <label className="text-[10px] uppercase font-bold text-slate-500 block">Target Mandi</label>
  <select
  value={selectedCentreId}
  onChange={(e) => setSelectedCentreId(e.target.value)}
@@ -160,7 +160,7 @@ export default function AdminSlots() {
  Daily Intake Cap: <strong className="text-slate-900">{selectedCentre?.daily_capacity_quintals} Q</strong>
  </span>
  <span className="border-l border-slate-200 pl-3 flex items-center gap-1">
- <Clock className="w-3.5 h-3.5 text-slate-400" />
+ <Clock className="w-3.5 h-3.5 text-slate-500" />
  Computerized Scale: <strong className="text-slate-900">Certified Active</strong>
  </span>
  </div>
@@ -341,7 +341,7 @@ export default function AdminSlots() {
  onChange={(e) => setWeatherBufferPercent(Number(e.target.value))}
  className="w-full accent-blue-600 cursor-pointer"
  />
- <div className="flex justify-between text-[10px] text-slate-400 font-semibold mt-1">
+ <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
  <span>0% (No buffer)</span>
  <span>25% (Recommended)</span>
  <span>50% (Heavy downpour)</span>
@@ -402,7 +402,7 @@ export default function AdminSlots() {
  <div className="flex items-center gap-2 mb-3">
  <AlertCircle
  className={`w-5 h-5 ${
- isEmergencyThrottled ? 'text-red-600' : 'text-slate-400'
+ isEmergencyThrottled ? 'text-red-600' : 'text-slate-500'
  }`}
  />
  <div>

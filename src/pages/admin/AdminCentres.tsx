@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useMockStore } from '@/services/useMockStore';
+import { useKishanData } from '@/context/DataContext';
 import { ProcurementCentre } from '@/types';
 import {
  Building2,
@@ -32,7 +32,7 @@ import {
 } from '@/components/ui/dialog';
 
 export default function AdminCentres() {
- const store = useMockStore();
+ const store = useKishanData();
  const [searchTerm, setSearchTerm] = useState('');
  const [districtFilter, setDistrictFilter] = useState('ALL');
  const [statusFilter, setStatusFilter] = useState('ALL');
@@ -47,7 +47,7 @@ export default function AdminCentres() {
  const [newMandiAddress, setNewMandiAddress] = useState('');
  const [newMandiCapacity, setNewMandiCapacity] = useState(1200);
 
- const centres = store.getCentres();
+ const centres = store.centres;
 
  // Extract unique districts
  const districts = useMemo(() => {
@@ -136,7 +136,7 @@ export default function AdminCentres() {
  {/* Header Banner */}
  <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+ <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
  Infrastructure &amp; Mandi Control
  </span>
  <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
@@ -158,8 +158,8 @@ export default function AdminCentres() {
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
  <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Mandis</span>
- <Building2 className="w-4 h-4 text-slate-400" />
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Mandis</span>
+ <Building2 className="w-4 h-4 text-slate-500" />
  </div>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{centres.length}</h3>
@@ -170,7 +170,7 @@ export default function AdminCentres() {
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
  <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">State Capacity</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">State Capacity</span>
  <Scale className="w-4 h-4 text-emerald-600" />
  </div>
  <div className="flex items-baseline gap-1.5 mt-2">
@@ -184,7 +184,7 @@ export default function AdminCentres() {
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
  <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Vehicles In Yard</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vehicles In Yard</span>
  <Users className="w-4 h-4 text-blue-600" />
  </div>
  <div className="flex items-baseline gap-1.5 mt-2">
@@ -196,7 +196,7 @@ export default function AdminCentres() {
 
  <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
  <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mandi Health</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mandi Health</span>
  <TrendingUp className="w-4 h-4 text-purple-600" />
  </div>
  <div className="flex items-baseline gap-1.5 mt-2">
@@ -213,7 +213,7 @@ export default function AdminCentres() {
  <Card className="p-4 border border-slate-200 shadow-xs bg-white rounded-2xl">
  <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
  <div className="relative w-full md:w-96">
- <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+ <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
  <Input
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
@@ -224,7 +224,7 @@ export default function AdminCentres() {
 
  <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
  <div className="flex items-center gap-1.5">
- <Filter className="w-3.5 h-3.5 text-slate-400" />
+ <Filter className="w-3.5 h-3.5 text-slate-500" />
  <span className="text-xs font-semibold text-slate-600">District:</span>
  <select
  value={districtFilter}
@@ -298,7 +298,7 @@ export default function AdminCentres() {
  </div>
 
  <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
- <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+ <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
  <span className="truncate">{centre.address}, {centre.district}</span>
  </p>
 
@@ -319,11 +319,11 @@ export default function AdminCentres() {
 
  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 text-center text-xs">
  <div>
- <span className="text-[10px] text-slate-400 block font-semibold">Active Queue</span>
+ <span className="text-[10px] text-slate-500 block font-semibold">Active Queue</span>
  <span className="font-extrabold text-slate-900">{centre.current_queue_length} Vehicles</span>
  </div>
  <div className="border-l border-slate-200/60">
- <span className="text-[10px] text-slate-400 block font-semibold">Daily Quota</span>
+ <span className="text-[10px] text-slate-500 block font-semibold">Daily Quota</span>
  <span className="font-extrabold text-slate-900">{centre.daily_capacity_quintals} Q</span>
  </div>
  </div>
@@ -332,11 +332,11 @@ export default function AdminCentres() {
  {/* Hardware Spec */}
  <div className="flex items-center justify-between text-xs text-slate-500 mt-3 px-1">
  <span className="flex items-center gap-1">
- <Scale className="w-3.5 h-3.5 text-slate-400" />
+ <Scale className="w-3.5 h-3.5 text-slate-500" />
  Computerized Scale
  </span>
  <span className="flex items-center gap-1">
- <Clock className="w-3.5 h-3.5 text-slate-400" />
+ <Clock className="w-3.5 h-3.5 text-slate-500" />
  ~{centre.est_wait_time_mins}m wait
  </span>
  </div>
@@ -415,7 +415,7 @@ export default function AdminCentres() {
  step={50}
  className="text-sm font-bold rounded-xl border-slate-200 focus-visible:ring-emerald-500"
  />
- <p className="text-[11px] text-slate-400 mt-1">
+ <p className="text-[11px] text-slate-500 mt-1">
  Recommended range: 500 Q to 5,000 Q based on active weighbridges.
  </p>
  </div>

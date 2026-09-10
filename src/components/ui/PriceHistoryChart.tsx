@@ -87,7 +87,7 @@ export function PriceHistoryChart({ cropName, mspRate }: PriceHistoryChartProps)
               contentStyle={{ borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)' }}
               labelStyle={{ fontWeight: '900', color: '#0f172a', marginBottom: '4px' }}
               itemStyle={{ fontWeight: '700' }}
-              formatter={(value: number) => [`₹${value}`, undefined]}
+              formatter={(value: any) => [`₹${value}`, undefined]}
             />
             <Area 
               type="monotone" 

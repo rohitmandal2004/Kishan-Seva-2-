@@ -78,7 +78,7 @@ export function QueueAnalyticsChart({ centreId }: QueueAnalyticsChartProps) {
  />
  <Tooltip 
  contentStyle={{ borderRadius: '8px', fontSize: '11px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
- formatter={(value: number) => [`${value} mins`, 'Wait Time']}
+ formatter={(value: any) => [`${value} mins`, 'Wait Time']}
  labelStyle={{ fontWeight: 'bold', color: '#0f172a' }}
  />
  {showCurrentTime && (

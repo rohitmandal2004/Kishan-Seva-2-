@@ -27,12 +27,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
 
  // STATE B: Not signed in and no demo user — redirect to roles/auth
  if (!isSignedIn && !user) {
- try {
- const cached = localStorage.getItem('kishan_farmer_profile');
- if (cached && allowedRoles.includes('FARMER')) {
- return <>{children}</>;
- }
- } catch {}
+ 
  return <Navigate to="/roles" state={{ from: location }} replace />;
  }
 
@@ -57,13 +52,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
 
  // STATE E: Farmer role but no farmer profile exists in database
  if (user?.role === 'FARMER' && allowedRoles.includes('FARMER') && !farmer) {
- // Check localStorage fallback before redirecting to registration
- try {
- const cached = localStorage.getItem('kishan_farmer_profile');
- if (cached) {
- return <>{children}</>;
- }
- } catch {}
+ 
 
  // If there was a database error, show it instead of redirecting to register
  if (profileError) {

@@ -72,7 +72,7 @@ export function ReloadPrompt() {
  </div>
  </div>
  
- <button onClick={close} className="text-slate-400 hover:text-slate-600 absolute top-3 right-3 p-1">
+ <button onClick={close} className="text-slate-500 hover:text-slate-600 absolute top-3 right-3 p-1">
  <X className="w-4 h-4" />
  </button>
  </Card>
