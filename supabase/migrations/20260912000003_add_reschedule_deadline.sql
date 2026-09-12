@@ -62,7 +62,6 @@ SECURITY DEFINER
 AS $$
 DECLARE
   v_booking public.bookings%ROWTYPE;
-  v_new_slot public.slots%ROWTYPE;
   v_new_queue_sequence INTEGER;
 BEGIN
   -- Verify booking exists and is eligible for rescheduling
@@ -82,41 +81,19 @@ BEGIN
     RAISE EXCEPTION 'Reschedule deadline has passed';
   END IF;
 
-  -- Find or create the new slot
-  SELECT * INTO v_new_slot
-  FROM public.slots
-  WHERE centre_id = p_new_centre_id
-    AND slot_date = p_new_slot_date
-    AND slot_time = p_new_slot_time;
-
-  IF NOT FOUND THEN
-    INSERT INTO public.slots (centre_id, slot_date, slot_time, capacity_quintals, booked_quintals)
-    VALUES (p_new_centre_id, p_new_slot_date, p_new_slot_time, 1000, 0)
-    RETURNING * INTO v_new_slot;
-  END IF;
-
-  -- Check capacity
-  IF (v_new_slot.booked_quintals + v_booking.expected_quantity) > v_new_slot.capacity_quintals THEN
-    RAISE EXCEPTION 'Slot capacity exceeded for the selected time';
-  END IF;
-
   -- Assign new queue sequence
   UPDATE public.procurement_centres
   SET current_queue_length = current_queue_length + 1
   WHERE id = p_new_centre_id
   RETURNING current_queue_length INTO v_new_queue_sequence;
 
-  -- Update slot booked_quintals
-  UPDATE public.slots
-  SET booked_quintals = booked_quintals + v_booking.expected_quantity
-  WHERE id = v_new_slot.id;
-
   -- Reactivate booking
   UPDATE public.bookings
   SET 
     status = 'BOOKED',
     centre_id = p_new_centre_id,
-    slot_id = v_new_slot.id,
+    slot_date = p_new_slot_date,
+    slot_time = p_new_slot_time,
     queue_sequence = v_new_queue_sequence,
     reschedule_deadline = NULL,
     updated_at = NOW()

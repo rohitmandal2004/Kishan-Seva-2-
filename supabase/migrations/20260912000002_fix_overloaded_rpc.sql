@@ -14,7 +14,7 @@ BEGIN
         WHERE proname = 'create_booking' AND pronamespace = 'public'::regnamespace
     ) 
     LOOP
-        EXECUTE 'DROP FUNCTION IF EXISTS public.' || split_part(r.signature::text, 'public.', 2) || ' CASCADE';
+        EXECUTE 'DROP FUNCTION IF EXISTS ' || r.signature::text || ' CASCADE';
     END LOOP;
 END $$;
 
