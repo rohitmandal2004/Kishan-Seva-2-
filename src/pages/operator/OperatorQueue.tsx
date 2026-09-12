@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,10 +13,13 @@ import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { playMandiChime, speakAnnouncement } from '@/services/soundAndSpeech';
+import { useLanguage } from '@/services/i18n';
+import { SmsGateway } from '@/services/smsGateway';
 import { toast } from 'sonner';
 
 export default function OperatorQueue() {
     const navigate = useNavigate();
+    const { t } = useLanguage();
     const store = useKishanData();
     const bookings = store.getBookings();
     const [search, setSearch] = useState('');
@@ -28,9 +32,56 @@ export default function OperatorQueue() {
 
     if (isProfileLoading) {
         return (
-            <div className="max-w-7xl mx-auto w-full p-4 sm:p-6 space-y-6 pt-12">
-                <Skeleton className="h-24 w-full rounded-2xl" />
-                <Skeleton className="h-[500px] w-full rounded-2xl" />
+            <div className="max-w-6xl mx-auto w-full font-sans">
+                {/* Header Skeleton */}
+                <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-6">
+                    <div className="space-y-2">
+                        <div className="h-3 w-32 bg-slate-200 animate-pulse"></div>
+                        <div className="h-8 w-64 bg-slate-300 animate-pulse"></div>
+                        <div className="h-3 w-96 bg-slate-200 animate-pulse"></div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                        <div className="h-11 w-40 bg-emerald-100 rounded-xl animate-pulse"></div>
+                        <div className="h-11 w-48 bg-blue-200 rounded-xl animate-pulse"></div>
+                    </div>
+                </div>
+
+                {/* Queue Card Skeleton */}
+                <div className="border border-slate-200 shadow-sm bg-white rounded-3xl overflow-hidden">
+                    {/* Toolbar Skeleton */}
+                    <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div className="flex items-center gap-2">
+                            <div className="h-4 w-24 bg-slate-300 animate-pulse"></div>
+                            <div className="h-5 w-16 bg-blue-100 rounded-full animate-pulse"></div>
+                        </div>
+                        <div className="flex gap-2.5 w-full sm:w-auto">
+                            <div className="h-9 w-full sm:w-64 bg-slate-200 rounded-full animate-pulse"></div>
+                            <div className="h-9 w-64 bg-slate-200 rounded-full animate-pulse hidden sm:block"></div>
+                        </div>
+                    </div>
+                    
+                    {/* List Skeleton */}
+                    <div className="divide-y divide-slate-100 p-4 space-y-4">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-2xl bg-slate-200 animate-pulse shrink-0"></div>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="h-4 w-32 bg-slate-300 animate-pulse"></div>
+                                            <div className="h-4 w-20 bg-slate-200 rounded-full animate-pulse"></div>
+                                        </div>
+                                        <div className="h-3 w-48 bg-slate-200 animate-pulse"></div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <div className="h-8 w-24 bg-slate-200 rounded-xl animate-pulse"></div>
+                                    <div className="h-8 w-32 bg-slate-300 rounded-xl animate-pulse"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -50,6 +101,10 @@ export default function OperatorQueue() {
             speakAnnouncement(`Attention please. Token number ${waiting.token_number}, vehicle ${waiting.vehicle_number || 'tractor'}, please proceed to inspection bay.`, 'en');
             store.advanceBooking(waiting.id);
             toast.success(`Calling Token ${waiting.token_number} (${waiting.farmer_name})`);
+            SmsGateway.sendSmsNotification(
+                waiting.farmer_phone || '+91 9999999999', 
+                `Kishan Seva: Your Token ${waiting.token_number} has been called. Please proceed to the inspection bay with your vehicle.`
+            );
         } else {
             toast.info('No waiting tokens in queue to call');
         }
@@ -60,6 +115,10 @@ export default function OperatorQueue() {
         speakAnnouncement(`Calling token number ${item.token_number}. Farmer ${item.farmer_name}, please proceed to weighbridge platform.`, 'en');
         store.advanceBooking(item.id);
         toast.success(`Calling Token ${item.token_number}`);
+        SmsGateway.sendSmsNotification(
+            item.farmer_phone || '+91 9999999999', 
+            `Kishan Seva: Your Token ${item.token_number} has been called. Please proceed to the weighbridge platform immediately.`
+        );
     };
 
     const handleQrSubmit = (e?: React.FormEvent) => {
@@ -104,9 +163,9 @@ export default function OperatorQueue() {
         <div className="max-w-6xl mx-auto w-full font-sans">
             <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-6">
                 <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Yard Management</span>
-                    <h2 className="text-2xl font-black text-slate-900 leading-tight">Live Mandi Token Queue</h2>
-                    <p className="text-xs text-slate-500 mt-0.5">Call vehicles to weighbridge, verify documents, and initiate digital assays.</p>
+                    <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">{t('yard_management')}</span>
+                    <h2 className="text-2xl font-black text-slate-900 leading-tight">{t('live_mandi_queue')}</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">{t('call_vehicles_desc')}</p>
                 </div>
                 <div className="flex items-center gap-2.5">
                     <Button
@@ -115,7 +174,7 @@ export default function OperatorQueue() {
                         className="border-emerald-600 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 font-bold h-11 px-4 rounded-xl shadow-xs gap-2 text-xs"
                     >
                         <QrCode className="w-4 h-4 text-emerald-700" />
-                        Scan Gate QR Pass
+                        {t('scan_gate_qr')}
                     </Button>
 
                     <Button
@@ -123,7 +182,7 @@ export default function OperatorQueue() {
                         className="bg-blue-600 hover:bg-blue-700 text-white font-bold h-11 px-5 rounded-xl shadow-md gap-2 text-xs"
                     >
                         <BellRing className="w-4 h-4" />
-                        Call Next Farmer 🔊
+                        {t('call_next_farmer')} 🔊
                     </Button>
                 </div>
             </div>
@@ -132,9 +191,9 @@ export default function OperatorQueue() {
                 {/* Search & Filter Toolbar */}
                 <div className="p-4 border-b border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-3">
                     <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-slate-800 text-sm">Active Queue</span>
+                        <span className="font-extrabold text-slate-800 text-sm">{t('active_queue')}</span>
                         <Badge variant="outline" className="bg-blue-50 text-blue-800 border-blue-200 text-xs font-bold">
-                            {filtered.length} Tokens
+                            {filtered.length} {t('tokens')}
                         </Badge>
                     </div>
 
@@ -142,7 +201,7 @@ export default function OperatorQueue() {
                         <div className="relative w-full sm:w-64">
                             <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                             <Input
-                                placeholder="Search token, farmer or crop..."
+                                placeholder={t('search_placeholder')}
                                 className="pl-8 h-9 bg-white border-slate-200 rounded-full text-xs w-full"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -157,7 +216,7 @@ export default function OperatorQueue() {
                                     className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition shrink-0 ${statusFilter === st ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                                         }`}
                                 >
-                                    {st === 'ALL' ? 'All' : st.replace('_', ' ')}
+                                    {st === 'ALL' ? t('all') : st.replace('_', ' ')}
                                 </button>
                             ))}
                         </div>
@@ -168,15 +227,28 @@ export default function OperatorQueue() {
                 <div className="divide-y divide-slate-100">
                     {filtered.length === 0 ? (
                         <div className="p-12 text-center text-slate-500">
-                            <p className="text-sm font-semibold">No tokens match this filter.</p>
+                            <p className="text-sm font-semibold">{t('no_tokens_match')}</p>
                         </div>
                     ) : (
-                        filtered.map((item, index) => (
-                            <div
-                                key={item.id}
-                                className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-slate-50/80 ${item.status === 'QUALITY_TESTING' ? 'bg-amber-50/30' : item.status === 'WEIGHMENT' ? 'bg-blue-50/30' : ''
+                        <AnimatePresence initial={false}>
+                            {filtered.map((item, index) => (
+                                <motion.div
+                                    key={item.id}
+                                    layout
+                                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                                    transition={{ 
+                                        type: "spring", 
+                                        stiffness: 400, 
+                                        damping: 30,
+                                        mass: 0.8
+                                    }}
+                                    className={`p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-colors hover:bg-slate-50/80 ${
+                                        item.status === 'QUALITY_TESTING' ? 'bg-amber-50/30' : 
+                                        item.status === 'WEIGHMENT' ? 'bg-blue-50/30' : ''
                                     }`}
-                            >
+                                >
                                 <div className="flex items-center gap-4">
                                     <div className={`w-12 h-12 rounded-2xl flex flex-col items-center justify-center font-bold text-xs shadow-xs border ${item.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800 border-emerald-200' :
                                             item.status === 'WEIGHMENT' ? 'bg-blue-100 text-blue-800 border-blue-200 animate-pulse' :
@@ -251,8 +323,9 @@ export default function OperatorQueue() {
                                         </Button>
                                     )}
                                 </div>
-                            </div>
-                        ))
+                            </motion.div>
+                            ))}
+                        </AnimatePresence>
                     )}
                 </div>
             </Card>

@@ -7,7 +7,7 @@ import {
     CheckCircle2, Play, User, ChevronRight, BarChart3,
     Search, MapPin, ArrowRight, X, PhoneCall, ChevronDown, Menu
 } from 'lucide-react';
-import { OFFICIAL_MSP_RATES } from '@/services/mockStore';
+import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { useKishanData } from '@/context/DataContext';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -16,12 +16,53 @@ import 'leaflet/dist/leaflet.css';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import { motion } from 'framer-motion';
+import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
+import { useRef } from 'react';
 
 import { defaultMapIcon } from '@/lib/leaflet-icons';
 export default function LandingPage() {
     const navigate = useNavigate();
     const store = useKishanData();
     const { lang, t } = useLanguage();
+    const containerRef = useRef<HTMLDivElement>(null);
+
+    useGSAP(() => {
+        // Animate hero section elements in
+        gsap.from(".hero-anim", {
+            y: 30,
+            opacity: 0,
+            stagger: 0.15,
+            duration: 1,
+            ease: "back.out(1.4)",
+            delay: 0.2
+        });
+
+        // Parallax background mesh
+        gsap.to(".bg-mesh", {
+            yPercent: 30,
+            ease: "none",
+            scrollTrigger: {
+                trigger: containerRef.current,
+                start: "top top",
+                end: "bottom top",
+                scrub: true
+            }
+        });
+
+        // Animate feature cards on scroll
+        gsap.from(".feature-card", {
+            y: 50,
+            opacity: 0,
+            stagger: 0.1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: ".features-grid",
+                start: "top 80%",
+                toggleActions: "play none none reverse"
+            }
+        });
+    }, { scope: containerRef });
 
     // State
     const [centreSearch, setCentreSearch] = useState('');
@@ -301,56 +342,26 @@ export default function LandingPage() {
             <section className="relative overflow-hidden bg-gradient-to-b from-white via-emerald-50/30 to-emerald-50/60 border-b border-slate-200 pt-[140px] sm:pt-[150px] lg:pt-[160px]">
                 <div className="max-w-7xl mx-auto px-6 lg:px-16 py-10 lg:py-16 flex flex-col lg:flex-row items-center gap-12">
                     {/* Left: Text Content */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -30 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="flex-1 relative z-10 max-w-xl"
-                    >
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2, duration: 0.5 }}
-                            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/90 text-emerald-900 text-xs font-bold mb-6 border border-emerald-300 shadow-xs"
-                        >
+                    <div className="flex-1 max-w-2xl pt-10 sm:pt-20 z-10">
+                        <div className="hero-anim inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/90 text-emerald-900 text-xs font-bold mb-6 border border-emerald-300 shadow-xs">
                             <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                             {t('hero_badge')}
-                        </motion.div>
+                        </div>
 
-                        <motion.h1
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3, duration: 0.5 }}
-                            className="text-4xl sm:text-5xl lg:text-[3.25rem] font-black text-[#112d1b] leading-[1.18] mb-4"
-                        >
+                        <h1 className="hero-anim text-4xl sm:text-5xl lg:text-[3.25rem] font-black text-[#112d1b] leading-[1.18] mb-4">
                             {t('hero_title_1')} <br />
                             <span className="text-emerald-600">{t('hero_title_2')}</span>
-                        </motion.h1>
+                        </h1>
 
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.4, duration: 0.5 }}
-                            className="text-lg font-bold text-slate-800 mb-2"
-                        >
+                        <p className="hero-anim text-lg font-bold text-slate-800 mb-2">
                             {t('hero_subtitle')}
-                        </motion.p>
+                        </p>
 
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5, duration: 0.5 }}
-                            className="text-slate-600 mb-8 leading-relaxed text-sm sm:text-base"
-                        >
+                        <p className="hero-anim text-slate-600 mb-8 leading-relaxed text-sm sm:text-base">
                             {t('hero_desc')}
-                        </motion.p>
+                        </p>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.6, duration: 0.5 }}
-                            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-10"
-                        >
+                        <div className="hero-anim flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-10">
                             <Link to="/farmer/book" className="w-full sm:w-auto">
                                 <Button className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm px-7 h-12 rounded-full shadow-lg hover:shadow-xl transition gap-2 justify-center">
                                     {t('book_slot_now')}
@@ -365,15 +376,10 @@ export default function LandingPage() {
                                 <Play className="w-4 h-4 text-emerald-700 fill-emerald-700" />
                                 {t('watch_tour')}
                             </Button>
-                        </motion.div>
+                        </div>
 
                         {/* Feature Badges */}
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7, duration: 0.5 }}
-                            className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-6 border-t border-slate-200"
-                        >
+                        <div className="hero-anim grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-6 border-t border-slate-200">
                             <div className="flex items-center gap-2">
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><Leaf className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_msp')}</span>
@@ -390,16 +396,11 @@ export default function LandingPage() {
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><Banknote className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_dbt')}</span>
                             </div>
-                        </motion.div>
-                    </motion.div>
+                        </div>
+                    </div>
 
                     {/* Right: Hero Image with Stats Overlay */}
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9, x: 30 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
-                        className="flex-1 relative w-full max-w-lg lg:max-w-none"
-                    >
+                    <div className="flex-1 relative w-full max-w-lg lg:max-w-none">
                         <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-900">
                             <img
                                 src="/hero-farmer.jpg"
@@ -419,7 +420,7 @@ export default function LandingPage() {
 
 
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             </section>
 
@@ -594,7 +595,7 @@ export default function LandingPage() {
             </section>
 
             {/* How It Works - 4 Steps */}
-            <section id="how-it-works" className="relative z-10 py-16 px-6 lg:px-16 bg-slate-100/70 border-b border-slate-200">
+            <section id="how-it-works" className="relative z-10 py-16 px-6 lg:px-16 bg-slate-100/70 border-b border-slate-200 features-grid">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
                         <span className="text-emerald-800 font-bold text-xs uppercase tracking-widest bg-emerald-100 px-3 py-1 rounded-full">
@@ -639,7 +640,7 @@ export default function LandingPage() {
                                 badge: '48h DBT'
                             }
                         ].map((item, idx) => (
-                            <div key={idx} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-lg transition-shadow">
+                            <div key={idx} className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:shadow-lg transition-shadow feature-card">
                                 <div className="text-3xl font-black text-slate-100 group-hover:text-emerald-100 transition-colors absolute top-4 right-4">
                                     {item.step}
                                 </div>
@@ -658,7 +659,7 @@ export default function LandingPage() {
             </section>
 
             {/* Role Selection Section */}
-            <section className="relative z-10 py-16 px-6 lg:px-16 bg-white border-b border-slate-200">
+            <section className="relative z-10 py-16 px-6 lg:px-16 bg-white border-b border-slate-200 features-grid">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-10">
                         <p className="text-emerald-700 font-bold text-xs uppercase tracking-widest mb-1">
@@ -674,7 +675,7 @@ export default function LandingPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Farmer Card */}
-                        <Link to="/farmer/login" className="group">
+                        <Link to="/farmer/login" className="group feature-card">
                             <div className="bg-gradient-to-b from-white to-emerald-50/40 rounded-3xl border-2 border-emerald-100 hover:border-emerald-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
                                 <div>
                                     <div className="flex items-start justify-between mb-4">
@@ -704,7 +705,7 @@ export default function LandingPage() {
                         </Link>
 
                         {/* Operator Card */}
-                        <Link to="/operator/dashboard" className="group">
+                        <Link to="/operator/dashboard" className="group feature-card">
                             <div className="bg-gradient-to-b from-white to-blue-50/40 rounded-3xl border-2 border-slate-200 hover:border-blue-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
                                 <div>
                                     <div className="flex items-start justify-between mb-4">
@@ -734,7 +735,7 @@ export default function LandingPage() {
                         </Link>
 
                         {/* Admin Card */}
-                        <Link to="/admin/dashboard" className="group">
+                        <Link to="/admin/dashboard" className="group feature-card">
                             <div className="bg-gradient-to-b from-white to-purple-50/40 rounded-3xl border-2 border-slate-200 hover:border-purple-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
                                 <div>
                                     <div className="flex items-start justify-between mb-4">

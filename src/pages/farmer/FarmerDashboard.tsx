@@ -11,7 +11,8 @@ import {
   TrendingUp, TrendingDown, Sun, Cloud, Bell, Building, BellRing
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
-import { BookingRecord, OFFICIAL_MSP_RATES } from '@/services/mockStore';
+import { Booking as BookingRecord } from '@/types';
+import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { useSupabase } from '@/context/SupabaseContext';
 import { evaluateCentreRecommendationsAsync } from '@/services/recommendationEngine';
 import { CentreRecommendation } from '@/types';

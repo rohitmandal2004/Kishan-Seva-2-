@@ -17,15 +17,49 @@ export async function calculateQueuePredictionAsync(
  averageProcessingTimeMins: number = 4.5,
  noShowRatePercent: number = 5
 ): Promise<QueuePrediction> {
- // Try database-first
- try {
- const dbResult = await SupabaseDataService.getQueuePrediction(centreId);
- if (dbResult) {
- return dbResult;
- }
- } catch (err) {
- console.warn('Database queue prediction failed, using client-side fallback:', err);
- }
+  // 1. Try ML Service (FastAPI)
+  try {
+    const queueState = calculateQueuePrediction(centreId, bookings, averageProcessingTimeMins, noShowRatePercent);
+    const date = new Date();
+    
+    // In production, URL would be loaded from env. Using localhost for SIH demo.
+    const response = await fetch('http://localhost:8000/predict_wait_time', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        centre_id: centreId,
+        day_of_week: date.getDay(),
+        hour_of_day: date.getHours(),
+        current_queue_length: queueState.current_queue,
+        active_counters: 2, // Mocked for now
+        avg_quantity_qtl: 30, // Mocked for now
+        avg_service_time_min: averageProcessingTimeMins,
+        no_show_count: Math.round(queueState.prebooked_tokens * (noShowRatePercent / 100)),
+        weather_condition: 'Clear' // Mocked for now, in a real app would be from weather service
+      }),
+    });
+
+    if (response.ok) {
+      const mlData = await response.json();
+      return {
+        ...queueState,
+        predicted_wait_mins: mlData.predicted_wait_mins,
+        confidence: mlData.fallback_used ? 'MEDIUM' : 'HIGH'
+      };
+    }
+  } catch (err) {
+    console.warn('ML Prediction service unavailable. Falling back to Supabase/Heuristic:', err);
+  }
+
+  // 2. Try database-first heuristic
+  try {
+    const dbResult = await SupabaseDataService.getQueuePrediction(centreId);
+    if (dbResult) {
+      return dbResult;
+    }
+  } catch (err) {
+    console.warn('Database queue prediction failed, using client-side fallback:', err);
+  }
 
  // Fallback: client-side calculation
  return calculateQueuePrediction(centreId, bookings, averageProcessingTimeMins, noShowRatePercent);

@@ -1,0 +1,5 @@
+centre_id,centre_name,district,block,centre_type,latitude,longitude,service_counters,daily_capacity_qtl,avg_daily_farmer_capacity,status
+C001,Barasat CPC,North 24 Parganas,Barasat I,CPC,22.7212,88.4826,4,120,180,active
+C002,Basirhat CPC,North 24 Parganas,Basirhat I,CPC,22.6574,88.867,3,90,150,active
+C003,Bongaon CPC,North 24 Parganas,Bongaon,CPC,23.0706,88.819,4,110,165,active
+C004,Barasat Mobile CPC,North 24 Parganas,Barasat I,mCPC,22.735,88.47,2,60,100,active

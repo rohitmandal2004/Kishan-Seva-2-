@@ -16,7 +16,7 @@ export default function FarmerLayout() {
     const { user, farmer, signOut } = useSupabase();
     const currentPath = location.pathname;
     const store = useKishanData();
-    const activeBooking = store.getActiveFarmerBookingForFarmer(farmer, user?.email);
+    const activeBooking = store.getActiveFarmerBookingForFarmer(farmer?.id, user?.email);
     const { t } = useLanguage();
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -24,6 +24,9 @@ export default function FarmerLayout() {
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
     useEffect(() => {
+        try {
+            localStorage.removeItem('kishan_offline_pass');
+        } catch {}
         const goOffline = () => setIsOffline(true);
         const goOnline = () => setIsOffline(false);
         window.addEventListener('offline', goOffline);
@@ -47,6 +50,10 @@ export default function FarmerLayout() {
 
     const handleLogout = async () => {
         try {
+            localStorage.removeItem('kishan_offline_pass');
+            if (farmer?.id) {
+                localStorage.removeItem(`kishan_offline_pass_${farmer.id}`);
+            }
             await signOut();
         } catch (err) {
             console.error('[Kishan Seva] Error signing out:', err);

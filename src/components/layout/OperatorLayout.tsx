@@ -6,6 +6,7 @@ import { useKishanData } from '@/context/DataContext';
 import { useLanguage } from '@/services/i18n';
 import { useSupabase } from '@/context/SupabaseContext';
 import { LanguageSelector } from '@/components/ui/language-selector';
+import { SyncManager } from '@/components/ui/SyncManager';
 
 export default function OperatorLayout() {
  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function OperatorLayout() {
  ];
 
  return (
- <div className="bg-slate-100 min-h-screen pb-20 md:pb-0 flex flex-col md:flex-row font-sans">
+ <div className="bg-slate-100 h-screen flex flex-col md:flex-row font-sans overflow-hidden">
  {/* Mobile Top Bar */}
  <div className="md:hidden bg-[#0a192f] text-white px-3 sm:px-4 py-2.5 flex justify-between items-center sticky top-0 z-40 shadow-sm">
  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
@@ -69,75 +70,69 @@ export default function OperatorLayout() {
  </div>
 
  {/* Desktop & Tablet Sidebar Navigation */}
- <aside className="w-56 lg:w-64 bg-[#0a192f] text-slate-300 flex-col hidden md:flex shrink-0 h-screen sticky top-0 border-r border-slate-800 shadow-xl">
- <div className="p-5 border-b border-white/10">
- <div className="flex items-center gap-3 text-white mb-2">
- <div className="p-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-md">
- <img src="/logo.svg" alt="Kishan Seva" className="h-14 w-14 object-contain" />
- </div>
- <div>
- <span className="font-black text-xl tracking-tight leading-none block">Kishan Seva</span>
- <span className="text-[10px] text-blue-400 font-bold tracking-wider uppercase mt-1 block">
- {t('role_operator_title')}
- </span>
- </div>
- </div>
- </div>
+ <aside className="w-56 lg:w-64 bg-slate-900 text-slate-300 flex-col hidden md:flex shrink-0 h-full border-r-2 border-slate-900 z-10">
+    <div className="p-5 border-b border-slate-700 bg-slate-950">
+      <span className="font-mono text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1">State Govt</span>
+      <span className="font-black text-xl tracking-tight leading-none text-white block">Kishan Seva</span>
+      <span className="text-[10px] text-emerald-400 font-bold tracking-widest uppercase mt-2 block">
+        [ {t('role_operator_title')} ]
+      </span>
+    </div>
 
- <div className="px-5 py-3.5 bg-white/5 border-b border-white/10">
- <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Station Centre</p>
- <p className="font-bold text-xs text-white mt-0.5">Krishnapur Centre (KSP-001)</p>
- <div className="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
- <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
- <span>Electronic Weighbridge Active</span>
- </div>
- </div>
+    <div className="px-5 py-4 bg-slate-900 border-b border-slate-800">
+      <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Station Centre</p>
+      <p className="font-mono font-bold text-xs text-slate-200">Krishnapur (KSP-001)</p>
+      <div className="flex items-center gap-2 mt-2">
+        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none animate-pulse"></span>
+        <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest">Weighbridge Active</span>
+      </div>
+    </div>
 
- <nav className="flex-1 px-3 py-4 space-y-1">
- {navItems.map((item) => {
- const Icon = item.icon;
- const isActive = currentPath === item.path;
- return (
- <Link 
- key={item.path} 
- to={item.path}
- className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition ${
- isActive 
- ? 'bg-blue-600 text-white shadow-md shadow-blue-950/40' 
- : 'text-slate-300 hover:bg-white/10 hover:text-white'
- }`}
- >
- <Icon className="w-4 h-4" />
- {item.label}
- {item.badge !== undefined && (
- <span className="ml-auto px-2 py-0.5 bg-blue-500/30 text-blue-200 text-[10px] font-bold rounded-full">
- {item.badge}
- </span>
- )}
- </Link>
- );
- })}
- </nav>
+    <nav className="flex-1 px-3 py-4 space-y-1">
+      {navItems.map((item) => {
+        const Icon = item.icon;
+        const isActive = currentPath === item.path;
+        return (
+          <Link 
+            key={item.path} 
+            to={item.path}
+            className={`flex items-center gap-3 px-3 py-2 text-[10px] font-bold font-mono uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+              isActive 
+                ? 'bg-emerald-500 text-slate-900' 
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white'
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            {item.label}
+            {item.badge !== undefined && item.badge > 0 && (
+              <span className={`ml-auto px-1.5 py-0.5 text-[9px] tabular-nums ${isActive ? 'bg-slate-900 text-emerald-400' : 'bg-slate-800 text-slate-300'}`}>
+                {item.badge}
+              </span>
+            )}
+          </Link>
+        );
+      })}
+    </nav>
 
- <div className="p-4 border-t border-white/10 space-y-3">
- <div className="flex items-center justify-between px-1">
- <span className="text-[11px] text-slate-500 font-semibold">Language / ভাষা</span>
- <LanguageSelector variant="compact" />
- </div>
- <Button 
- variant="ghost" 
- className="w-full justify-start text-xs font-bold text-red-300 hover:text-red-100 hover:bg-red-500/20 rounded-xl"
- onClick={handleLogout}
- title="Sign out of Operator Console"
- >
- <LogOut className="w-4 h-4 mr-2.5 text-red-300" />
- Sign Out
- </Button>
- </div>
- </aside>
+    <div className="px-4 py-3 border-t border-slate-800 bg-slate-950">
+      <SyncManager />
+    </div>
+
+    <div className="p-4 border-t border-slate-800 bg-slate-950">
+      <Button 
+        variant="ghost" 
+        className="w-full justify-start text-[10px] font-bold font-mono uppercase tracking-widest text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+        onClick={handleLogout}
+        title="Sign out of Operator Console"
+      >
+        <LogOut className="w-4 h-4 mr-3" />
+        Sign Out
+      </Button>
+    </div>
+  </aside>
 
  {/* Main Content */}
- <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
+ <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
  {/* Top Header for Desktop & Tablet */}
  <header className="hidden md:flex bg-white border-b border-slate-200 h-16 items-center justify-between px-6 shrink-0 shadow-xs">
  <h1 className="font-extrabold text-slate-900 text-base">

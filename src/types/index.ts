@@ -170,6 +170,7 @@ export interface Booking {
  checked_in_at?: string;
  completed_at?: string;
  cancelled_at?: string;
+ reschedule_deadline?: string;
  quality_data?: QualityCheck;
  weighment_data?: Weighment;
  created_at?: string;

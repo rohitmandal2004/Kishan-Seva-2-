@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { getCoordinatesForVillage } from '@/services/locationNames';
-import { OFFICIAL_MSP_RATES } from '@/services/mockStore';
+import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 
 const VILLAGE_OPTIONS = ['Basirhat', 'Diamond Harbour', 'Barasat', 'Habra', 'Baruipur', 'Canning', 'Singur', 'Bongaon'];
 
@@ -55,6 +55,7 @@ export default function FarmerProfile() {
         land_area_acres: parseFloat(formData.land_area_acres) || farmer?.land_area_acres,
       };
       setFarmer(updated as any);
+
       if (farmer?.id) {
         try {
           await supabase.from('farmer_profiles').update({
@@ -63,10 +64,40 @@ export default function FarmerProfile() {
             district: coords.district,
             latitude: coords.latitude,
             longitude: coords.longitude,
-            crop_name: formData.crop_name,
             land_area_acres: parseFloat(formData.land_area_acres) || undefined,
           }).eq('id', farmer.id);
-        } catch (err) { console.warn('Profile DB update error:', err); }
+
+          // Update or insert primary crop in farmer_crops
+          const { data: cropsList } = await supabase.from('crops').select('id, name');
+          const matchedCrop = cropsList?.find(c => 
+            c.name.toLowerCase().includes(formData.crop_name.toLowerCase()) || 
+            formData.crop_name.toLowerCase().includes(c.name.toLowerCase())
+          );
+          if (matchedCrop) {
+            const { data: existingFarmerCrops } = await supabase
+              .from('farmer_crops')
+              .select('id')
+              .eq('farmer_id', farmer.id)
+              .maybeSingle();
+
+            if (existingFarmerCrops?.id) {
+              await supabase.from('farmer_crops').update({
+                crop_id: matchedCrop.id,
+                area_acres: parseFloat(formData.land_area_acres) || undefined,
+              }).eq('id', existingFarmerCrops.id);
+            } else {
+              await supabase.from('farmer_crops').insert({
+                farmer_id: farmer.id,
+                crop_id: matchedCrop.id,
+                season: 'Rabi 2026',
+                area_acres: parseFloat(formData.land_area_acres) || 1,
+                expected_quantity: (parseFloat(formData.land_area_acres) || 1) * 18,
+                unit: 'Quintal',
+                status: 'READY_FOR_HARVEST'
+              });
+            }
+          }
+        } catch (err) { console.warn('[Kishan Seva] Profile DB update error:', err); }
       }
       toast.success('Profile updated successfully!');
       setIsEditing(false);

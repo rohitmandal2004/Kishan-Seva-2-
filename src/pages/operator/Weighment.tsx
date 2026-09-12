@@ -18,15 +18,18 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
 import { triggerWhatsAppNotification } from '@/services/soundAndSpeech';
-import { OFFICIAL_MSP_RATES, BookingRecord } from '@/services/mockStore';
+import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { QRScannerModal } from '@/components/operator/QRScannerModal';
 import { AnomalyDetectionEngine } from '@/services/anomalyDetection';
 import { NotificationService } from '@/services/notificationService';
+import { SmsGateway } from '@/services/smsGateway';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Booking } from '@/types';
+import { gsap, useGSAP } from '@/lib/gsap';
+import { useRef } from 'react';
 
 const weighmentSchema = z
  .object({
@@ -49,10 +52,26 @@ export default function Weighment() {
 
  const [selectedTokenId, setSelectedTokenId] = useState<string>(bookings[0]?.id || '');
  const [loading, setLoading] = useState(false);
- const [completedBooking, setCompletedBooking] = useState<BookingRecord | null>(null);
+ const [completedBooking, setCompletedBooking] = useState<Booking | null>(null);
  const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+ const container = useRef<HTMLDivElement>(null);
 
  const selectedBooking = bookings.find((b) => b.id === selectedTokenId) || bookings[0];
+
+ useGSAP(() => {
+   if (completedBooking) {
+     // Animate the checkmark path drawing
+     gsap.fromTo(".receipt-check-path", 
+       { drawSVG: "0%" }, 
+       { drawSVG: "100%", duration: 0.8, ease: "power2.out", delay: 0.3 }
+     );
+     // Animate the receipt scaling in
+     gsap.fromTo(".receipt-card",
+       { scale: 0.95, opacity: 0, y: 20 },
+       { scale: 1, opacity: 1, y: 0, duration: 0.6, ease: "back.out(1.2)" }
+     );
+   }
+ }, { scope: container, dependencies: [completedBooking] });
 
  const {
  register,
@@ -152,6 +171,11 @@ export default function Weighment() {
  amount: actualNetPayable,
  dbt_ref: dbtRef,
  });
+
+ SmsGateway.sendSmsNotification(
+ updated.farmer_phone || '+91 98301 23456',
+ `Kishan Seva: Weighment complete. Net weight: ${actualNet} Q. Rs ${actualNetPayable.toLocaleString('en-IN')} will be credited via PFMS.`
+ );
  }
  setLoading(false);
  toast.success('e-J-Form generated and DBT Payout Dispatched!');
@@ -162,7 +186,7 @@ export default function Weighment() {
  };
 
  return (
- <div className="max-w-4xl mx-auto w-full pb-24 font-sans">
+ <div ref={container} className="max-w-4xl mx-auto w-full pb-24 font-sans">
  <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3 mb-6">
  <div>
  <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
@@ -186,11 +210,14 @@ export default function Weighment() {
 
  {completedBooking && completedBooking.weighment_data ? (
  /* Official Electronic J-Form (Receipt) */
- <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
- <Card className="p-0 border border-slate-200 shadow-xl bg-white rounded-3xl overflow-hidden max-w-2xl mx-auto">
+ <div className="duration-300">
+ <Card className="receipt-card p-0 border border-slate-200 shadow-xl bg-white rounded-3xl overflow-hidden max-w-2xl mx-auto">
  <div className="p-6 bg-gradient-to-r from-emerald-800 to-emerald-700 text-white text-center relative overflow-hidden">
- <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
- <CheckCircle2 className="w-8 h-8 text-white" />
+ <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner relative">
+   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8 text-white relative z-10">
+     <path className="receipt-check-path" d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+     <path className="receipt-check-path" d="M22 4L12 14.01l-3-3" />
+   </svg>
  </div>
  <span className="text-[10px] font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded-full text-emerald-100">
  Procurement &amp; Weighment Successfully Certified

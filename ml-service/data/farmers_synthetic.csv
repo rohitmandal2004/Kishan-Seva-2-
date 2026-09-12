@@ -1,0 +1,101 @@
+farmer_id,registration_no,block,crop,land_category,verification_status,preferred_language
+F0001,REG26000001,Barasat I,paddy,small,verified,bn
+F0002,REG26000002,Basirhat I,paddy,small,verified,en
+F0003,REG26000003,Barasat II,paddy,small,verified,bn
+F0004,REG26000004,Barasat I,paddy,marginal,verified,en
+F0005,REG26000005,Barasat I,paddy,small,verified,en
+F0006,REG26000006,Barasat II,paddy,small,verified,bn
+F0007,REG26000007,Barasat II,paddy,marginal,verified,en
+F0008,REG26000008,Bongaon,paddy,marginal,verified,en
+F0009,REG26000009,Barasat II,paddy,marginal,verified,hi
+F0010,REG26000010,Basirhat I,paddy,small,verified,en
+F0011,REG26000011,Basirhat I,paddy,small,verified,en
+F0012,REG26000012,Bongaon,paddy,small,verified,hi
+F0013,REG26000013,Basirhat I,paddy,marginal,verified,en
+F0014,REG26000014,Bongaon,paddy,small,verified,hi
+F0015,REG26000015,Barasat I,paddy,marginal,verified,bn
+F0016,REG26000016,Basirhat I,paddy,small,verified,bn
+F0017,REG26000017,Barasat I,paddy,small,verified,bn
+F0018,REG26000018,Barasat II,paddy,marginal,verified,en
+F0019,REG26000019,Barasat II,paddy,small,verified,hi
+F0020,REG26000020,Basirhat I,paddy,marginal,verified,bn
+F0021,REG26000021,Basirhat I,paddy,small,verified,hi
+F0022,REG26000022,Basirhat I,paddy,small,verified,bn
+F0023,REG26000023,Basirhat I,paddy,small,verified,bn
+F0024,REG26000024,Barasat II,paddy,small,verified,en
+F0025,REG26000025,Bongaon,paddy,marginal,verified,hi
+F0026,REG26000026,Barasat II,paddy,marginal,verified,en
+F0027,REG26000027,Barasat II,paddy,small,verified,hi
+F0028,REG26000028,Bongaon,paddy,marginal,verified,en
+F0029,REG26000029,Barasat II,paddy,marginal,verified,en
+F0030,REG26000030,Bongaon,paddy,marginal,verified,bn
+F0031,REG26000031,Bongaon,paddy,small,verified,hi
+F0032,REG26000032,Barasat II,paddy,small,verified,bn
+F0033,REG26000033,Basirhat I,paddy,marginal,verified,bn
+F0034,REG26000034,Bongaon,paddy,marginal,verified,en
+F0035,REG26000035,Barasat II,paddy,marginal,verified,en
+F0036,REG26000036,Barasat I,paddy,small,verified,en
+F0037,REG26000037,Barasat II,paddy,marginal,verified,bn
+F0038,REG26000038,Barasat I,paddy,marginal,verified,hi
+F0039,REG26000039,Bongaon,paddy,marginal,verified,bn
+F0040,REG26000040,Barasat I,paddy,small,verified,bn
+F0041,REG26000041,Basirhat I,paddy,marginal,verified,en
+F0042,REG26000042,Basirhat I,paddy,marginal,verified,en
+F0043,REG26000043,Bongaon,paddy,small,verified,bn
+F0044,REG26000044,Basirhat I,paddy,small,verified,bn
+F0045,REG26000045,Barasat I,paddy,marginal,verified,bn
+F0046,REG26000046,Barasat II,paddy,small,verified,hi
+F0047,REG26000047,Barasat II,paddy,small,verified,bn
+F0048,REG26000048,Basirhat I,paddy,marginal,verified,en
+F0049,REG26000049,Barasat I,paddy,marginal,verified,hi
+F0050,REG26000050,Barasat II,paddy,small,verified,en
+F0051,REG26000051,Barasat I,paddy,small,verified,bn
+F0052,REG26000052,Bongaon,paddy,small,verified,bn
+F0053,REG26000053,Barasat II,paddy,small,verified,bn
+F0054,REG26000054,Bongaon,paddy,small,verified,hi
+F0055,REG26000055,Bongaon,paddy,small,verified,bn
+F0056,REG26000056,Barasat II,paddy,marginal,verified,hi
+F0057,REG26000057,Basirhat I,paddy,marginal,verified,bn
+F0058,REG26000058,Bongaon,paddy,small,verified,en
+F0059,REG26000059,Barasat II,paddy,small,verified,hi
+F0060,REG26000060,Barasat I,paddy,small,verified,bn
+F0061,REG26000061,Barasat II,paddy,small,verified,en
+F0062,REG26000062,Barasat I,paddy,small,verified,en
+F0063,REG26000063,Barasat I,paddy,marginal,verified,en
+F0064,REG26000064,Barasat II,paddy,marginal,verified,bn
+F0065,REG26000065,Bongaon,paddy,small,verified,bn
+F0066,REG26000066,Barasat II,paddy,marginal,verified,en
+F0067,REG26000067,Bongaon,paddy,marginal,verified,en
+F0068,REG26000068,Barasat I,paddy,small,verified,bn
+F0069,REG26000069,Bongaon,paddy,marginal,verified,hi
+F0070,REG26000070,Bongaon,paddy,marginal,verified,bn
+F0071,REG26000071,Barasat I,paddy,small,verified,en
+F0072,REG26000072,Bongaon,paddy,marginal,verified,en
+F0073,REG26000073,Barasat II,paddy,small,verified,en
+F0074,REG26000074,Bongaon,paddy,small,verified,hi
+F0075,REG26000075,Barasat II,paddy,marginal,verified,hi
+F0076,REG26000076,Barasat II,paddy,small,verified,hi
+F0077,REG26000077,Barasat I,paddy,small,verified,bn
+F0078,REG26000078,Barasat I,paddy,small,verified,en
+F0079,REG26000079,Barasat II,paddy,marginal,verified,hi
+F0080,REG26000080,Bongaon,paddy,small,verified,hi
+F0081,REG26000081,Barasat I,paddy,small,verified,hi
+F0082,REG26000082,Barasat I,paddy,marginal,verified,hi
+F0083,REG26000083,Bongaon,paddy,marginal,verified,hi
+F0084,REG26000084,Bongaon,paddy,small,verified,en
+F0085,REG26000085,Basirhat I,paddy,small,verified,en
+F0086,REG26000086,Barasat I,paddy,marginal,verified,en
+F0087,REG26000087,Barasat I,paddy,marginal,verified,bn
+F0088,REG26000088,Barasat II,paddy,small,verified,bn
+F0089,REG26000089,Barasat I,paddy,small,verified,en
+F0090,REG26000090,Barasat I,paddy,small,verified,hi
+F0091,REG26000091,Barasat I,paddy,small,verified,bn
+F0092,REG26000092,Barasat I,paddy,small,verified,hi
+F0093,REG26000093,Basirhat I,paddy,marginal,verified,en
+F0094,REG26000094,Basirhat I,paddy,small,verified,hi
+F0095,REG26000095,Bongaon,paddy,small,verified,bn
+F0096,REG26000096,Basirhat I,paddy,marginal,verified,hi
+F0097,REG26000097,Barasat I,paddy,small,verified,hi
+F0098,REG26000098,Barasat I,paddy,small,verified,bn
+F0099,REG26000099,Barasat II,paddy,marginal,verified,en
+F0100,REG26000100,Basirhat I,paddy,small,verified,en

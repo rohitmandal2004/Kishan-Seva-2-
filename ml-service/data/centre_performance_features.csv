@@ -1,0 +1,5 @@
+centre_id,daily_capacity_qtl,daily_farmer_capacity,service_counters,historical_on_time_rate,historical_processing_efficiency,slot_fill_rate
+C001,120,180,4,0.736,0.631,0.81
+C002,90,150,3,0.896,0.791,0.812
+C003,110,165,4,0.921,0.854,0.862
+C004,60,100,2,0.746,0.824,0.822

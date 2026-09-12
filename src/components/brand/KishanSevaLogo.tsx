@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { Sparkles } from 'lucide-react';
+import { gsap, useGSAP } from '@/lib/gsap';
 
 interface KishanSevaLogoProps {
  className?: string;
  size?: 'sm' | 'md' | 'lg' | 'xl';
- showSubtitle?: boolean;
  theme?: 'light' | 'dark';
+ showSubtitle?: boolean;
 }
 
 export function KishanSevaLogo({
  className,
  size = 'md',
- showSubtitle = true,
- theme = 'light'
+ theme = 'light',
+ showSubtitle = true
 }: KishanSevaLogoProps) {
  
  const sizeClasses = {
@@ -40,15 +41,43 @@ export function KishanSevaLogo({
 
  const currentSize = sizeClasses[size];
  const currentTheme = themeClasses[theme];
+ const container = useRef<HTMLDivElement>(null);
+
+ useGSAP(() => {
+   // Draw the SVG ring around the logo
+   gsap.fromTo(".logo-ring circle", 
+     { drawSVG: "0%" },
+     { drawSVG: "100%", duration: 1.5, ease: "power2.inOut", delay: 0.2 }
+   );
+
+   // Draw the sparkles on hover (lucide icons use strokes!)
+   const sparkles = gsap.utils.toArray(".sparkle-icon path");
+   gsap.set(sparkles, { drawSVG: "0%" });
+   
+   const hoverAnim = gsap.to(sparkles, {
+     drawSVG: "100%",
+     duration: 0.6,
+     stagger: 0.1,
+     ease: "power1.inOut",
+     paused: true
+   });
+
+   const wrapper = container.current?.querySelector('.logo-wrapper');
+   wrapper?.addEventListener('mouseenter', () => hoverAnim.play());
+   wrapper?.addEventListener('mouseleave', () => hoverAnim.reverse());
+
+ }, { scope: container });
 
  return (
- <div className={cn("flex items-center gap-3", className)}>
+ <div ref={container} className={cn("flex items-center gap-3", className)}>
  <div className={cn(
- "p-2 rounded-2xl border hover:scale-105 transition-transform shrink-0 flex items-center justify-center relative",
+ "logo-wrapper p-2 rounded-2xl border hover:scale-105 transition-transform shrink-0 flex items-center justify-center relative group",
  currentTheme.wrapper
  )}>
- {/* Subtle sparkle animation disabled if prefers-reduced-motion */}
- <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-emerald-400 opacity-0 group-hover:opacity-100 animate-pulse motion-reduce:hidden" />
+ <svg className="logo-ring absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="300" className="text-emerald-500/30" />
+ </svg>
+ <Sparkles className="sparkle-icon absolute -top-1 -right-1 w-3 h-3 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity motion-reduce:hidden" />
  <img 
  src="/logo.svg" 
  alt="Kishan Seva Official Emblem" 
@@ -60,11 +89,6 @@ export function KishanSevaLogo({
  <span className={currentTheme.titlePrimary}>Kishan</span>{' '}
  <span className={currentTheme.titleSecondary}>Seva</span>
  </h1>
- {showSubtitle && (
- <p className={cn("font-semibold mt-1", currentSize.sub, currentTheme.subtitle)}>
- SIH 2026 Portal
- </p>
- )}
  </div>
  </div>
  );

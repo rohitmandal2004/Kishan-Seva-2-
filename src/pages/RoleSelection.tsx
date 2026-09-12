@@ -5,14 +5,37 @@ import { Leaf, Building2, Shield, ArrowRight, ChevronLeft, CheckCircle2 } from '
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import AnimatedPage from '@/components/ui/AnimatedPage';
-import { motion } from 'framer-motion';
+import { gsap, useGSAP } from '@/lib/gsap';
+import { useRef } from 'react';
 
 export default function RoleSelection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const container = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    // Header animation
+    gsap.from(".role-header", {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power2.out"
+    });
+
+    // Stagger cards
+    gsap.from(".role-card", {
+      y: 40,
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.15,
+      ease: "back.out(1.2)",
+      delay: 0.2
+    });
+  }, { scope: container });
 
   return (
     <AnimatedPage className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden font-sans">
+      <div ref={container} className="w-full max-w-5xl flex flex-col items-center justify-center relative z-10">
       {/* Dynamic Background Mesh */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-200/40 blur-[120px]" />
@@ -20,8 +43,7 @@ export default function RoleSelection() {
         <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-amber-100/40 blur-[120px]" />
       </div>
 
-      {/* Top Bar */}
-      <div className="w-full max-w-5xl flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 relative z-10">
+      <div className="w-full flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 relative z-10">
         <Link 
           to="/" 
           className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-500 hover:text-slate-900 font-semibold transition-colors bg-white/70 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
@@ -34,30 +56,23 @@ export default function RoleSelection() {
       </div>
 
       {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        className="mb-10 sm:mb-12 text-center max-w-2xl px-2 relative z-10"
-      >
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-md text-emerald-900 text-[10px] sm:text-xs font-bold mb-5 border border-white/50 shadow-sm tracking-wide uppercase">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span> 
-          {t('sso_gateway')}
+      <div className="role-header text-center mb-10 sm:mb-12 relative z-10">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-4 border border-emerald-200">
+          <CheckCircle2 className="w-4 h-4" /> {t('official_platform')}
         </div>
-        
-        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
-          {t('roles_title')}
-        </h2>
-        <p className="text-slate-500 text-sm sm:text-base mt-4 max-w-lg mx-auto font-medium leading-relaxed">
-          {t('roles_subtitle')}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+          {t('select_portal')}
+        </h1>
+        <p className="text-sm sm:text-base text-slate-500 max-w-lg mx-auto font-medium">
+          {t('secure_dbt')}
         </p>
-      </motion.div>
+      </div>
 
       {/* Role Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl w-full relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full relative z-10">
         
         {/* Farmer Card */}
-        <div>
+        <div className="role-card">
           <Card 
             onClick={() => navigate('/farmer/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
@@ -96,7 +111,7 @@ export default function RoleSelection() {
         </div>
 
         {/* Operator Card */}
-        <div>
+        <div className="role-card">
           <Card 
             onClick={() => navigate('/operator/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
@@ -135,7 +150,7 @@ export default function RoleSelection() {
         </div>
 
         {/* Admin Card */}
-        <div>
+        <div className="role-card">
           <Card 
             onClick={() => navigate('/admin/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
@@ -175,14 +190,10 @@ export default function RoleSelection() {
         
       </div>
 
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5, duration: 1 }}
-        className="mt-12 text-center text-xs text-slate-400 font-medium relative z-10"
-      >
+      <div className="mt-12 text-center text-xs text-slate-400 font-medium relative z-10">
         {t('need_help')} <strong className="text-slate-700 font-bold tracking-wide">1800-180-1551</strong>
-      </motion.div>
+      </div>
+      </div>
     </AnimatedPage>
   );
 }

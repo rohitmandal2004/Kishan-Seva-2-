@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,7 @@ export default function FarmerPayments() {
     .filter(b => b.status === 'COMPLETED' && b.weighment_data);
 
   // ─── Bank Details ──────────────────────────────────────────────────────────
-  const getInitialDetails = () => {
+  const getInitialDetails = useCallback(() => {
     try {
       const saved = localStorage.getItem(LS_KEY);
       if (saved) return JSON.parse(saved);
@@ -40,7 +40,7 @@ export default function FarmerPayments() {
       ifsc: farmer?.ifsc_code || 'SBIN0001234',
       upiId: (farmer as any)?.upi_id || '',
     };
-  };
+  }, [farmer?.bank_name, farmer?.account_number_masked, farmer?.ifsc_code]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(getInitialDetails);
@@ -51,7 +51,7 @@ export default function FarmerPayments() {
     const saved = getInitialDetails();
     setPaymentDetails(saved);
     setFormData(saved);
-  }, [farmer?.id]);
+  }, [farmer?.id, getInitialDetails]);
 
   const handleSavePaymentDetails = async () => {
     setPaymentDetails(formData);

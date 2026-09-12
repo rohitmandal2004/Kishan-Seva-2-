@@ -1,5 +1,4 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { mockStore } from './mockStore';
 import { ProcurementCentre, Booking, QualityCheck, Weighment, BookingStatus, QueuePrediction } from '@/types';
 
 /**
@@ -8,9 +7,7 @@ import { ProcurementCentre, Booking, QualityCheck, Weighment, BookingStatus, Que
  * Architecture:
  * 1. Database-first: All heavy logic (geo-spatial, queue aggregation,
  * atomic transactions) is executed server-side via Supabase RPCs/Views.
- * 2. Client fallback: When Supabase is not configured or VITE_ENABLE_DEMO_DATA
- * is enabled, the mockStore provides local data.
- * 3. Scoped real-time: Subscriptions are filtered by role (farmer_id / centre_id)
+ * 2. Scoped real-time: Subscriptions are filtered by role (farmer_id / centre_id)
  * to minimize bandwidth and enforce security.
  */
 const isDemoDataEnabled = import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
@@ -26,14 +23,14 @@ export const SupabaseDataService = {
  .from('procurement_centres')
  .select('*')
  .order('name', { ascending: true });
- if (!error && data && data.length > 0) {
+ if (!error && data) {
  return data as ProcurementCentre[];
  }
  } catch (err) {
  console.warn('Supabase getCentres error:', err);
  }
  }
- return mockStore.getCentres();
+ return [];
  },
 
  /**
@@ -60,28 +57,22 @@ export const SupabaseDataService = {
  return data as (ProcurementCentre & { distance_km: number; travel_time_mins: number })[];
  }
  } catch (err) {
- console.warn('Supabase findNearestCentres RPC error, falling back to client-side:', err);
+ console.warn('Supabase findNearestCentres RPC error:', err);
  }
  }
- // Fallback: return all centres from mockStore (client will score them)
- return mockStore.getCentres().map(c => ({
- ...c,
- distance_km: c.distance_km ?? 5,
- travel_time_mins: Math.round((c.distance_km || 5) / 25 * 60)
- }));
+ return [];
  },
 
  /** Toggle centre active/maintenance status. */
  toggleCentreStatus: async (centreId: string): Promise<void> => {
- mockStore.toggleCentreStatus(centreId);
-
  if (isSupabaseConfigured()) {
  try {
- const centre = mockStore.getCentreById(centreId);
+ const { data: centre } = await supabase.from('procurement_centres').select('status').eq('id', centreId).single();
  if (centre) {
+ const newStatus = centre.status === 'ACTIVE' ? 'MAINTENANCE' : 'ACTIVE';
  await supabase
  .from('procurement_centres')
- .update({ status: centre.status, updated_at: new Date().toISOString() })
+ .update({ status: newStatus, updated_at: new Date().toISOString() })
  .eq('id', centreId);
  }
  } catch (err) {
@@ -100,7 +91,7 @@ export const SupabaseDataService = {
  .from('bookings')
  .select('*, quality_checks(*), weighments(*)')
  .order('created_at', { ascending: false });
- if (!error && data && data.length > 0) {
+ if (!error && data) {
  const normalized: Booking[] = data.map((b: any) => {
  const qc = Array.isArray(b.quality_checks) ? b.quality_checks[0] : b.quality_checks;
  const wm = Array.isArray(b.weighments) ? b.weighments[0] : b.weighments;
@@ -110,14 +101,13 @@ export const SupabaseDataService = {
  weighment_data: wm || b.weighment_data,
  };
  });
- mockStore.syncBookings(normalized);
  return normalized;
  }
  } catch (err) {
  console.warn('Supabase getBookings error:', err);
  }
  }
- return mockStore.getBookings();
+ return [];
  },
 
  /** Create a new procurement booking slot atomically via RPC. */
@@ -136,16 +126,6 @@ export const SupabaseDataService = {
  vehicle_number?: string;
  vehicle_type?: string;
  }): Promise<Booking> => {
- const localBooking = mockStore.createBooking({
- ...params,
- farmerId: params.farmer_id || 'unknown',
- farmerName: params.farmer_name || 'Farmer',
- farmerPhone: params.farmer_phone || '',
- farmerEmail: params.farmer_email,
- farmerCode: params.farmer_code,
- clerkUserId: params.clerk_user_id,
- });
-
  if (isSupabaseConfigured()) {
  try {
  // Resolve farmer_id to UUID if needed
@@ -166,10 +146,14 @@ export const SupabaseDataService = {
  }
  }
 
- // Only call Supabase RPC if we have a valid UUID or fallback UUID
+ // Only call Supabase RPC if we have a valid UUID
  const finalFarmerId = (resolvedFarmerId && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(resolvedFarmerId))
  ? resolvedFarmerId
- : 'f1111111-1111-1111-1111-111111111111';
+ : null;
+
+ if (!finalFarmerId) {
+ throw new Error('Cannot book slot: Valid farmer profile was not found.');
+ }
 
  const { data, error } = await supabase.rpc('create_booking', {
  p_farmer_id: finalFarmerId,
@@ -178,23 +162,58 @@ export const SupabaseDataService = {
  p_expected_quantity: params.expected_quantity_q,
  p_slot_date: params.slot_date,
  p_slot_time: params.slot_time,
- p_vehicle_number: params.vehicle_number || 'WB 25 B 4821',
+ p_vehicle_number: params.vehicle_number || null,
  p_vehicle_type: params.vehicle_type || 'Tractor Trolley',
  });
 
  if (!error && data) {
- const remoteBooking = data as Booking;
- mockStore.syncBookings([remoteBooking]);
- return remoteBooking;
+ return data as Booking;
  } else if (error) {
- console.warn('Supabase create_booking RPC error, using local booking:', error.message);
+ console.error('Supabase create_booking RPC error:', error.message);
+ throw new Error(`Booking failed: ${error.message}`);
  }
- } catch (err) {
- console.warn('Supabase create_booking RPC exception, using local booking:', err);
+ } catch (err: any) {
+ console.error('Supabase create_booking RPC exception:', err);
+ throw err;
  }
  }
 
- return localBooking;
+ throw new Error('Database service not configured. Cannot process slot booking.');
+ },
+
+ /** Postpone an active booking for rescheduling within 7 days. */
+ postponeBooking: async (bookingId: string): Promise<void> => {
+ if (isSupabaseConfigured()) {
+ const { error } = await supabase.rpc('postpone_booking', {
+ p_booking_id: bookingId,
+ });
+ if (error) {
+ console.error('Supabase postpone_booking RPC error:', error.message);
+ throw new Error(`Cancellation failed: ${error.message}`);
+ }
+ }
+ },
+
+ /** Reschedule a postponed booking. */
+ rescheduleBooking: async (
+ bookingId: string,
+ newCentreId: string,
+ newSlotDate: string,
+ newSlotTime: string
+ ): Promise<any> => {
+ if (isSupabaseConfigured()) {
+ const { data, error } = await supabase.rpc('reschedule_booking', {
+ p_booking_id: bookingId,
+ p_new_centre_id: newCentreId,
+ p_new_slot_date: newSlotDate,
+ p_new_slot_time: newSlotTime,
+ });
+ if (error) {
+ console.error('Supabase reschedule_booking RPC error:', error.message);
+ throw new Error(`Rescheduling failed: ${error.message}`);
+ }
+ return data;
+ }
  },
 
  // ─── Atomic Transaction RPCs ─────────────────────────────────────────
@@ -208,10 +227,6 @@ export const SupabaseDataService = {
  qualityData?: QualityCheck,
  weighmentData?: Weighment
  ): Promise<void> => {
- // 1. Update local reactive store
- mockStore.updateBookingStatus(bookingId, status, qualityData, weighmentData);
-
- // 2. Sync to Supabase if configured
  if (isSupabaseConfigured()) {
  try {
  const payload: Record<string, any> = {
@@ -243,7 +258,6 @@ export const SupabaseDataService = {
  const { error } = await supabase.rpc('submit_weighment_transaction', payload);
 
  if (error) {
- // If error code is PGRST202 (parameter mismatch because p_rejection_reason isn't on remote DB), retry without it
  if (error.code === 'PGRST202') {
  const { p_rejection_reason, ...legacyPayload } = payload;
  const { error: retryErr } = await supabase.rpc('submit_weighment_transaction', legacyPayload);
@@ -286,23 +300,78 @@ export const SupabaseDataService = {
 
  /** Advance booking in the queue state machine. */
  advanceBooking: async (bookingId: string): Promise<Booking | undefined> => {
- const updated = mockStore.advanceBooking(bookingId);
- if (isSupabaseConfigured() && updated) {
+ if (isSupabaseConfigured()) {
  try {
- await SupabaseDataService.updateBookingStatus(
- bookingId,
- updated.status,
- updated.quality_data,
- updated.weighment_data
- );
+ const { data: booking } = await supabase.from('bookings').select('status').eq('id', bookingId).single();
+ if (booking) {
+ const currentStatus = booking.status;
+ let nextStatus: BookingStatus | null = null;
+ if (currentStatus === 'BOOKED') nextStatus = 'CHECKED_IN';
+ else if (currentStatus === 'CHECKED_IN') nextStatus = 'WAITING';
+ else if (currentStatus === 'WAITING') nextStatus = 'CALLED';
+ else if (currentStatus === 'CALLED') nextStatus = 'QUALITY_TESTING';
+ else if (currentStatus === 'QUALITY_TESTING') nextStatus = 'WEIGHMENT';
+ else if (currentStatus === 'WEIGHMENT') nextStatus = 'COMPLETED';
+ 
+ if (nextStatus) {
+ await SupabaseDataService.updateBookingStatus(bookingId, nextStatus);
+ const { data: updatedBooking } = await supabase
+ .from('bookings')
+ .select('*, quality_checks(*), weighments(*)')
+ .eq('id', bookingId)
+ .single();
+ if (updatedBooking) {
+ const qc = Array.isArray(updatedBooking.quality_checks) ? updatedBooking.quality_checks[0] : updatedBooking.quality_checks;
+ const wm = Array.isArray(updatedBooking.weighments) ? updatedBooking.weighments[0] : updatedBooking.weighments;
+ return {
+ ...updatedBooking,
+ quality_data: qc || updatedBooking.quality_data,
+ weighment_data: wm || updatedBooking.weighment_data,
+ } as Booking;
+ }
+ }
+ }
  } catch (err) {
  console.warn('Supabase advanceBooking error:', err);
  }
  }
- return updated;
+ return undefined;
  },
 
- // ─── Scoped Real-time Subscriptions ──────────────────────────────────
+  // ─── Scoped Real-time Subscriptions ──────────────────────────────────
+
+  /**
+   * Record the outcome of a recommendation vs user choice.
+   */
+  recordRecommendationOutcome: async (params: {
+    farmer_id: string;
+    booking_id: string;
+    farmer_lat?: number;
+    farmer_lon?: number;
+    recommended_centre_id: string;
+    recommended_journey_score: number;
+    chosen_centre_id: string;
+    chosen_journey_score: number;
+    reason_for_deviation?: string;
+  }): Promise<void> => {
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.from('recommendation_outcomes').insert({
+          farmer_id: params.farmer_id,
+          booking_id: params.booking_id,
+          farmer_lat: params.farmer_lat,
+          farmer_lon: params.farmer_lon,
+          recommended_centre_id: params.recommended_centre_id,
+          recommended_journey_score: params.recommended_journey_score,
+          chosen_centre_id: params.chosen_centre_id,
+          chosen_journey_score: params.chosen_journey_score,
+          reason_for_deviation: params.reason_for_deviation,
+        });
+      } catch (err) {
+        console.warn('Supabase recordRecommendationOutcome error:', err);
+      }
+    }
+  },
 
  /**
  * Subscribe to real-time booking changes scoped by role:

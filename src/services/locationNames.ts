@@ -1,7 +1,7 @@
 import { Language } from './i18n';
 
 // Dictionary of District names
-export const DISTRICT_NAMES: Record<string, Record<Language, string>> = {
+export const DISTRICT_NAMES: Record<string, Partial<Record<Language, string>>> = {
  'North 24 Parganas': {
  en: 'North 24 Parganas',
  hi: 'उत्तर 24 परगना',
@@ -35,7 +35,7 @@ export const DISTRICT_NAMES: Record<string, Record<Language, string>> = {
 };
 
 // Dictionary of Centre/City names
-export const LOCATION_NAMES: Record<string, Record<Language, string>> = {
+export const LOCATION_NAMES: Record<string, Partial<Record<Language, string>>> = {
  'Barasat': {
  en: 'Barasat',
  hi: 'बारासात',
@@ -390,14 +390,16 @@ export function getDistrictForVillage(village: string): string | undefined {
 export function tLocation(name: string, lang: Language, type: 'district' | 'city' = 'city'): string {
  const dict = type === 'district' ? DISTRICT_NAMES : LOCATION_NAMES;
  // If the exact match exists
- if (dict[name] && dict[name][lang]) {
- return dict[name][lang];
+ const exact = dict[name]?.[lang];
+ if (exact) {
+ return exact;
  }
  
  // Try case-insensitive matching
  const key = Object.keys(dict).find(k => k.toLowerCase() === name.toLowerCase());
- if (key && dict[key][lang]) {
- return dict[key][lang];
+ if (key) {
+ const ciMatch = dict[key]?.[lang];
+ if (ciMatch) return ciMatch;
  }
 
  // Fallback to original string

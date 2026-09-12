@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { BookingRecord } from './mockStore';
+import { Booking as BookingRecord } from '@/types';
 
 const SESSION_KEY = 'kishan_push_scheduled';
 

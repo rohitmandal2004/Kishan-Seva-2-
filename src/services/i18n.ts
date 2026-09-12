@@ -847,6 +847,20 @@ export const translations: Translations = {
   push_banner_text: { en: 'Enable slot reminders to get notified 2 hours before your procurement appointment.', hi: 'खरीद अपॉइंटमेंट से 2 घंटे पहले सूचना पाने के लिए स्लॉट अनुस्मारक सक्षम करें।', bn: 'ক্রয় অ্যাপয়েন্টমেন্টের ২ ঘণ্টা আগে সূচিত হতে স্লট রিমাইন্ডার সক্রিয় করুন।' },
   enable: { en: 'Enable', hi: 'सक्षम करें', bn: 'সক্রিয় করুন' },
 
+  no_active_token: { en: 'No Active Token', hi: 'कोई सक्रिय टोकन नहीं', bn: 'কোনো সক্রিয় টোকেন নেই' },
+  no_active_token_desc: { en: 'You do not currently have a harvest delivery token scheduled for today. Book a procurement slot to get your digital mandi gate pass.', hi: 'आपके पास आज के लिए कोई टोकन नहीं है। अपना डिजिटल मंडी गेट पास प्राप्त करने के लिए एक खरीद स्लॉट बुक करें।', bn: 'আজকের জন্য আপনার কাছে কোনো টোকেন নেই। আপনার ডিজিটাল মান্ডি গেট পাস পেতে একটি প্রকিউরমেন্ট স্লট বুক করুন।' },
+  view_offline_pass: { en: 'View Offline Pass', hi: 'ऑफ़लाइन पास देखें', bn: 'অফলাইন পাস দেখুন' },
+  book_procurement_slot: { en: 'Book a Procurement Slot', hi: 'एक खरीद स्लॉट बुक करें', bn: 'একটি প্রকিউরমেন্ট স্লট বুক করুন' },
+
+  TIME_SLOT: { en: 'Time Slot', hi: 'समय स्लॉट', bn: 'সময় স্লট' },
+  afternoon_faster: { en: 'Afternoon is generally faster', hi: 'दोपहर आमतौर पर तेज होती है', bn: 'বিকেল সাধারণত দ্রুত হয়' },
+  peak: { en: 'Peak', hi: 'भीड़-भाड़', bn: 'ভিড়' },
+  normal: { en: 'Normal', hi: 'सामान्य', bn: 'স্বাভাবিক' },
+  fast: { en: 'Fast', hi: 'तेज', bn: 'দ্রুত' },
+  wait_mins: { en: 'wait', hi: 'प्रतीक्षा', bn: 'অপেক্ষা' },
+  READY_CONFIRM: { en: 'Ready to Confirm', hi: 'पुष्टि के लिए तैयार', bn: 'নিশ্চিত করার জন্য প্রস্তুত' },
+  generate_token: { en: 'Generate Token', hi: 'टोकन जनरेट करें', bn: 'টোকেন তৈরি করুন' },
+
 };
 
 

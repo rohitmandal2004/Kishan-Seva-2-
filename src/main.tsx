@@ -4,7 +4,8 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { SupabaseProvider } from './context/SupabaseContext'
-import { ClerkProvider } from '@clerk/clerk-react'
+import { KishanDataProvider } from './context/DataContext'
+import { ClerkProvider } from '@clerk/react'
 import { ErrorBoundary } from './components/ui/ErrorBoundary'
 
 // Import virtual:pwa-register to auto-register the service worker for PWA
@@ -45,7 +46,9 @@ createRoot(document.getElementById('root')!).render(
         <ErrorBoundary>
             <ClerkProvider publishableKey={clerkPubKey} appearance={{ variables: { colorPrimary: '#047857' } }}>
                 <SupabaseProvider>
-                    <App />
+                    <KishanDataProvider>
+                        <App />
+                    </KishanDataProvider>
                 </SupabaseProvider>
             </ClerkProvider>
         </ErrorBoundary>

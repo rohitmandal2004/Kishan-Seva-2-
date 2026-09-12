@@ -1,0 +1,10 @@
+source,url,purpose
+West Bengal e-Paddy official portal,https://epaddy.wb.gov.in/,"Official procurement system; centre reports, schedules, farmer schedule status"
+e-Paddy self scheduling,https://epaddy.wb.gov.in/PublicProfile/SelfScheduling,"Centre, quantity, procurement date, time-slot and farmer-history fields"
+CFPP,https://cfpp.nic.in/,"National farmer registration, procurement, MSP and centre reports"
+GOI MSP for Wheat and Rice,https://dfpd.gov.in/msp-for-wheat-and-rice/en,Official MSP history
+OGD district crop production,https://www.data.gov.in/catalog/district-wise-season-wise-crop-production-statistics-0,District/crop/season/year area and production
+OGD daily mandi prices,https://www.data.gov.in/catalog/current-daily-price-various-commodities-various-markets-mandi,Daily min/modal/max market prices
+OGD paddy variety prices,https://sandbox.data.gov.in/catalog/variety-wise-daily-market-prices-data-paddydhan,Paddy variety/market daily prices
+OGD rainfall,https://www.data.gov.in/catalog/rainfall,Rainfall datasets
+OGD district rainfall normals,https://www.data.gov.in/catalog/district-rainfall-normal-mm-monthly-seasonal-and-annual-data-period-1951-2000,District rainfall normals

@@ -1,204 +1,311 @@
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Card } from '@/components/ui/card';
-import { Users, Truck, CheckCircle2, Clock, ArrowRight, Scale, FileCheck, ScanLine, BarChart3 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
-import { Skeleton } from '@/components/ui/skeleton';
 import { QRScannerModal } from '@/components/ui/QRScannerModal';
 import { QueueAnalyticsChart } from '@/components/ui/QueueAnalyticsChart';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useLanguage } from '@/services/i18n';
 
 export default function OperatorDashboard() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const store = useKishanData();
   const allBookings = store.getBookings();
+  
+  // Status bucketing
   const activeBookings = allBookings.filter(b => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
   const completedBookings = allBookings.filter(b => b.status === 'COMPLETED');
-
+  const cancelledBookings = allBookings.filter(b => b.status === 'CANCELLED');
+  const waitingBookings = activeBookings.filter(b => b.status === 'BOOKED' || b.status === 'CHECKED_IN');
+  const servingBookings = activeBookings.filter(b => b.status === 'QUALITY_TESTING' || b.status === 'WEIGHMENT');
+  
   const totalProcuredQ = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || b.expected_quantity_q), 0);
-  const currentlyServing = activeBookings.find(b => b.status === 'QUALITY_TESTING' || b.status === 'WEIGHMENT') || activeBookings[0];
-  const nextInQueue = activeBookings.filter(b => b.id !== currentlyServing?.id)[0];
+  const centreCapacity = 500; // Mocked capacity
+  const remainingCapacity = centreCapacity - totalProcuredQ;
+
+  const currentlyServing = servingBookings[0] || waitingBookings[0]; // The active one
+  
+  // Queue for table (excluding the one currently in the big command box)
+  const queueList = activeBookings.filter(b => b.id !== currentlyServing?.id);
 
   const { isProfileLoading } = useSupabase();
+  const reduce = useReducedMotion();
+
+  // Animation constants based on the animate skill
+  const transition = {
+    duration: 0.2 // 200ms
+  };
+
+  const variants = {
+    initial: { opacity: 0, transform: reduce ? "translateY(0px)" : "translateY(10px)" },
+    animate: { opacity: 1, transform: "translateY(0px)" },
+    exit: { opacity: 0, transform: reduce ? "translateY(0px)" : "translateY(-10px)" }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement).tagName)) return;
+      if (isScannerOpen) return;
+      
+      if (e.key.toLowerCase() === 'q') navigate('/operator/quality');
+      if (e.key.toLowerCase() === 'w') navigate('/operator/weighment');
+      if (e.key.toLowerCase() === 's') setIsScannerOpen(true);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate, isScannerOpen]);
 
   if (isProfileLoading) {
     return (
-      <div className="max-w-6xl mx-auto w-full space-y-8 pt-4">
-        <Skeleton className="h-16 w-1/2 md:w-1/3 rounded-xl" />
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
-          <Skeleton className="h-32 w-full rounded-2xl" />
+      <div className="max-w-[1400px] mx-auto w-full p-4 md:p-6 bg-slate-50/60 min-h-screen">
+        {/* Top Strip Skeleton */}
+        <div className="bg-slate-900 p-3 mb-6 flex justify-between">
+          <div className="h-4 w-48 bg-slate-800 animate-pulse"></div>
+          <div className="h-4 w-96 bg-slate-800 animate-pulse hidden md:block"></div>
         </div>
-        <Skeleton className="h-64 w-full rounded-3xl" />
+
+        {/* Command Box Skeleton */}
+        <div className="border-2 border-slate-900 bg-white mb-8">
+          <div className="p-4 border-b-2 border-slate-900 bg-slate-50 flex justify-between">
+            <div className="h-3 w-48 bg-slate-300 animate-pulse"></div>
+            <div className="h-3 w-64 bg-slate-200 animate-pulse"></div>
+          </div>
+          <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between gap-8">
+            <div className="flex-1 space-y-4">
+              <div className="h-4 w-32 bg-slate-800 animate-pulse"></div>
+              <div className="h-24 w-48 bg-slate-300 animate-pulse"></div>
+              <div className="h-6 w-64 bg-slate-200 animate-pulse"></div>
+            </div>
+            <div className="w-full md:w-auto flex flex-col gap-3 min-w-[280px]">
+              <div className="h-16 w-full bg-slate-200 animate-pulse border-2 border-transparent"></div>
+              <div className="h-16 w-full bg-white animate-pulse border-2 border-slate-200"></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Table Skeleton */}
+        <div className="border border-slate-300 bg-white">
+          <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between">
+            <div className="h-3 w-48 bg-slate-300 animate-pulse"></div>
+          </div>
+          <div className="p-4 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div className="h-4 w-16 bg-slate-200 animate-pulse"></div>
+                <div className="h-4 w-48 bg-slate-200 animate-pulse"></div>
+                <div className="h-4 w-24 bg-slate-300 animate-pulse"></div>
+                <div className="h-6 w-16 bg-slate-200 animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="max-w-6xl mx-auto w-full font-sans">
-        {/* Date & Centre Status */}
-        <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-8">
-          <div>
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Operational Console</span>
-            <h2 className="text-2xl font-black text-slate-900 leading-tight">Today's Mandi Overview</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Krishnapur Procurement Centre (KSP-001) • Automated Assay & Weighbridge</p>
+      <div className="max-w-[1400px] mx-auto w-full font-sans text-slate-900 pb-12 p-4 md:p-6">
+        
+        {/* 1. CENTRE STATUS (Top Strip) */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 text-white p-3 mb-6 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 bg-emerald-400 rounded-none animate-pulse"></div>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-300">
+              KSP-001 | Live Operations
+            </span>
           </div>
-          <div className="flex items-center gap-3 bg-emerald-50 text-emerald-800 px-4 py-2 rounded-xl border border-emerald-200">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
-            <span className="font-extrabold text-xs tracking-wider uppercase">Live Queue Active</span>
+          <div className="flex flex-wrap gap-x-6 gap-y-2 font-mono text-xs">
+            <div className="flex gap-2 items-center">
+              <span className="text-slate-400 uppercase">{t('waiting')}:</span>
+              <span className="font-bold">{waitingBookings.length}</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-slate-400 uppercase">{t('serving')}:</span>
+              <span className="font-bold text-emerald-400">{servingBookings.length}</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-slate-400 uppercase">{t('completed_status')}:</span>
+              <span className="font-bold">{completedBookings.length}</span>
+            </div>
+            <div className="flex gap-2 items-center">
+              <span className="text-slate-400 uppercase">{t('cancel_noshow')}:</span>
+              <span className="font-bold text-red-400">{cancelledBookings.length}</span>
+            </div>
+            <div className="flex gap-2 items-center border-l border-slate-700 pl-6">
+              <span className="text-slate-400 uppercase">{t('capacity_rem')}:</span>
+              <span className="font-bold text-amber-400">{Math.max(0, remainingCapacity).toFixed(0)} Q</span>
+            </div>
           </div>
         </div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">In Queue</span>
-              <div className="p-2 sm:p-2.5 bg-blue-50 text-blue-700 rounded-xl shrink-0">
-                <Users className="w-4 h-4" />
-              </div>
+        {/* 2. PRIMARY ACTION & CURRENT TOKEN (Command Box) */}
+        <div className="border-2 border-slate-900 bg-white mb-8">
+          <div className="p-4 border-b-2 border-slate-900 bg-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900">{t('immediate_action')}</h2>
+            <div className="flex flex-wrap gap-3 text-[10px] font-bold font-mono text-slate-500 uppercase tracking-widest">
+              <span>Shortcuts:</span>
+              <span className="bg-slate-200 px-1 border border-slate-300">[Q] Quality</span>
+              <span className="bg-slate-200 px-1 border border-slate-300">[W] Weigh</span>
+              <span className="bg-slate-200 px-1 border border-slate-300">[S] Scan</span>
             </div>
-            <motion.p key={activeBookings.length} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-2xl sm:text-3xl font-black text-slate-900">{activeBookings.length}</motion.p>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-1">Vehicles in yard</p>
-          </Card>
-
-          <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Completed</span>
-              <div className="p-2 sm:p-2.5 bg-emerald-50 text-emerald-700 rounded-xl shrink-0">
-                <CheckCircle2 className="w-4 h-4" />
-              </div>
-            </div>
-            <motion.p key={completedBookings.length} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-2xl sm:text-3xl font-black text-slate-900">{completedBookings.length}</motion.p>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-1">Processed today</p>
-          </Card>
-
-          <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Procured</span>
-              <div className="p-2 sm:p-2.5 bg-amber-50 text-amber-700 rounded-xl shrink-0">
-                <Truck className="w-4 h-4" />
-              </div>
-            </div>
-            <motion.p key={totalProcuredQ} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-2xl sm:text-3xl font-black text-slate-900">{totalProcuredQ.toFixed(0)} <span className="text-xs sm:text-sm font-medium text-slate-500">Q</span></motion.p>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-1">Metric Quintals</p>
-          </Card>
-
-          <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
-            <div className="flex items-center justify-between mb-2 sm:mb-3">
-              <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Turnaround</span>
-              <div className="p-2 sm:p-2.5 bg-purple-50 text-purple-700 rounded-xl shrink-0">
-                <Clock className="w-4 h-4" />
-              </div>
-            </div>
-            <p className="text-2xl sm:text-3xl font-black text-slate-900">4.5 <span className="text-xs sm:text-sm font-medium text-slate-500">min</span></p>
-            <p className="text-[11px] sm:text-xs text-slate-500 mt-1">Avg. duration</p>
-          </Card>
-        </div>
-
-        {/* Currently Serving Hero Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2">
-            <Card className="p-0 border border-slate-200 shadow-md bg-white rounded-3xl overflow-hidden">
-              <div className="p-6 bg-slate-900 text-white flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div>
-                  <p className="text-slate-500 text-xs uppercase font-bold tracking-widest mb-1">Now At Weighbridge / Lab</p>
-                  <div className="flex items-baseline gap-3">
-                    <motion.h4 key={currentlyServing ? currentlyServing.token_number : 'none'} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="text-4xl font-black text-emerald-400 font-mono tracking-wider">
-                      {currentlyServing ? currentlyServing.token_number : '---'}
-                    </motion.h4>
-                    <span className="text-lg font-bold text-slate-200">
-                      {currentlyServing ? currentlyServing.farmer_name : 'No Active Vehicle'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {currentlyServing ? `${currentlyServing.crop_name} (${currentlyServing.expected_quantity_q} Q) • Vehicle: ${currentlyServing.vehicle_number}` : 'Queue is empty'}
-                  </p>
-                </div>
-
-                <div className="sm:text-right">
-                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${currentlyServing ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-slate-700 text-slate-500 border-slate-600'}`}>
-                    {currentlyServing && <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>}
-                    {currentlyServing ? currentlyServing.status.replace('_', ' ') : 'IDLE'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4 bg-slate-800 text-slate-300 flex flex-wrap justify-between items-center gap-3">
-                <p className="text-xs font-medium">
-                  Next in Yard: <strong className="text-white ml-1">{nextInQueue ? `${nextInQueue.token_number} (${nextInQueue.farmer_name})` : 'Queue Clear'}</strong>
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => navigate('/operator/quality')}
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold h-12 px-5 gap-2 shadow-sm"
-                  >
-                    <FileCheck className="w-4 h-4" /> Quality Check
-                  </Button>
-                  <Button
-                    onClick={() => navigate('/operator/weighment')}
-                    size="lg"
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold h-12 px-5 gap-2 shadow-sm"
-                  >
-                    <Scale className="w-4 h-4" /> Start Weighment
-                  </Button>
-                </div>
-              </div>
-            </Card>
           </div>
-
-          {/* Quick Action Navigation */}
-          <div className="space-y-4">
-            <Card className="p-5 border border-slate-200 bg-white rounded-2xl shadow-xs">
-              <h3 className="font-extrabold text-slate-900 text-sm mb-3">Operator Quick Actions</h3>
-              <div className="space-y-2">
-                <Link to="/operator/queue" className="block">
-                  <Button variant="outline" className="w-full justify-between rounded-2xl h-14 text-sm font-bold border-slate-200 text-slate-800 hover:bg-slate-50">
-                    <span>Manage Active Queue</span>
-                    <ArrowRight className="w-5 h-5 text-slate-500" />
-                  </Button>
-                </Link>
-                <Link to="/operator/quality" className="block">
-                  <Button variant="outline" className="w-full justify-between rounded-2xl h-14 text-sm font-bold border-slate-200 text-slate-800 hover:bg-slate-50">
-                    <span>Moisture Assay Testing</span>
-                    <ArrowRight className="w-5 h-5 text-slate-500" />
-                  </Button>
-                </Link>
-                <Button
-                  onClick={() => setIsScannerOpen(true)}
-                  variant="outline"
-                  className="w-full justify-between rounded-2xl h-14 text-base font-bold border-emerald-200 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 shadow-sm"
+          
+          <div className="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 overflow-hidden relative">
+            <AnimatePresence mode="popLayout">
+              {currentlyServing ? (
+                <motion.div 
+                  key={currentlyServing.id}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={variants}
+                  transition={transition}
+                  className="flex-1 flex flex-col md:flex-row justify-between items-start md:items-center gap-8 w-full"
                 >
-                  <span className="flex items-center gap-2"><ScanLine className="w-4 h-4 text-emerald-600" /> Scan Farmer e-Slip (QR)</span>
-                  <ArrowRight className="w-4 h-4 text-emerald-600" />
-                </Button>
-              </div>
-            </Card>
-
-            <Card className="p-5 border border-slate-200 bg-white rounded-2xl shadow-xs">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-indigo-500" /> Queue Analytics
-                </h3>
-                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold uppercase">Today</span>
-              </div>
-              <QueueAnalyticsChart centreId="KSP-001" />
-            </Card>
-
-            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200 text-xs text-blue-900">
-              <p className="font-bold mb-0.5">QC Protocol Reminder</p>
-              <p className="text-blue-800/90 leading-relaxed text-[11px]">
-                Take 3 random representative core samples across each tractor trolley before entering moisture percentage.
-              </p>
-            </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="bg-slate-900 text-white font-mono text-[10px] px-2 py-0.5 font-bold uppercase tracking-widest">
+                        {currentlyServing.status.replace('_', ' ')}
+                      </span>
+                      <span className="font-mono text-xs text-slate-500 font-bold uppercase tracking-widest">
+                        {currentlyServing.crop_name} • {currentlyServing.expected_quantity_q} Q
+                      </span>
+                    </div>
+                    <h3 className="text-[clamp(2.5rem,8vw,4.5rem)] font-black font-mono tabular-nums tracking-tighter mb-2 leading-none">
+                      {currentlyServing.token_number}
+                    </h3>
+                    <p className="text-xl font-bold text-slate-700">
+                      {currentlyServing.farmer_name} <span className="text-slate-400 font-normal">({currentlyServing.farmer_phone})</span>
+                    </p>
+                    <p className="text-sm font-mono text-slate-500 mt-1 uppercase">Vehicle: {currentlyServing.vehicle_number || 'N/A'}</p>
+                  </div>
+                  
+                  <div className="w-full md:w-auto flex flex-col gap-3 min-w-[280px]">
+                    {currentlyServing.status === 'BOOKED' || currentlyServing.status === 'CHECKED_IN' ? (
+                      <button 
+                        onClick={() => navigate('/operator/quality')}
+                        className="w-full bg-slate-900 text-white font-bold uppercase tracking-widest py-4 px-6 border-2 border-transparent hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+                      >
+                        {t('call_quality')}
+                      </button>
+                    ) : currentlyServing.status === 'QUALITY_TESTING' ? (
+                      <button 
+                        onClick={() => navigate('/operator/weighment')}
+                        className="w-full bg-emerald-600 text-white font-bold uppercase tracking-widest py-4 px-6 border-2 border-transparent hover:bg-emerald-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+                      >
+                        {t('proceed_weighment')}
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => navigate('/operator/weighment')}
+                        className="w-full bg-amber-500 text-slate-900 font-bold uppercase tracking-widest py-4 px-6 border-2 border-transparent hover:bg-amber-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
+                      >
+                        Complete & Disburse
+                      </button>
+                    )}
+                    <button className="w-full bg-white text-slate-900 font-bold uppercase tracking-widest py-4 px-6 border-2 border-slate-900 hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2">
+                      Mark No-Show
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="empty-queue"
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  variants={variants}
+                  transition={transition}
+                  className="flex-1 text-center py-12 w-full"
+                >
+                  <p className="text-2xl font-bold text-slate-400">Queue is currently empty.</p>
+                  <button 
+                    onClick={() => setIsScannerOpen(true)}
+                    className="mt-6 bg-slate-900 text-white font-bold uppercase tracking-widest py-3 px-6 hover:bg-slate-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2"
+                  >
+                    Scan Arrival Slip [S]
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
+        </div>
+
+        {/* 3. THE LIVE QUEUE */}
+        <div className="border border-slate-300 bg-white mb-12">
+          <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between items-center">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Live Operational Queue</h3>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">{queueList.length} Farmers Waiting</span>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50/50">
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Token</th>
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Farmer</th>
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Commodity</th>
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Wait Time</th>
+                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 font-mono">
+                {queueList.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8 text-center text-slate-400 font-sans font-bold">No other farmers in the live queue.</td>
+                  </tr>
+                ) : queueList.map((booking, index) => {
+                  // Mocking wait duration based on index for visual realism
+                  const waitTime = (index + 1) * 15;
+                  const isDelayed = waitTime > 45;
+                  
+                  return (
+                    <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3 px-4 font-bold text-slate-900">{booking.token_number}</td>
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-slate-900 font-sans">{booking.farmer_name}</div>
+                        <div className="text-[9px] text-slate-500">{booking.farmer_phone}</div>
+                      </td>
+                      <td className="py-3 px-4 text-slate-700">
+                        {booking.expected_quantity_q} Q <br/> <span className="text-[9px] text-slate-400">{booking.crop_name}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 border uppercase ${
+                          booking.status === 'BOOKED' ? 'bg-slate-100 text-slate-600 border-slate-300' :
+                          booking.status === 'QUALITY_TESTING' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-amber-50 text-amber-700 border-amber-200'
+                        }`}>
+                          [{booking.status.replace('_', ' ')}]
+                        </span>
+                      </td>
+                      <td className={`py-3 px-4 font-bold ${isDelayed ? 'text-amber-600' : 'text-slate-600'}`}>
+                        {waitTime}m
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button className="text-[10px] font-bold uppercase tracking-widest text-slate-900 underline hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-sm">
+                          {booking.status === 'BOOKED' ? 'Call' : 'Manage'}
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* 4. SECONDARY ANALYTICS */}
+        <div className="border border-slate-300 bg-white p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-slate-900 text-sm uppercase tracking-widest">Queue Analytics (End of Day)</h3>
+            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 font-bold font-mono uppercase tracking-widest">HISTORICAL</span>
+          </div>
+          <QueueAnalyticsChart centreId="KSP-001" />
         </div>
       </div>
 

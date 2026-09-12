@@ -115,10 +115,19 @@ export function evaluateCentreRecommendations(
  cropName: string = 'Paddy (Grade A)',
  expectedQuantityQ: number = 40
 ): CentreRecommendation[] {
- if (!centres || centres.length === 0) return [];
+  if (!centres || centres.length === 0) return [];
 
- // Filter centres accepting this crop and active
- const candidateCentres = centres.map((centre) => {
+  // Strictly filter only ACTIVE centres that accept the crop
+  const validCentres = centres.filter((centre) => {
+    const isCropAccepted = centre.accepted_crops.some((c) =>
+      c.toLowerCase().includes(cropName.toLowerCase())
+    );
+    return centre.status === 'ACTIVE' && isCropAccepted;
+  });
+
+  if (validCentres.length === 0) return [];
+
+  const candidateCentres = validCentres.map((centre) => {
  const hasFarmerCoords =
  farmerLocation &&
  typeof farmerLocation.latitude === 'number' &&
@@ -167,9 +176,7 @@ export function evaluateCentreRecommendations(
 
  // Score each candidate centre (0 to 100)
  const scoredCentres = candidateCentres.map((cand) => {
- const isCropAccepted = cand.centre.accepted_crops.some((c) =>
- c.toLowerCase().includes(cropName.toLowerCase())
- );
+    const isCropAccepted = true; // Pre-filtered above
 
  // Factor 1: Distance score (0-100, closer is higher)
  const distanceScore = Math.max(0, 100 - ((cand.distanceKm - minDistance) / (maxDistance - minDistance || 1)) * 100);

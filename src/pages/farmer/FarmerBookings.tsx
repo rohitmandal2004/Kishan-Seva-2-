@@ -76,9 +76,52 @@ export default function FarmerBookings() {
 
   if (isProfileLoading) {
     return (
-      <div className="p-4 md:p-8 max-w-4xl mx-auto w-full space-y-6 pt-12">
-        <Skeleton className="h-12 w-1/3 rounded-md" />
-        <Skeleton className="h-[200px] w-full rounded-lg" />
+      <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-24 md:pb-8">
+        <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
+          {/* Header Skeleton */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="w-full md:w-36 h-10 rounded-md shrink-0" />
+          </div>
+
+          {/* Tabs Skeleton */}
+          <div className="flex border-b border-zinc-200 mb-6 gap-6">
+            {[...Array(3)].map((_, i) => (
+              <Skeleton key={i} className="h-6 w-24 mb-3" />
+            ))}
+          </div>
+
+          {/* Bookings List Skeleton */}
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="p-5 border border-zinc-200 rounded-lg shadow-sm bg-white flex flex-col md:flex-row gap-5 justify-between md:items-center">
+                <div className="flex gap-4 items-start">
+                  <Skeleton className="w-10 h-10 rounded-md shrink-0" />
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-4 w-20 rounded-sm" />
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-zinc-100 w-full md:w-auto shrink-0 justify-start md:justify-end">
+                  <Skeleton className="h-9 w-16 rounded-md" />
+                  <Skeleton className="h-9 w-9 rounded-md" />
+                  <Skeleton className="h-9 w-24 rounded-md" />
+                  <Skeleton className="h-9 w-9 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

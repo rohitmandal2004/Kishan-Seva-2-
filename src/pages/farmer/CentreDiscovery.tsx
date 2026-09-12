@@ -82,7 +82,6 @@ export default function CentreDiscovery() {
     const [focusedCentre, setFocusedCentre] = useState<[number, number] | null>(null);
     const [cameraKey, setCameraKey] = useState<string>('init');
     const [isLocating, setIsLocating] = useState(false);
-    const [isGeolocationDenied, setIsGeolocationDenied] = useState(false);
 
     const [routeCoords, setRouteCoords] = useState<[number, number][] | null>(null);
     const [routeStats, setRouteStats] = useState<{ distanceKm: number, durationMins: number } | null>(null);
@@ -148,9 +147,9 @@ export default function CentreDiscovery() {
         return evaluateCentreRecommendations(
             centresList,
             { latitude: farmerLocation[0], longitude: farmerLocation[1] },
-            cropFilter === 'All' ? 'Paddy (Grade A)' : cropFilter
+            cropFilter === 'All' ? (farmer?.crop_name || 'Paddy (Grade A)') : cropFilter
         );
-    }, [centresList, farmerLocation, cropFilter]);
+    }, [centresList, farmerLocation, cropFilter, farmer?.crop_name]);
 
     // Filter and sort candidates
     const filteredRecs = useMemo(() => {

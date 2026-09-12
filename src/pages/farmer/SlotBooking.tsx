@@ -28,7 +28,8 @@ import {
   Sun,
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
-import { OFFICIAL_MSP_RATES, BookingRecord } from '@/services/mockStore';
+import { OFFICIAL_MSP_RATES } from '@/lib/constants';
+import { Booking as BookingRecord } from '@/types';
 import { useSupabase } from '@/context/SupabaseContext';
 import { useLanguage } from '@/services/i18n';
 
@@ -51,17 +52,30 @@ export default function SlotBooking() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const preSelectedCentreId = searchParams.get('centre');
+  const rescheduleBookingId = searchParams.get('reschedule');
 
   const { t } = useLanguage();
   const store = useKishanData();
   const { farmer, clerkUser } = useSupabase();
   const centres = store.getCentres();
 
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(1);
-  const [selectedCrop, setSelectedCrop] = useState('Paddy (Grade A)');
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4>(rescheduleBookingId ? 2 : 1);
+  const [selectedCrop, setSelectedCrop] = useState(farmer?.crop_name || 'Paddy (Grade A)');
   const [quantity, setQuantity] = useState('');
   const [vehicleNumber, setVehicleNumber] = useState('');
   const [vehicleType] = useState('Tractor Trolley');
+
+  useEffect(() => {
+    if (rescheduleBookingId) {
+      const existing = store.bookings.find(b => b.id === rescheduleBookingId);
+      if (existing) {
+        setSelectedCrop(existing.crop_name);
+        setQuantity(existing.expected_quantity_q.toString());
+      }
+    } else if (farmer?.crop_name) {
+      setSelectedCrop(farmer.crop_name);
+    }
+  }, [farmer?.crop_name, rescheduleBookingId, store.bookings]);
 
   // farmer is guaranteed by RequireRole. We use fallback to satisfy TS.
   const f = farmer || { id: 'fallback', full_name: 'Fallback', phone: '', village: 'Barasat', district: 'North 24 Parganas' } as any;
@@ -148,32 +162,72 @@ export default function SlotBooking() {
     }
     setIsSubmitting(true);
     try {
-      const booking = await SupabaseDataService.createBooking({
-        farmer_id: f.id || f.clerk_user_id || 'farmer',
-        farmer_name: f.full_name,
-        farmer_phone: f.phone,
-        farmer_email: f.email,
-        farmer_code: f.farmer_code,
-        clerk_user_id: f.clerk_user_id,
-        centre_id: selectedCentre.id,
-        crop_name: selectedCrop,
-        expected_quantity_q: numQuantity,
-        slot_date: format(selectedDate, 'yyyy-MM-dd'),
-        slot_time: selectedSlot,
-        vehicle_number: vehicleNumber || 'WB-25-T-1904',
-        vehicle_type: vehicleType,
-      });
+      let booking;
+      if (rescheduleBookingId) {
+        // Handle Reschedule
+        await store.rescheduleBooking(
+          rescheduleBookingId,
+          selectedCentre.id,
+          format(selectedDate, 'yyyy-MM-dd'),
+          selectedSlot
+        );
+        // Find the newly updated booking to show in the success screen
+        booking = store.bookings.find(b => b.id === rescheduleBookingId);
+        if (!booking) throw new Error('Could not retrieve rescheduled booking');
+      } else {
+        // Handle New Booking
+        booking = await store.createBooking({
+          farmer_id: f.id || f.clerk_user_id || 'farmer',
+          farmer_name: f.full_name,
+          farmer_phone: f.phone,
+          farmer_email: f.email,
+          farmer_code: f.farmer_code,
+          clerk_user_id: f.clerk_user_id,
+          centre_id: selectedCentre.id,
+          crop_name: selectedCrop,
+          expected_quantity_q: numQuantity,
+          slot_date: format(selectedDate, 'yyyy-MM-dd'),
+          slot_time: selectedSlot,
+          vehicle_number: vehicleNumber ? vehicleNumber.trim() : undefined,
+          vehicle_type: vehicleType,
+        });
+      }
+
+      if (!booking) {
+        throw new Error("Failed to create or retrieve booking");
+      }
 
       setConfirmedBooking(booking);
 
       try {
-        localStorage.setItem('kishan_offline_pass', JSON.stringify(booking));
+        const topRec = recommendations[0];
+        const chosenRec = recommendations.find(r => r.centre.id === selectedCentre.id) || topRec;
+        
+        await SupabaseDataService.recordRecommendationOutcome({
+          farmer_id: f.id || f.clerk_user_id || 'farmer',
+          booking_id: booking.id,
+          farmer_lat: farmer?.latitude,
+          farmer_lon: farmer?.longitude,
+          recommended_centre_id: topRec?.centre?.id,
+          recommended_journey_score: topRec?.journey_score,
+          chosen_centre_id: selectedCentre.id,
+          chosen_journey_score: chosenRec?.journey_score,
+        });
+      } catch (err) {
+        // Soft fail
+      }
+
+      try {
+        localStorage.removeItem('kishan_offline_pass');
+        if (f?.id) {
+          localStorage.setItem(`kishan_offline_pass_${f.id}`, JSON.stringify(booking));
+        }
       } catch {
         // ignore
       }
 
       setCurrentStep(4);
-      toast.success('Procurement slot confirmed & token generated!');
+      toast.success(rescheduleBookingId ? 'Procurement slot rescheduled successfully!' : 'Procurement slot confirmed & token generated!');
 
       speakBookingConfirmed(booking.token_number, selectedCentre.name, 'bn');
 
@@ -204,7 +258,7 @@ export default function SlotBooking() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => currentStep > 1 && currentStep < 4 ? setCurrentStep((prev) => (prev - 1) as any) : navigate('/farmer/dashboard')}
+            onClick={() => currentStep > (rescheduleBookingId ? 2 : 1) && currentStep < 4 ? setCurrentStep((prev) => (prev - 1) as any) : navigate('/farmer/dashboard')}
             className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-[0_2px_10px_rgb(0,0,0,0.06)] border border-zinc-100 hover:scale-105 transition-transform"
           >
             <ChevronLeft className="w-5 h-5 text-zinc-600" />
@@ -219,10 +273,10 @@ export default function SlotBooking() {
         <div className="flex justify-between items-center mb-8 relative">
           <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-zinc-100 -z-10 transform -translate-y-1/2"></div>
           {[
-            { num: 1, title: 'Produce' },
-            { num: 2, title: 'Mandi' },
-            { num: 3, title: 'Slot' },
-            { num: 4, title: 'Token' },
+            { num: 1, title: t('step_produce') },
+            { num: 2, title: t('step_mandi') },
+            { num: 3, title: t('step_slot') },
+            { num: 4, title: t('step_token') },
           ].map((s) => {
             const isDone = currentStep > s.num;
             const isCurrent = currentStep === s.num;
@@ -247,9 +301,9 @@ export default function SlotBooking() {
           <div className="bg-white border-zinc-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
-                <Sprout className="w-6 h-6 text-emerald-600" /> Produce & Transport
+                <Sprout className="w-6 h-6 text-emerald-600" /> {t('produce_transport')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">Tell us what you're bringing and how.</p>
+              <p className="text-sm text-zinc-500 mt-1">{t('tell_us_bringing')}</p>
             </div>
 
             {anomalyReport.isSuspicious && (
@@ -279,7 +333,7 @@ export default function SlotBooking() {
               <div className="space-y-2">
                 <Label className="text-xs font-bold text-zinc-700 uppercase tracking-wider flex justify-between">
                   <span>{t('expected_qty')}</span>
-                  <span className="text-zinc-500 font-medium normal-case">in Quintals</span>
+                  <span className="text-zinc-500 font-medium normal-case">{t('in_quintals')}</span>
                 </Label>
                 <Input
                   type="number"
@@ -311,19 +365,19 @@ export default function SlotBooking() {
 
               <div className="relative z-10">
                 <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest mb-1 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" /> Govt Assured MSP
+                  <ShieldCheck className="w-3.5 h-3.5" /> {t('govt_assured_msp')}
                 </p>
-                <p className="text-lg font-bold">₹{selectedMsp.rate_per_quintal.toLocaleString('en-IN')} <span className="text-sm font-normal text-emerald-100">/ Quintal</span></p>
+                <p className="text-lg font-bold">₹{selectedMsp.rate_per_quintal.toLocaleString('en-IN')} <span className="text-sm font-normal text-emerald-100">/ {t('per_quintal')}</span></p>
               </div>
               <div className="relative z-10 text-left sm:text-right">
-                <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest mb-1">Est. Direct Transfer (DBT)</p>
+                <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-widest mb-1">{t('est_dbt')}</p>
                 <p className="text-3xl font-semibold tracking-tight">₹{estimatedPayout.toLocaleString('en-IN')}</p>
               </div>
             </div>
 
             <div className="mt-8 flex justify-end">
               <Button onClick={() => setCurrentStep(2)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-lg h-12 px-8 text-sm font-bold shadow-md transition-transform active:scale-[0.97] gap-2">
-                Continue <ArrowRight className="w-4 h-4" />
+                {t('continue_btn')} <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -336,7 +390,7 @@ export default function SlotBooking() {
               <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
                 <MapPin className="w-6 h-6 text-emerald-600" /> {t('select_mandi')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">Smart recommendations based on distance and queue times.</p>
+              <p className="text-sm text-zinc-500 mt-1">{t('smart_recs')}</p>
             </div>
 
             
@@ -355,7 +409,7 @@ export default function SlotBooking() {
                   >
                     {rec.is_optimal && (
                       <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl">
-                        AI Top Choice
+                        {t('ai_top_choice')}
                       </div>
                     )}
 
@@ -371,14 +425,14 @@ export default function SlotBooking() {
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Clock className="w-4 h-4 text-zinc-500" />
-                            <span className="font-semibold text-emerald-700">~{rec.predicted_wait_mins}m wait</span>
+                            <span className="font-semibold text-emerald-700">~{rec.predicted_wait_mins}m {t('wait_mins')}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end gap-1 mt-1">
                         <div className="text-2xl font-semibold text-zinc-900">{rec.journey_score}</div>
-                        <div className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider">Score</div>
+                        <div className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider">{t('score')}</div>
                       </div>
                     </div>
                   </div>
@@ -389,11 +443,11 @@ export default function SlotBooking() {
 
 
             <div className="mt-8 flex justify-between">
-              <Button variant="ghost" onClick={() => setCurrentStep(1)} className="rounded-lg h-12 px-6 text-zinc-500 hover:bg-zinc-100 font-bold">
-                Back
-              </Button>
+                <Button variant="ghost" onClick={() => setCurrentStep(rescheduleBookingId ? 2 : 1)} className="rounded-lg h-12 px-6 text-zinc-500 hover:bg-zinc-100 font-bold">
+                  {t('back_btn')}
+                </Button>
               <Button onClick={() => setCurrentStep(3)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-lg h-12 px-8 text-sm font-bold shadow-md transition-transform active:scale-[0.97] gap-2">
-                Continue <ArrowRight className="w-4 h-4" />
+                {t('continue_btn')} <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
           </div>
@@ -404,13 +458,13 @@ export default function SlotBooking() {
           <div className="bg-white border-zinc-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="mb-6">
               <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-emerald-600" /> Pick Date & Time
+                <Calendar className="w-6 h-6 text-emerald-600" /> {t('pick_date_time')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">Select an optimal slot to minimize wait time.</p>
+              <p className="text-sm text-zinc-500 mt-1">{t('select_optimal')}</p>
             </div>
 
             <div className="mb-8">
-              <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-3">Delivery Date</Label>
+              <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-3">{t('delivery_date')}</Label>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {availableDates.map((date, idx) => {
                   const isSelected = format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
@@ -435,9 +489,9 @@ export default function SlotBooking() {
 
             <div className="mb-8">
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">Time Slot</Label>
+                <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">{t('time_slot')}</Label>
                 <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
-                  <TrendingUp className="w-3 h-3 inline mr-1 -mt-0.5" /> Afternoon is 65% faster
+                  <TrendingUp className="w-3 h-3 inline mr-1 -mt-0.5" /> {t('afternoon_faster')}
                 </span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -462,9 +516,9 @@ export default function SlotBooking() {
                         <span className={`px-2 py-0.5 rounded font-bold ${s.rushLevel === 'Low' ? 'bg-emerald-100 text-emerald-700' :
                             s.rushLevel === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
                           }`}>
-                          {s.rushLevel === 'Low' ? 'Fast' : s.rushLevel === 'Medium' ? 'Normal' : 'Peak'}
+                          {s.rushLevel === 'Low' ? t('fast') : s.rushLevel === 'Medium' ? t('normal') : t('peak')}
                         </span>
-                        <span className="text-zinc-500 font-medium">~{s.waitMins}m wait</span>
+                        <span className="text-zinc-500 font-medium">~{s.waitMins}m {t('wait_mins')}</span>
                       </div>
                     </button>
                   );
@@ -474,7 +528,7 @@ export default function SlotBooking() {
 
             <div className="bg-slate-900 text-white rounded-md p-6 flex flex-col sm:flex-row justify-between items-center gap-6 shadow-xl">
               <div>
-                <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-1">Ready to Confirm</p>
+                <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest mb-1">{t('ready_confirm')}</p>
                 <h3 className="text-lg font-bold">{selectedCrop} at {selectedCentre.name}</h3>
                 <p className="text-sm text-slate-300 mt-1">{format(selectedDate, 'MMM d, yyyy')} • {selectedSlot}</p>
               </div>
@@ -483,7 +537,7 @@ export default function SlotBooking() {
                 disabled={isSubmitting}
                 className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold h-12 px-8 rounded-lg shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-transform active:scale-[0.97] whitespace-nowrap"
               >
-                {isSubmitting ? 'Generating...' : 'Generate Token'}
+                {isSubmitting ? t('processing') : rescheduleBookingId ? t('confirm_reschedule') : t('generate_token')}
               </Button>
             </div>
           </div>
@@ -499,10 +553,10 @@ export default function SlotBooking() {
                 <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center mx-auto mb-4 border border-white/30">
                   <CheckCircle2 className="w-8 h-8 text-white" />
                 </div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200 mb-2">Digital Token Issued</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-200 mb-2">{t('digital_token_issued')}</p>
                 <h2 className="text-4xl font-semibold tracking-widest font-mono text-white mb-2 shadow-sm">{confirmedBooking.token_number}</h2>
                 <div className="inline-flex items-center gap-1.5 bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-medium text-emerald-100">
-                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Saved Offline
+                  <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> {t('saved_offline')}
                 </div>
               </div>
 
@@ -519,19 +573,19 @@ export default function SlotBooking() {
 
                 <div className="space-y-4 text-sm">
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">Farmer</span>
+                    <span className="text-zinc-500 font-medium">{t('farmer_label')}</span>
                     <span className="font-bold text-zinc-800">{farmer.full_name}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">Centre</span>
+                    <span className="text-zinc-500 font-medium">{t('centre_label')}</span>
                     <span className="font-bold text-zinc-800 text-right max-w-[60%]">{confirmedBooking.centre_name}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">Produce</span>
+                    <span className="text-zinc-500 font-medium">{t('produce_label')}</span>
                     <span className="font-bold text-emerald-600">{confirmedBooking.expected_quantity_q} Q {confirmedBooking.crop_name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-500 font-medium">Time</span>
+                    <span className="text-zinc-500 font-medium">{t('time_label')}</span>
                     <span className="font-bold text-zinc-800">{confirmedBooking.slot_time}</span>
                   </div>
                 </div>
@@ -541,10 +595,10 @@ export default function SlotBooking() {
                     tokenNumber: confirmedBooking.token_number, centreName: confirmedBooking.centre_name, slotDate: confirmedBooking.slot_date, slotTime: confirmedBooking.slot_time, cropName: confirmedBooking.crop_name, quantityQ: confirmedBooking.expected_quantity_q, vehicleNumber: confirmedBooking.vehicle_number
                   }), '_blank')}
                     className="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white font-bold h-12 rounded-lg shadow-md gap-2">
-                    <Share2 className="w-4 h-4" /> Share on WhatsApp
+                    <Share2 className="w-4 h-4" /> {t('share_whatsapp')}
                   </Button>
                   <Button onClick={() => navigate('/farmer/queue')} variant="outline" className="w-full h-12 rounded-lg font-bold border-zinc-200 text-zinc-700 hover:bg-zinc-50">
-                    Track Live Queue
+                    {t('track_queue')}
                   </Button>
                 </div>
               </div>
