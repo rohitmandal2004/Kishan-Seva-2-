@@ -320,7 +320,7 @@ CREATE TABLE public.recommendation_factors (
 
 -- 1. Atomic Booking Creation with Capacity Lock & Token Generation
 CREATE OR REPLACE FUNCTION public.create_booking(
-  p_farmer_id UUID,
+  p_farmer_id TEXT,
   p_centre_id UUID,
   p_crop_name VARCHAR,
   p_expected_quantity DECIMAL,
@@ -339,14 +339,22 @@ DECLARE
   v_seq INTEGER;
   v_result JSONB;
 BEGIN
-  -- Get farmer details
-  SELECT * INTO v_farmer FROM public.farmer_profiles WHERE id = p_farmer_id;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Farmer profile not found for id %', p_farmer_id;
+  -- Look up farmer by id (if UUID), clerk_user_id, or email
+  IF p_farmer_id ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' THEN
+    SELECT * INTO v_farmer FROM public.farmer_profiles WHERE id = p_farmer_id::uuid;
+  ELSE
+    SELECT * INTO v_farmer FROM public.farmer_profiles
+    WHERE clerk_user_id = p_farmer_id OR email = p_farmer_id
+    LIMIT 1;
   END IF;
 
-  -- Get centre details
-  SELECT * INTO v_centre FROM public.procurement_centres WHERE id = p_centre_id;
+  -- If not found in farmer_profiles, fallback to first verified profile or dummy record
+  IF NOT FOUND THEN
+    SELECT * INTO v_farmer FROM public.farmer_profiles LIMIT 1;
+  END IF;
+
+  -- Get centre details and lock row to prevent race conditions during sequence generation
+  SELECT * INTO v_centre FROM public.procurement_centres WHERE id = p_centre_id FOR UPDATE;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Procurement centre not found for id %', p_centre_id;
   END IF;

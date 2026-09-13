@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Clock, BellRing, MapPin, ChevronLeft, 
+import {
+  BellRing, MapPin, ChevronLeft,
   Ticket, Navigation, CheckCircle2, ArrowRight,
-  Play, Smartphone, Download, FileText,
-  Volume2, Share2, WifiOff, Banknote, Sparkles,
+  Smartphone,
+  Volume2, Share2, WifiOff,
   RefreshCw, Wifi, ShieldCheck, Beaker, Scale, Wallet
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
@@ -29,9 +28,6 @@ export default function LiveQueue() {
   const activeBooking = store.getActiveFarmerBookingForFarmer(farmer?.id, user?.email);
   const centre = activeBooking ? store.getCentreById(activeBooking.centre_id) : null;
   const allBookings = store.getBookings();
-  const [smsSent, setSmsSent] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
   const [countdown, setCountdown] = useState(30);
   const [isRealtimeConnected, setIsRealtimeConnected] = useState(false);
   const POLL_INTERVAL = 30;
@@ -49,34 +45,23 @@ export default function LiveQueue() {
     if (offlinePassKey && activeBooking) {
       try {
         localStorage.setItem(offlinePassKey, JSON.stringify(activeBooking));
-      } catch (e) {
+      } catch {
         // quota ignore
       }
     }
   }, [offlinePassKey, activeBooking]);
 
-  // Auto-poll: refresh store data every 30s and count down
+  // Auto-poll: count down every second; reset when booking status changes
   useEffect(() => {
-    setLastUpdated(new Date());
     setCountdown(POLL_INTERVAL);
-
     const countdownTimer = setInterval(() => {
-      setCountdown(prev => {
-        if (prev <= 1) {
-          // Trigger a no-op state bump to re-read store
-          setLastUpdated(new Date());
-          return POLL_INTERVAL;
-        }
-        return prev - 1;
-      });
+      setCountdown(prev => (prev <= 1 ? POLL_INTERVAL : prev - 1));
     }, 1000);
-
     return () => clearInterval(countdownTimer);
   }, [activeBooking?.status]);
 
   useEffect(() => {
     const unsubscribe = SupabaseDataService.subscribeRealtime(() => {
-      setLastUpdated(new Date());
       setCountdown(POLL_INTERVAL);
       setIsRealtimeConnected(true);
     }, { farmerId: farmer?.id });
@@ -86,14 +71,8 @@ export default function LiveQueue() {
   const handleSimulateAdvance = async () => {
     if (activeBooking) {
       await SupabaseDataService.advanceBooking(activeBooking.id);
-      setLastUpdated(new Date());
       setCountdown(POLL_INTERVAL);
     }
-  };
-
-  const handleSendSms = () => {
-    setSmsSent(true);
-    setTimeout(() => setSmsSent(false), 4000);
   };
 
   const [showOfflinePass, setShowOfflinePass] = useState(false);

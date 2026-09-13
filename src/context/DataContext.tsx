@@ -221,11 +221,11 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
     };
   }, [bookings]);
   
-  const updateCentre = async (id: string, updates: any) => {
+  const updateCentre = async (_id: string, _updates: any) => {
     // Stub for now
   };
   
-  const addCentre = async (centre: any) => {
+  const addCentre = async (_centre: any) => {
     // Stub for now
   };
 

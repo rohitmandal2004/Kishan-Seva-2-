@@ -55,8 +55,8 @@ BEGIN
     SELECT * INTO v_farmer FROM public.farmer_profiles LIMIT 1;
   END IF;
 
-  -- Get centre details
-  SELECT * INTO v_centre FROM public.procurement_centres WHERE id = p_centre_id;
+  -- Get centre details and lock row to prevent race conditions during sequence generation
+  SELECT * INTO v_centre FROM public.procurement_centres WHERE id = p_centre_id FOR UPDATE;
   IF NOT FOUND THEN
     RAISE EXCEPTION 'Procurement centre not found for id %', p_centre_id;
   END IF;

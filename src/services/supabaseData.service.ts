@@ -10,7 +10,7 @@ import { ProcurementCentre, Booking, QualityCheck, Weighment, BookingStatus, Que
  * 2. Scoped real-time: Subscriptions are filtered by role (farmer_id / centre_id)
  * to minimize bandwidth and enforce security.
  */
-const isDemoDataEnabled = import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
+const _isDemoDataEnabled = import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
 
 export const SupabaseDataService = {
  // ─── Procurement Centres ─────────────────────────────────────────────
@@ -259,7 +259,7 @@ export const SupabaseDataService = {
 
  if (error) {
  if (error.code === 'PGRST202') {
- const { p_rejection_reason, ...legacyPayload } = payload;
+ const { p_rejection_reason: _p_rejection_reason, ...legacyPayload } = payload;
  const { error: retryErr } = await supabase.rpc('submit_weighment_transaction', legacyPayload);
  if (!retryErr && qualityData?.rejection_reason) {
  await supabase

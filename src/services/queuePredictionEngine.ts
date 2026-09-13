@@ -17,38 +17,43 @@ export async function calculateQueuePredictionAsync(
  averageProcessingTimeMins: number = 4.5,
  noShowRatePercent: number = 5
 ): Promise<QueuePrediction> {
-  // 1. Try ML Service (FastAPI)
-  try {
-    const queueState = calculateQueuePrediction(centreId, bookings, averageProcessingTimeMins, noShowRatePercent);
-    const date = new Date();
-    
-    // In production, URL would be loaded from env. Using localhost for SIH demo.
-    const response = await fetch('http://localhost:8000/predict_wait_time', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        centre_id: centreId,
-        day_of_week: date.getDay(),
-        hour_of_day: date.getHours(),
-        current_queue_length: queueState.current_queue,
-        active_counters: 2, // Mocked for now
-        avg_quantity_qtl: 30, // Mocked for now
-        avg_service_time_min: averageProcessingTimeMins,
-        no_show_count: Math.round(queueState.prebooked_tokens * (noShowRatePercent / 100)),
-        weather_condition: 'Clear' // Mocked for now, in a real app would be from weather service
-      }),
-    });
+  // 1. Try ML Service (FastAPI) — only if VITE_ML_SERVICE_URL is configured.
+  // Set this env var to the URL of a deployed ml-service instance (e.g. on
+  // Render/Railway/Fly.io).  When unset, we skip straight to the DB heuristic
+  // so the app never makes a request that will always 500/ECONNREFUSED.
+  const mlServiceUrl = import.meta.env.VITE_ML_SERVICE_URL;
+  if (mlServiceUrl) {
+    try {
+      const queueState = calculateQueuePrediction(centreId, bookings, averageProcessingTimeMins, noShowRatePercent);
+      const date = new Date();
 
-    if (response.ok) {
-      const mlData = await response.json();
-      return {
-        ...queueState,
-        predicted_wait_mins: mlData.predicted_wait_mins,
-        confidence: mlData.fallback_used ? 'MEDIUM' : 'HIGH'
-      };
+      const response = await fetch(`${mlServiceUrl}/predict_wait_time`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          centre_id: centreId,
+          day_of_week: date.getDay(),
+          hour_of_day: date.getHours(),
+          current_queue_length: queueState.current_queue,
+          active_counters: 2,
+          avg_quantity_qtl: 30,
+          avg_service_time_min: averageProcessingTimeMins,
+          no_show_count: Math.round(queueState.prebooked_tokens * (noShowRatePercent / 100)),
+          weather_condition: 'Clear',
+        }),
+      });
+
+      if (response.ok) {
+        const mlData = await response.json();
+        return {
+          ...queueState,
+          predicted_wait_mins: mlData.predicted_wait_mins,
+          confidence: mlData.fallback_used ? 'MEDIUM' : 'HIGH',
+        };
+      }
+    } catch (err) {
+      console.warn('ML Prediction service unavailable. Falling back to Supabase/Heuristic:', err);
     }
-  } catch (err) {
-    console.warn('ML Prediction service unavailable. Falling back to Supabase/Heuristic:', err);
   }
 
   // 2. Try database-first heuristic

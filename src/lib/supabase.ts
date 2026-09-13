@@ -12,10 +12,34 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 // Supabase is DATABASE ONLY — no auth configuration needed.
-// Authentication is handled entirely by Clerk.
+// Authentication is handled entirely by Clerk. We inject the Clerk JWT dynamically.
+let clerkGetToken: ((options?: { template?: string }) => Promise<string | null>) | null = null;
+
+export const setClerkTokenProvider = (provider: (options?: { template?: string }) => Promise<string | null>) => {
+  clerkGetToken = provider;
+};
+
 export const supabase = createClient(
- supabaseUrl || 'https://placeholder.supabase.co',
- supabaseKey || 'placeholder-key'
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseKey || 'placeholder-key',
+  {
+    global: {
+      fetch: async (url, options = {}) => {
+        const headers = new Headers(options?.headers);
+        if (clerkGetToken) {
+          try {
+            const token = await clerkGetToken({ template: 'supabase' });
+            if (token) {
+              headers.set('Authorization', `Bearer ${token}`);
+            }
+          } catch (e) {
+            console.warn('[Kishan Seva] Failed to fetch Clerk Supabase token:', e);
+          }
+        }
+        return fetch(url, { ...options, headers });
+      }
+    }
+  }
 );
 
 /**

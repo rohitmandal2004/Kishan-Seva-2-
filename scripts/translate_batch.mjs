@@ -4,7 +4,6 @@ import translate from '@iamtraction/google-translate';
 const FILE_PATH = 'C:/Users/rohit/OneDrive/Desktop/Kishan/src/services/i18n.ts';
 const LANGUAGES = ['te', 'ta', 'mr', 'gu', 'kn', 'ml', 'pa', 'or', 'ur', 'as'];
 const DELIMITER = '\n\n===XXX===\n\n';
-const REGEX_DELIM = /\s*===XXX===\s*/;
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -72,7 +71,7 @@ async function processTranslations() {
               const singleRes = await translate(b.enText, { from: 'en', to: targetLang });
               b.translations[lang] = singleRes.text.replace(/'/g, "\\'");
               await delay(200);
-            } catch (e) {
+            } catch (_e) {
               b.translations[lang] = b.enText.replace(/'/g, "\\'");
             }
           }

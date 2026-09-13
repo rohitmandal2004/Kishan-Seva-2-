@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
-import { triggerWhatsAppNotification } from '@/services/soundAndSpeech';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { QRScannerModal } from '@/components/operator/QRScannerModal';
@@ -28,8 +27,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Booking } from '@/types';
-import { gsap, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
+import { useGSAP, gsap } from '@/lib/gsap';
 
 const weighmentSchema = z
  .object({
@@ -77,7 +76,7 @@ export default function Weighment() {
  register,
  handleSubmit,
  watch,
- setValue,
+ _setValue,
  formState: { errors },
  } = useForm<WeighmentFormData>({
  resolver: zodResolver(weighmentSchema),

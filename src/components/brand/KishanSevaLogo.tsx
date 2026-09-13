@@ -8,13 +8,15 @@ interface KishanSevaLogoProps {
  size?: 'sm' | 'md' | 'lg' | 'xl';
  theme?: 'light' | 'dark';
  showSubtitle?: boolean;
+ animated?: boolean;
 }
 
 export function KishanSevaLogo({
  className,
  size = 'md',
  theme = 'light',
- showSubtitle = true
+ showSubtitle = true,
+ animated = true
 }: KishanSevaLogoProps) {
  
  const sizeClasses = {
@@ -44,6 +46,7 @@ export function KishanSevaLogo({
  const container = useRef<HTMLDivElement>(null);
 
  useGSAP(() => {
+   if (!animated) return;
    // Draw the SVG ring around the logo
    gsap.fromTo(".logo-ring circle", 
      { drawSVG: "0%" },
@@ -66,18 +69,23 @@ export function KishanSevaLogo({
    wrapper?.addEventListener('mouseenter', () => hoverAnim.play());
    wrapper?.addEventListener('mouseleave', () => hoverAnim.reverse());
 
- }, { scope: container });
+ }, { scope: container, dependencies: [animated] });
 
  return (
  <div ref={container} className={cn("flex items-center gap-3", className)}>
  <div className={cn(
- "logo-wrapper p-2 rounded-2xl border hover:scale-105 transition-transform shrink-0 flex items-center justify-center relative group",
+ "logo-wrapper p-2 rounded-2xl border shrink-0 flex items-center justify-center relative group",
+ animated ? "hover:scale-105 transition-transform" : "",
  currentTheme.wrapper
  )}>
- <svg className="logo-ring absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
-   <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="300" className="text-emerald-500/30" />
- </svg>
- <Sparkles className="sparkle-icon absolute -top-1 -right-1 w-3 h-3 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity motion-reduce:hidden" />
+ {animated && (
+   <>
+     <svg className="logo-ring absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
+       <circle cx="50" cy="50" r="48" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="300" className="text-emerald-500/30" />
+     </svg>
+     <Sparkles className="sparkle-icon absolute -top-1 -right-1 w-3 h-3 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity motion-reduce:hidden" />
+   </>
+ )}
  <img 
  src="/logo.svg" 
  alt="Kishan Seva Official Emblem" 

@@ -1,4 +1,4 @@
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+// Recharts is used in AdminAnalytics — not needed here
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
 import { Download } from 'lucide-react';

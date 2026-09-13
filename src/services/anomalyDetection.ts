@@ -1,4 +1,4 @@
-import { Booking, QualityCheck, Weighment } from '@/types';
+import { Booking } from '@/types';
 
 export interface AnomalyReport {
  isSuspicious: boolean;

@@ -41,3 +41,21 @@ Thumbs.db
 .claude
 .impeccable
 .agents
+
+# Generated reports (regenerate on demand — do not commit)
+lint.json
+
+# Trained ML model binaries — do NOT commit these to git.
+# See ml-service/MODELS.md for instructions on how to regenerate or download.
+ml-service/models/*.pkl
+ml-service/models/*.joblib
+ml-service/models/*.h5
+ml-service/models/*.pt
+
+# Stray image/SVG files (screenshots, mockups — store in docs/ or exclude entirely)
+*.png
+*.svg
+!public/**/*.png
+!public/**/*.svg
+!src/assets/**/*.png
+!src/assets/**/*.svg

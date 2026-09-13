@@ -13,13 +13,7 @@ import { useKishanData } from '@/context/DataContext';
 import { Booking } from '@/types';
 import {
  QrCode,
- Camera,
  Search,
- CheckCircle2,
- AlertCircle,
- Truck,
- User,
- Building2,
  ScanLine,
 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -39,7 +33,6 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
  const bookings = store.bookings;
 
  const [manualToken, setManualToken] = useState('');
- const [isScanningActive, setIsScanningActive] = useState(true);
 
  // Available tokens for quick-scan simulation in yard
  const activeBookings = bookings.filter(

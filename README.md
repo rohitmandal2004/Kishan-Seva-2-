@@ -156,6 +156,18 @@ npm run build
 
 ---
 
+## ⚠️ Demo Limitations
+
+The following features are **simulated** in the current demo build and do not perform real external calls:
+
+| Feature | Reality | How to upgrade |
+|---------|---------|----------------|
+| **SMS / WhatsApp Notifications** | Shown as toast notifications. No real message is sent. | Integrate Twilio / MSG91 / TextLocal via a Supabase Edge Function |
+| **Weather Forecast** | Deterministic hash of location+date — not a live API | Use [Open-Meteo](https://open-meteo.com) (free, no key) or OpenWeatherMap |
+| **ML Wait-Time Prediction** | Falls back to SQL heuristic unless `VITE_ML_SERVICE_URL` is set | Deploy `ml-service/` to Render/Railway/Fly.io and set the env var |
+
+---
+
 ## 📄 License
 Developed for Smart India Hackathon (SIH 2026). Government of India & Ministry of Agriculture and Farmers Welfare.
 # Kishan-Seva-2-

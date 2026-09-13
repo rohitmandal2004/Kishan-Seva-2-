@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useUser, useClerk, useAuth as useClerkAuth } from '@clerk/react';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured, setClerkTokenProvider } from '@/lib/supabase';
 import { FarmerProfile } from '@/types';
 
 export type AppRole = 'FARMER' | 'ADMIN' | 'OPERATOR';
@@ -71,7 +71,12 @@ const SupabaseContext = createContext<SupabaseContextType | undefined>(undefined
 
 export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user: clerkUser, isLoaded: clerkUserLoaded } = useUser();
-  const { isSignedIn, isLoaded: clerkAuthLoaded } = useClerkAuth();
+  const { isSignedIn, isLoaded: clerkAuthLoaded, getToken } = useClerkAuth();
+  
+  // Provide the JWT fetcher to the Supabase client
+  useEffect(() => {
+    setClerkTokenProvider(getToken);
+  }, [getToken]);
   const { signOut: clerkSignOut } = useClerk();
 
   const [authState, setAuthState] = useState<AuthState>('AUTH_LOADING');

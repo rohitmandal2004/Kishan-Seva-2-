@@ -15,8 +15,7 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import AnimatedPage from '@/components/ui/AnimatedPage';
-import { motion } from 'framer-motion';
-import { gsap, ScrollTrigger, useGSAP } from '@/lib/gsap';
+import { useGSAP, gsap } from '@/lib/gsap';
 import { useRef } from 'react';
 
 import { defaultMapIcon } from '@/lib/leaflet-icons';
@@ -896,7 +895,12 @@ export default function LandingPage() {
                 </div>
 
                 <div className="max-w-7xl mx-auto pt-6 border-t border-emerald-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-300/70 text-center sm:text-left">
-                    <p>{t('footer_rights')}</p>
+                    <div className="flex flex-col gap-1">
+                        <p>{t('footer_rights')}</p>
+                        <p className="text-amber-200/90 italic max-w-2xl font-semibold">
+                            Disclaimer: This application is a prototype submitted for the Smart India Hackathon (SIH) 2026. It is not an official service of the Government of India.
+                        </p>
+                    </div>
                     <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4">
                         <span className="hover:text-white cursor-pointer">Privacy Policy</span>
                         <span className="hover:text-white cursor-pointer">Terms of Service</span>

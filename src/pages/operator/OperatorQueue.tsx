@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
-import { Skeleton } from '@/components/ui/skeleton';
+
 import { playMandiChime, speakAnnouncement } from '@/services/soundAndSpeech';
 import { useLanguage } from '@/services/i18n';
 import { SmsGateway } from '@/services/smsGateway';

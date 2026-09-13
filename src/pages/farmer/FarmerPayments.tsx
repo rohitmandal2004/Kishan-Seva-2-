@@ -22,7 +22,7 @@ const LS_KEY = 'kishan_bank_details';
 
 export default function FarmerPayments() {
   const store = useKishanData();
-  const { farmer, user } = useSupabase();
+  const { farmer, user: _user } = useSupabase();
   const { t, lang } = useLanguage();
 
   const bookings = store.getFarmerBookingsForFarmer(farmer?.id, user?.email)
@@ -40,7 +40,7 @@ export default function FarmerPayments() {
       ifsc: farmer?.ifsc_code || 'SBIN0001234',
       upiId: (farmer as any)?.upi_id || '',
     };
-  }, [farmer?.bank_name, farmer?.account_number_masked, farmer?.ifsc_code]);
+  }, [farmer?.bank_name, farmer?.account_number_masked, farmer?.ifsc_code, (farmer as any)?.account_number, (farmer as any)?.upi_id]);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(getInitialDetails);
@@ -95,7 +95,7 @@ export default function FarmerPayments() {
     return Object.entries(map).map(([month, amount]) => ({ month, amount }));
   }, [bookings]);
 
-  const stateLabel = farmer?.state || 'India';
+  const _stateLabel = farmer?.state || 'India';
 
   return (
     <div className="relative min-h-screen">

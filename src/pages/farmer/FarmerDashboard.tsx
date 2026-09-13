@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import QRCode from 'react-qr-code';
 import { getDeterministicWeather } from '@/services/weatherService';
-import { addDays, format, parseISO } from 'date-fns';
+import { addDays, format } from 'date-fns';
 import { PriceHistoryChart } from '@/components/ui/PriceHistoryChart';
 import { useLanguage } from '@/services/i18n';
 import { usePushNotifications, getNotificationPermission } from '@/services/usePushNotifications';

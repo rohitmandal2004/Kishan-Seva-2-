@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Leaf, Building2, Shield, ArrowRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
+import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
@@ -56,15 +57,11 @@ export default function RoleSelection() {
       </div>
 
       {/* Header */}
-      <div className="role-header text-center mb-10 sm:mb-12 relative z-10">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold mb-4 border border-emerald-200">
-          <CheckCircle2 className="w-4 h-4" /> {t('official_platform')}
-        </div>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
-          {t('select_portal')}
-        </h1>
-        <p className="text-sm sm:text-base text-slate-500 max-w-lg mx-auto font-medium">
-          {t('secure_dbt')}
+      <div className="role-header flex flex-col items-center justify-center text-center mb-10 sm:mb-12 relative z-10">
+        <KishanSevaLogo size="xl" showSubtitle={true} animated={false} className="mb-2" />
+        
+        <p className="text-sm sm:text-base text-slate-500 max-w-lg mx-auto font-medium mt-4">
+          {t('Select Portal')}
         </p>
       </div>
 

@@ -1,4 +1,4 @@
-import { format, addDays } from 'date-fns';
+import { format } from 'date-fns';
 
 export interface WeatherCondition {
  temp: number;
@@ -10,8 +10,18 @@ export interface WeatherCondition {
 }
 
 /**
- * A mock weather service that provides deterministic weather
- * based on the location (string) and date to simulate real conditions.
+ * getDeterministicWeather — SIMULATED for demo purposes.
+ *
+ * @simulated
+ * This function does NOT call a live weather API. It produces a deterministic
+ * "weather" value by hashing the location name + date string. The output is
+ * stable (same inputs always produce the same weather) but entirely synthetic.
+ *
+ * To replace with real data, integrate a free-tier provider such as:
+ *  - OpenWeatherMap (https://openweathermap.org/api) — free tier, 60 calls/min
+ *  - Open-Meteo (https://open-meteo.com) — completely free, no API key required
+ *
+ * Pass `VITE_WEATHER_API_KEY` in your .env and call the provider API instead.
  */
 export function getDeterministicWeather(locationName: string, date: Date): WeatherCondition {
  // Use a simple hash of the location string and date string to create deterministic "randomness"

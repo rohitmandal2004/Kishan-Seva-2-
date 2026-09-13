@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom';
-import { gsap, ScrollSmoother, useGSAP } from '@/lib/gsap';
+import { ScrollSmoother, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
 
 export default function RootLayout() {

@@ -13,11 +13,7 @@ import {
  CheckCircle2,
  Clock,
  AlertTriangle,
- FileSpreadsheet,
  Building,
- ShieldCheck,
- ArrowUpRight,
- TrendingUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -44,8 +40,8 @@ interface TransactionRecord {
 
 export default function AdminTransactions() {
  const store = useKishanData();
- const bookings = store.bookings;
- const weighments = store.getWeighments();
+ const _bookings = store.bookings;
+ const _weighments = store.getWeighments();
 
  const [searchTerm, setSearchTerm] = useState('');
  const [statusFilter, setStatusFilter] = useState('ALL');

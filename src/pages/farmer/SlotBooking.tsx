@@ -3,11 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import QRCode from 'react-qr-code';
-import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import {
   Calendar,
   Clock,
@@ -16,16 +14,10 @@ import {
   Sprout,
   ArrowRight,
   ShieldCheck,
-  Download,
-  Sparkles,
   Share2,
   TrendingUp,
   AlertTriangle,
   MapPin,
-  Cloud,
-  CloudRain,
-  Droplets,
-  Sun,
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
@@ -213,8 +205,8 @@ export default function SlotBooking() {
           chosen_centre_id: selectedCentre.id,
           chosen_journey_score: chosenRec?.journey_score,
         });
-      } catch (err) {
-        // Soft fail
+      } catch {
+        // Soft fail — tracking is non-critical
       }
 
       try {
