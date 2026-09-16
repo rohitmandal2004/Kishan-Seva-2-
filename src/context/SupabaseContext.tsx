@@ -408,7 +408,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         } else {
           setAuthState('PROFILE_NOT_FOUND');
         }
-      } else if (!isSignedIn && isLoaded) {
+      } else if (!isSignedIn && isLoaded && !demoRole) {
         // Not signed in — clear everything
         if (isMounted) {
           setUser(null);
@@ -426,7 +426,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       isMounted = false;
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clerkUser?.id, isLoaded, isSignedIn, resolveRole]);
+  }, [clerkUser?.id, isLoaded, isSignedIn, resolveRole, demoRole]);
 
   // Separate effect: handle demo mode when user is not signed in via Clerk
   useEffect(() => {
