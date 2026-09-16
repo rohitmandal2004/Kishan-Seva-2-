@@ -14,7 +14,6 @@ import {
    ShieldCheck,
    QrCode,
    AlertTriangle,
-   AlertCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
@@ -255,7 +254,7 @@ export default function QualityCheck() {
 
                   <Card className="p-4 border border-amber-200 bg-amber-50/70 text-amber-900 rounded-2xl shadow-xs">
                      <div className="flex gap-2.5">
-                        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                        <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                         <div className="text-xs">
                            <p className="font-bold mb-1">Official FCI Quality Standards</p>
                            <ul className="space-y-1 text-amber-800/90 text-[11px]">

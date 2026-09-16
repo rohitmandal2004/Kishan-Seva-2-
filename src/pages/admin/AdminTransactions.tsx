@@ -14,7 +14,7 @@ import {
  Clock,
  AlertTriangle,
  Building,
- ShieldCheck,
+ Shield,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -323,7 +323,7 @@ export default function AdminTransactions() {
  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
  Gateway SLA
  </span>
- <ShieldCheck className="w-4 h-4 text-emerald-600" />
+ <Shield className="w-4 h-4 text-emerald-600" />
  </div>
  <div className="flex items-baseline gap-1.5 mt-2">
  <h3 className="text-2xl sm:text-3xl font-black text-slate-900">99.4%</h3>
