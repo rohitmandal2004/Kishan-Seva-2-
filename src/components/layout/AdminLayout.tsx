@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
  Building2, Truck, LogOut, 
- BarChart3, Menu, X, ShieldCheck, LayoutDashboard
+ BarChart3, Menu, X, ShieldCheck, LayoutDashboard, Scale
 } from 'lucide-react';
 import { useSupabase } from '@/context/SupabaseContext';
 import { LanguageSelector } from '@/components/ui/language-selector';
@@ -30,6 +30,7 @@ export default function AdminLayout() {
  { icon: Truck, label: 'Slot & Capacity', path: '/admin/slots' },
  { icon: BarChart3, label: 'Analytics & Reports', path: '/admin/analytics' },
  { icon: ShieldCheck, label: 'Audit Logs', path: '/admin/transactions' },
+ { icon: Scale, label: 'Disputes & Appeals', path: '/admin/disputes' },
  ];
 
  return (
@@ -59,7 +60,7 @@ export default function AdminLayout() {
  type="button"
  className="p-2 rounded-full hover:bg-red-500/20 text-slate-300 hover:text-red-400 transition-colors"
  title="Sign Out"
- >
+  aria-label="Sign Out">
  <LogOut className="w-4 h-4" />
  </button>
  </div>

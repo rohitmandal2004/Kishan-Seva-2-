@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { DigitalGatePassModal } from '@/components/farmer/DigitalGatePassModal';
+import { FeedbackModal } from '@/components/farmer/FeedbackModal';
+import { QCAppealModal } from '@/components/farmer/QCAppealModal';
 import { speakQueuePosition } from '@/services/soundAndSpeech';
 import { Booking } from '@/types';
 import { toast } from 'sonner';
@@ -33,6 +35,8 @@ export default function FarmerBookings() {
   const [filter, setFilter] = useState<'ALL' | 'ACTIVE' | 'COMPLETED'>('ALL');
   const [selectedPassBooking, setSelectedPassBooking] = useState<Booking | null>(null);
   const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+  const [feedbackBooking, setFeedbackBooking] = useState<Booking | null>(null);
+  const [appealBooking, setAppealBooking] = useState<Booking | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
 
   const allBookings = store.getFarmerBookingsForFarmer(farmer?.id, user?.email);
@@ -76,7 +80,7 @@ export default function FarmerBookings() {
 
   if (isProfileLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-24 md:pb-8">
+      <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24 md:pb-8">
         <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
           {/* Header Skeleton */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
@@ -88,7 +92,7 @@ export default function FarmerBookings() {
           </div>
 
           {/* Tabs Skeleton */}
-          <div className="flex border-b border-zinc-200 mb-6 gap-6">
+          <div className="flex border-b border-slate-200 mb-6 gap-6">
             {[...Array(3)].map((_, i) => (
               <Skeleton key={i} className="h-6 w-24 mb-3" />
             ))}
@@ -97,7 +101,7 @@ export default function FarmerBookings() {
           {/* Bookings List Skeleton */}
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="p-5 border border-zinc-200 rounded-lg shadow-sm bg-white flex flex-col md:flex-row gap-5 justify-between md:items-center">
+              <div key={i} className="p-5 border border-slate-200 rounded-lg shadow-sm bg-white flex flex-col md:flex-row gap-5 justify-between md:items-center">
                 <div className="flex gap-4 items-start">
                   <Skeleton className="w-10 h-10 rounded-md shrink-0" />
                   <div className="space-y-3">
@@ -112,7 +116,7 @@ export default function FarmerBookings() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-zinc-100 w-full md:w-auto shrink-0 justify-start md:justify-end">
+                <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 w-full md:w-auto shrink-0 justify-start md:justify-end">
                   <Skeleton className="h-9 w-16 rounded-md" />
                   <Skeleton className="h-9 w-9 rounded-md" />
                   <Skeleton className="h-9 w-24 rounded-md" />
@@ -127,32 +131,32 @@ export default function FarmerBookings() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 font-sans text-zinc-900 pb-24 md:pb-8">
+    <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-24 md:pb-8">
       <div className="p-4 md:p-8 max-w-4xl mx-auto w-full">
         
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight">My Bookings</h1>
-            <p className="text-sm text-zinc-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Manage your procurement slots and E-Gate passes
             </p>
           </div>
           <Link to="/farmer/book" className="shrink-0">
-            <Button className="w-full md:w-auto bg-zinc-900 hover:bg-zinc-800 text-white font-medium gap-2 rounded-md h-10 px-4 transition-transform active:scale-[0.97]">
+            <Button className="w-full md:w-auto bg-slate-900 hover:bg-slate-800 text-white font-medium gap-2 rounded-md h-10 px-4 transition-transform active:scale-[0.97]">
               <CalendarClock className="w-4 h-4" /> Book New Slot
             </Button>
           </Link>
         </div>
 
         {/* Segmented Tabs */}
-        <div className="flex border-b border-zinc-200 mb-6 gap-6">
+        <div className="flex border-b border-slate-200 mb-6 gap-6">
           <button
             onClick={() => setFilter('ALL')}
             className={`pb-3 text-sm font-medium transition-colors duration-200 ease-out border-b-2 -mb-px ${
               filter === 'ALL'
-                ? 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-700'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             All Bookings
@@ -161,12 +165,12 @@ export default function FarmerBookings() {
             onClick={() => setFilter('ACTIVE')}
             className={`pb-3 text-sm font-medium transition-colors duration-200 ease-out border-b-2 -mb-px flex items-center gap-2 ${
               filter === 'ACTIVE'
-                ? 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-700'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             Active 
-            <span className={`px-1.5 py-0.5 rounded text-[10px] leading-none ${filter === 'ACTIVE' ? 'bg-zinc-100' : 'bg-zinc-100 text-zinc-500'}`}>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] leading-none ${filter === 'ACTIVE' ? 'bg-slate-100' : 'bg-slate-100 text-slate-500'}`}>
               {activeBookings.length}
             </span>
           </button>
@@ -174,12 +178,12 @@ export default function FarmerBookings() {
             onClick={() => setFilter('COMPLETED')}
             className={`pb-3 text-sm font-medium transition-colors duration-200 ease-out border-b-2 -mb-px flex items-center gap-2 ${
               filter === 'COMPLETED'
-                ? 'border-zinc-900 text-zinc-900'
-                : 'border-transparent text-zinc-500 hover:text-zinc-700'
+                ? 'border-slate-900 text-slate-900'
+                : 'border-transparent text-slate-500 hover:text-slate-700'
             }`}
           >
             History
-            <span className={`px-1.5 py-0.5 rounded text-[10px] leading-none ${filter === 'COMPLETED' ? 'bg-zinc-100' : 'bg-zinc-100 text-zinc-500'}`}>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] leading-none ${filter === 'COMPLETED' ? 'bg-slate-100' : 'bg-slate-100 text-slate-500'}`}>
               {completedBookings.length}
             </span>
           </button>
@@ -188,15 +192,15 @@ export default function FarmerBookings() {
         {/* Content */}
         <div className="space-y-4">
           {displayBookings.length === 0 ? (
-            <div className="py-20 flex flex-col items-center justify-center text-center bg-white border border-zinc-200 rounded-lg border-dashed">
-              <Ticket className="w-8 h-8 text-zinc-300 mb-4" />
-              <h3 className="text-base font-medium text-zinc-900 mb-1">No bookings found</h3>
-              <p className="text-sm text-zinc-500 mb-6 max-w-sm">
+            <div className="py-20 flex flex-col items-center justify-center text-center bg-white border border-slate-200 rounded-lg border-dashed">
+              <Ticket className="w-8 h-8 text-slate-300 mb-4" />
+              <h3 className="text-base font-medium text-slate-900 mb-1">No bookings found</h3>
+              <p className="text-sm text-slate-500 mb-6 max-w-sm">
                 You haven't made any slot bookings in this category yet.
               </p>
               {filter !== 'COMPLETED' && (
                 <Link to="/farmer/book">
-                  <Button className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium rounded-md h-10 px-6 transition-transform hover:scale-[1.02] active:scale-[0.97]">
+                  <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-md h-10 px-6 transition-transform hover:scale-[1.02] active:scale-[0.97]">
                     Book Your First Slot
                   </Button>
                 </Link>
@@ -229,11 +233,11 @@ export default function FarmerBookings() {
               return (
                 <Card
                   key={booking.id}
-                  className="p-5 border-zinc-200 rounded-lg shadow-sm bg-white transition-[border-color,shadow] duration-200 ease-out hover:shadow-md hover:border-zinc-300 flex flex-col md:flex-row gap-5 justify-between md:items-center"
+                  className="p-5 border-slate-200 rounded-lg shadow-sm bg-white transition-[border-color,shadow] duration-200 ease-out hover:shadow-md hover:border-slate-300 flex flex-col md:flex-row gap-5 justify-between md:items-center"
                 >
                   <div className="flex gap-4 items-start">
                     <div className={`w-10 h-10 rounded-md flex items-center justify-center shrink-0 border ${
-                      isCompleted ? 'bg-zinc-50 border-zinc-200 text-zinc-500' :
+                      isCompleted ? 'bg-slate-50 border-slate-200 text-slate-500' :
                       isCancelled ? 'bg-red-50 border-red-100 text-red-500' :
                       'bg-emerald-50 border-emerald-100 text-emerald-600'
                     }`}>
@@ -242,12 +246,12 @@ export default function FarmerBookings() {
                     
                     <div>
                       <div className="flex items-center gap-3 mb-0.5">
-                        <h3 className="font-semibold text-zinc-900 text-base">
+                        <h3 className="font-semibold text-slate-900 text-base">
                           {booking.crop_name} • {booking.expected_quantity_q} Qtl
                         </h3>
                         <span
                           className={`text-[11px] font-medium px-2 py-0.5 rounded-sm uppercase tracking-wide ${
-                            isCompleted ? 'bg-zinc-100 text-zinc-600' : 
+                            isCompleted ? 'bg-slate-100 text-slate-600' : 
                             isCancelled ? 'bg-red-50 text-red-600' : 
                             'bg-emerald-50 text-emerald-700'
                           }`}
@@ -256,26 +260,31 @@ export default function FarmerBookings() {
                         </span>
                       </div>
                       
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-zinc-500 mt-1.5">
-                        <span className="flex items-center gap-1.5 font-mono text-[13px] text-zinc-700 bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-100">
-                          <Ticket className="w-3.5 h-3.5 text-zinc-500" /> {booking.token_number}
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-slate-500 mt-1.5">
+                        <span className="flex items-center gap-1.5 font-mono text-[13px] text-slate-700 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                          <Ticket className="w-3.5 h-3.5 text-slate-500" /> {booking.token_number}
                         </span>
                         <span className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-zinc-500" /> {booking.centre_name}
+                          <MapPin className="w-3.5 h-3.5 text-slate-500" /> {booking.centre_name}
                         </span>
                         <span className="flex items-center gap-1.5">
-                          <CalendarClock className="w-3.5 h-3.5 text-zinc-500" /> {booking.slot_date} at {booking.slot_time}
+                          <CalendarClock className="w-3.5 h-3.5 text-slate-500" /> {booking.slot_date} at {booking.slot_time}
                         </span>
+                        {booking.quality_data && booking.quality_data.disputed && (
+                          <span className="flex items-center gap-1.5 text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded font-medium border border-amber-100">
+                            Dispute Under Review
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-zinc-100 w-full md:w-auto shrink-0 justify-start md:justify-end">
+                  <div className="flex items-center gap-2 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 w-full md:w-auto shrink-0 justify-start md:justify-end">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setSelectedPassBooking(normalizedBooking)}
-                      className="bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 text-xs font-medium rounded-md h-9 px-3 transition-transform active:scale-[0.97] shadow-sm"
+                      className="bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 text-xs font-medium rounded-md h-9 px-3 transition-transform active:scale-[0.97] shadow-sm"
                     >
                       <QrCode className="w-3.5 h-3.5 mr-1.5" /> Pass
                     </Button>
@@ -284,7 +293,7 @@ export default function FarmerBookings() {
                       size="sm"
                       variant="outline"
                       onClick={() => handleVoiceListen(booking)}
-                      className="bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 text-xs font-medium rounded-md h-9 px-2.5 transition-transform active:scale-[0.97] shadow-sm"
+                      className="bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 text-xs font-medium rounded-md h-9 px-2.5 transition-transform active:scale-[0.97] shadow-sm"
                       title="Listen in Regional Language"
                     >
                       <Volume2 className="w-4 h-4" /> 
@@ -292,10 +301,19 @@ export default function FarmerBookings() {
 
                     {!isCompleted && !isCancelled && (
                       <>
+                        {booking.quality_data && booking.quality_data.grade !== 'Grade A' && !booking.quality_data.disputed && (
+                          <Button
+                            size="sm"
+                            onClick={() => setAppealBooking(normalizedBooking)}
+                            className="bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs font-medium rounded-md h-9 px-3 transition-transform active:scale-[0.97] shadow-sm ml-1"
+                          >
+                            Dispute QC
+                          </Button>
+                        )}
                         <Link to="/farmer/queue">
                           <Button
                             size="sm"
-                            className="bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-medium rounded-md h-9 px-4 transition-transform active:scale-[0.97] shadow-sm ml-1"
+                            className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium rounded-md h-9 px-4 transition-transform active:scale-[0.97] shadow-sm ml-1"
                           >
                             Live Queue
                           </Button>
@@ -310,6 +328,16 @@ export default function FarmerBookings() {
                           <X className="w-4 h-4" />
                         </Button>
                       </>
+                    )}
+                    
+                    {isCompleted && (
+                      <Button
+                        size="sm"
+                        onClick={() => setFeedbackBooking(normalizedBooking)}
+                        className="bg-amber-100 text-amber-800 hover:bg-amber-200 text-xs font-medium rounded-md h-9 px-4 transition-transform active:scale-[0.97] shadow-sm ml-1"
+                      >
+                        Rate & Review
+                      </Button>
                     )}
                   </div>
                 </Card>
@@ -330,6 +358,25 @@ export default function FarmerBookings() {
           }
         />
 
+        {/* Feedback Modal */}
+        <FeedbackModal
+          isOpen={!!feedbackBooking}
+          onClose={() => setFeedbackBooking(null)}
+          booking={feedbackBooking}
+        />
+
+        {/* QC Appeal Modal */}
+        <QCAppealModal
+          isOpen={!!appealBooking}
+          onClose={() => setAppealBooking(null)}
+          booking={appealBooking}
+          onSuccess={() => {
+            // Update local state if needed or just trigger refresh
+            // Currently relies on the modal closing and user refreshing or real-time sub
+            toast.success('We have received your appeal');
+          }}
+        />
+
         {/* Cancel Confirmation Dialog */}
         <Dialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
           <DialogContent className="max-w-sm rounded-xl">
@@ -337,14 +384,14 @@ export default function FarmerBookings() {
               <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-3">
                 <AlertTriangle className="w-6 h-6 text-red-500" />
               </div>
-              <DialogTitle className="text-center text-base font-semibold text-zinc-900">
+              <DialogTitle className="text-center text-base font-semibold text-slate-900">
                 Cancel Booking?
               </DialogTitle>
             </DialogHeader>
-            <p className="text-sm text-zinc-500 text-center px-2">
+            <p className="text-sm text-slate-500 text-center px-2">
               This will cancel token{' '}
-              <span className="font-mono font-semibold text-zinc-800">{cancelTarget?.token_number}</span>{' '}
-              at <span className="font-semibold text-zinc-800">{cancelTarget?.centre_name}</span>.
+              <span className="font-mono font-semibold text-slate-800">{cancelTarget?.token_number}</span>{' '}
+              at <span className="font-semibold text-slate-800">{cancelTarget?.centre_name}</span>.
               This action cannot be undone.
             </p>
             <DialogFooter className="flex gap-3 mt-2">

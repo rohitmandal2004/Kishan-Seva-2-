@@ -29,6 +29,8 @@ import * as z from 'zod';
 import { Booking } from '@/types';
 import { useRef } from 'react';
 import { useGSAP, gsap } from '@/lib/gsap';
+import { generateReceiptPdf } from '@/services/receiptGenerator';
+import { Download } from 'lucide-react';
 
 const weighmentSchema = z
  .object({
@@ -76,7 +78,7 @@ export default function Weighment() {
  register,
  handleSubmit,
  watch,
- _setValue,
+ setValue,
  formState: { errors },
  } = useForm<WeighmentFormData>({
  resolver: zodResolver(weighmentSchema),
@@ -173,7 +175,7 @@ export default function Weighment() {
 
  SmsGateway.sendSmsNotification(
  updated.farmer_phone || '+91 98301 23456',
- `Kishan Seva: Weighment complete. Net weight: ${actualNet} Q. Rs ${actualNetPayable.toLocaleString('en-IN')} will be credited via PFMS.`
+ `[Simulated SMS] Kishan Seva: Weighment complete. Net weight: ${actualNet} Q. Rs ${actualNetPayable.toLocaleString('en-IN')} will be credited via PFMS.`
  );
  }
  setLoading(false);
@@ -313,6 +315,26 @@ export default function Weighment() {
  className="flex-1 bg-white border-slate-300 text-slate-700 hover:bg-slate-50 h-11 rounded-xl text-xs font-bold gap-2"
  >
  <Printer className="w-4 h-4" /> Print e-J-Form Slip
+ </Button>
+ <Button
+ onClick={async () => {
+  const paymentData = {
+    rate_per_q: completedBooking.weighment_data?.msp_rate_per_q,
+    total_amount: completedBooking.weighment_data?.net_payable,
+    dbt_reference: completedBooking.weighment_data?.transaction_ref
+  };
+  toast.promise(
+    generateReceiptPdf(completedBooking, completedBooking.weighment_data, paymentData),
+    {
+      loading: 'Generating PDF receipt...',
+      success: 'Receipt downloaded successfully!',
+      error: 'Failed to generate receipt'
+    }
+  );
+ }}
+ className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white h-11 rounded-xl text-xs font-bold gap-2 shadow-xs"
+ >
+ <Download className="w-4 h-4" /> Download PDF Receipt
  </Button>
  <Button
  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-xl text-xs font-bold gap-2 shadow-xs"

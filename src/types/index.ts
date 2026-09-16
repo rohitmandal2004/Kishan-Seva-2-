@@ -199,6 +199,7 @@ export interface QualityCheck {
  certificate_id: string;
  rejection_reason?: string;
  timestamp?: string;
+ disputed?: boolean;
  created_at?: string;
 }
 

@@ -14,6 +14,7 @@ import {
    ShieldCheck,
    QrCode,
    AlertTriangle,
+   AlertCircle,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';

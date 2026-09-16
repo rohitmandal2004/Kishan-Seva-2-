@@ -63,7 +63,7 @@ export default function OperatorLayout() {
  variant="ghost" 
  className="text-white hover:bg-white/10 text-xs h-8 px-2"
  title="Sign Out"
- >
+  aria-label="Sign Out">
  <LogOut className="w-4 h-4" />
  </Button>
  </div>
@@ -124,7 +124,7 @@ export default function OperatorLayout() {
         className="w-full justify-start text-[10px] font-bold font-mono uppercase tracking-widest text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
         onClick={handleLogout}
         title="Sign out of Operator Console"
-      >
+       aria-label="Sign out of Operator Console">
         <LogOut className="w-4 h-4 mr-3" />
         Sign Out
       </Button>

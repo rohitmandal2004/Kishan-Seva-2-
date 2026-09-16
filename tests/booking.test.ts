@@ -9,30 +9,55 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 describe('Booking Concurrency & Quota', () => {
   it('handles 10 concurrent create_booking calls correctly', async () => {
-    // 1. Fetch a valid active centre to test against
-    const { data: centres, error: centreErr } = await supabase
+    // 1. Fetch or create a valid active centre to test against
+    let { data: centres } = await supabase
       .from('procurement_centres')
       .select('id, name')
       .eq('status', 'ACTIVE')
       .limit(1);
     
-    if (centreErr || !centres || centres.length === 0) {
-      console.warn('Skipping test: No active procurement centres found');
-      return;
+    if (!centres || centres.length === 0) {
+      const { data: newCentre } = await supabase
+        .from('procurement_centres')
+        .insert({
+          name: 'Test Centre',
+          district: 'Test District',
+          status: 'ACTIVE',
+          daily_capacity_quintals: 500,
+          latitude: 22.5,
+          longitude: 88.3
+        })
+        .select('id, name')
+        .single();
+      centres = newCentre ? [newCentre] : [];
     }
-    const centreId = centres[0].id;
+    const centreId = centres[0]?.id;
 
     // 2. Fetch or create a dummy farmer profile
-    const { data: farmers } = await supabase
+    let { data: farmers } = await supabase
       .from('farmer_profiles')
       .select('id, clerk_user_id')
       .limit(1);
     
     if (!farmers || farmers.length === 0) {
-      console.warn('Skipping test: No farmer profiles found');
+      const { data: newFarmer } = await supabase
+        .from('farmer_profiles')
+        .insert({
+          full_name: 'Test Farmer',
+          phone_number: '9999999999',
+          district: 'Test District',
+          clerk_user_id: 'test_clerk_id'
+        })
+        .select('id, clerk_user_id')
+        .single();
+      farmers = newFarmer ? [newFarmer] : [];
+    }
+    const farmerId = farmers[0]?.id;
+
+    if (!centreId || !farmerId) {
+      console.warn('Skipping test: Could not fetch or create test data');
       return;
     }
-    const farmerId = farmers[0].id; // Use UUID
 
     // 3. Prepare parameters for concurrent booking
     const slotDate = new Date().toISOString().split('T')[0];

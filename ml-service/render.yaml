@@ -1,0 +1,19 @@
+# Render.com Blueprint — ML Service
+# Docs: https://docs.render.com/infrastructure-as-code
+services:
+  - type: web
+    name: kishan-ml
+    runtime: python
+    region: singapore  # closest to India
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: PYTHON_VERSION
+        value: 3.11.9
+    healthCheckPath: /docs
+    autoDeploy: true

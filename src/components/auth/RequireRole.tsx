@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSupabase } from '@/context/SupabaseContext';
 import { Role } from '@/types';
@@ -15,6 +15,20 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
   const { isLoaded: clerkLoaded, isSignedIn } = useClerkAuth();
   const location = useLocation();
 
+  // Safety timeout: if isProfileLoading is stuck for > 8 seconds, break out.
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
+  useEffect(() => {
+    if (!isProfileLoading) {
+      setLoadingTimedOut(false);
+      return;
+    }
+    const timer = setTimeout(() => {
+      console.warn('[RequireRole] Profile loading timed out after 8s. Proceeding with current state.');
+      setLoadingTimedOut(true);
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [isProfileLoading]);
+
   // STATE A: Clerk still initializing — NEVER redirect during this phase
   if (!clerkLoaded) {
     return (
@@ -25,13 +39,13 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
     );
   }
 
-  // STATE B: Not signed in and no demo user — redirect to role selection
+  // STATE B: Not signed in and no app user — redirect to role selection
   if (!isSignedIn && !user) {
     return <Navigate to="/roles" state={{ from: location }} replace />;
   }
 
-  // STATE C: Clerk signed in but database profile still loading
-  if (isSignedIn && (isProfileLoading || !user)) {
+  // STATE C: Database profile still loading (with timeout escape)
+  if ((isSignedIn || user) && isProfileLoading && !loadingTimedOut && (!farmer || user?.role !== 'FARMER')) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
@@ -42,6 +56,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
 
   // STATE D: Farmer portal route but no farmer profile exists in database
   if (allowedRoles.includes('FARMER') && (!farmer || user?.role !== 'FARMER')) {
+
     // If there was a database network error, show error screen with reload
     if (profileError) {
       return (
@@ -59,7 +74,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
         </div>
       );
     }
-    // Genuinely missing farmer profile -> redirect to register
+    // Genuinely missing farmer profile → redirect to register
     return <Navigate to="/farmer/register" replace />;
   }
 

@@ -424,4 +424,30 @@ export const SupabaseDataService = {
  }
  return () => {};
  },
+
+  getPendingFarmers: async (): Promise<any[]> => {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase
+        .from('farmer_profiles')
+        .select('*')
+        .eq('verification_status', 'PENDING')
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching pending farmers:', error.message);
+        return [];
+      }
+      return data || [];
+    }
+    return [];
+  },
+
+  approveFarmer: async (farmerId: string): Promise<any> => {
+    if (isSupabaseConfigured()) {
+      const { data, error } = await supabase.rpc('approve_farmer', { p_farmer_id: farmerId });
+      if (error) {
+        throw new Error(error.message);
+      }
+      return data;
+    }
+  }
 };

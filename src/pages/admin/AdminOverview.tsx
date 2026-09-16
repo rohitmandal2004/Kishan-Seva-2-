@@ -3,6 +3,8 @@ import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
 import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { SupabaseDataService } from '@/services/supabaseData.service';
+import { toast } from 'sonner';
 
 // Isolated clock component to prevent full-page re-renders
 function LiveClock() {
@@ -42,6 +44,30 @@ export default function AdminOverview() {
   const centres = store.centres;
   const stats = store.getStats();
   const storeBookings = store.bookings || [];
+
+  const [pendingFarmers, setPendingFarmers] = useState<any[]>([]);
+  const [isApproving, setIsApproving] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadPending = async () => {
+      const farmers = await SupabaseDataService.getPendingFarmers();
+      setPendingFarmers(farmers);
+    };
+    loadPending();
+  }, []);
+
+  const handleApprove = async (farmerId: string) => {
+    try {
+      setIsApproving(farmerId);
+      await SupabaseDataService.approveFarmer(farmerId);
+      setPendingFarmers(prev => prev.filter(f => f.id !== farmerId));
+      toast.success('Farmer profile approved successfully');
+    } catch (err: any) {
+      toast.error(`Failed to approve: ${err.message}`);
+    } finally {
+      setIsApproving(null);
+    }
+  };
 
   // Sort centres by queue length descending for the Centre Operations table
   const sortedCentres = [...centres].sort((a, b) => b.current_queue_length - a.current_queue_length);
@@ -352,6 +378,28 @@ export default function AdminOverview() {
           <div className="flex-1 overflow-auto bg-slate-50">
             <div className="divide-y divide-slate-200">
               
+              {pendingFarmers.length > 0 && pendingFarmers.map(farmer => (
+                <div key={farmer.id} className="p-4 bg-white hover:bg-slate-50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-none mt-1.5 flex-shrink-0"></div>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-[9px] font-bold font-mono text-blue-600 bg-blue-50 px-1 border border-blue-200">[VERIFICATION REQUIRED]</span>
+                      </div>
+                      <p className="text-xs font-bold text-slate-900 leading-tight mb-1">{farmer.full_name} ({farmer.farmer_code})</p>
+                      <p className="text-[10px] text-slate-600">Pending verification for Bank Account {farmer.account_number_masked}.</p>
+                      <button 
+                        onClick={() => handleApprove(farmer.id)}
+                        disabled={isApproving === farmer.id}
+                        className="mt-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600 hover:text-emerald-700 underline disabled:opacity-50 disabled:no-underline"
+                      >
+                        {isApproving === farmer.id ? 'Approving...' : 'Approve Profile'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
               {/* Alert 1 */}
               <div className="p-4 bg-white hover:bg-slate-50 transition-colors">
                 <div className="flex items-start gap-3">

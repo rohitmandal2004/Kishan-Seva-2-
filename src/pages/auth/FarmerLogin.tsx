@@ -8,7 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Loader2, ChevronLeft, Mail, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
-import { useClerk } from '@clerk/react';
+import { useClerk, useAuth } from '@clerk/react';
 import { useSignIn } from '@clerk/react/legacy';
 import { useSupabase } from '@/context/SupabaseContext';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
@@ -20,8 +20,9 @@ export default function FarmerLogin() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const clerk = useClerk();
+  const { isSignedIn } = useAuth();
   const { signIn, isLoaded, setActive } = useSignIn();
-  const { user, farmer, isConfigured, isProfileLoading, refreshProfile, signOut, setDemoRole, setFarmer, setUser } = useSupabase();
+  const { user, farmer, isConfigured, isProfileLoading, refreshProfile, fetchFarmerProfile, signOut, setDemoRole, setFarmer, setUser } = useSupabase();
   
   const [email, setEmail] = useState('');
   const [otp, setOtp] = useState('');
@@ -38,10 +39,10 @@ export default function FarmerLogin() {
 
   // Auto-redirect if already logged in with a valid session and farmer profile
   useEffect(() => {
-    if (isConfigured && !isProfileLoading && user && user.role === 'FARMER' && farmer) {
+    if (isConfigured && !isProfileLoading && isSignedIn && user && user.role === 'FARMER' && farmer) {
       navigate('/farmer/dashboard', { replace: true });
     }
-  }, [user, farmer, isConfigured, isProfileLoading, navigate]);
+  }, [user, farmer, isConfigured, isProfileLoading, isSignedIn, navigate]);
 
   /**
    * Farmer login flow:
@@ -65,39 +66,7 @@ export default function FarmerLogin() {
 
     setLoading(true);
     try {
-      // Step 1: Pre-auth check in Supabase
-      if (isSupabaseConfigured()) {
-        try {
-          const { data: existingFarmer, error: dbError } = await supabase
-            .from('farmer_profiles')
-            .select('id, clerk_user_id, full_name, email')
-            .ilike('email', cleanEmail)
-            .maybeSingle();
-
-          if (dbError) {
-            console.error('[Kishan Seva] Supabase lookup error:', dbError);
-            toast.error("We couldn't connect to Kishan Seva right now. Please try again.");
-            return;
-          }
-
-          if (!existingFarmer) {
-            // STOP! Do not let Clerk create an unregistered account or transfer
-            toast.error('Farmer account not found. Please register first.', {
-              action: {
-                label: 'Register now',
-                onClick: () => navigate('/farmer/register'),
-              },
-            });
-            return;
-          }
-        } catch (dbErr) {
-          console.error('[Kishan Seva] Supabase connection error:', dbErr);
-          toast.error("We couldn't connect to Kishan Seva right now. Please try again.");
-          return;
-        }
-      }
-
-      // Step 2: Start the sign-in process with Clerk using normalized email identifier
+      // Start the sign-in process with Clerk using normalized email identifier
       const result = await signIn.create({
         identifier: cleanEmail,
       });
@@ -199,6 +168,7 @@ export default function FarmerLogin() {
     }
 
     setLoading(true);
+    let success = false;
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: 'email_code',
@@ -206,6 +176,7 @@ export default function FarmerLogin() {
       });
 
       if (result.status === 'complete') {
+        success = true;
         // Finalize Clerk sign-in
         if (typeof (signIn as any).finalize === 'function') {
           try {
@@ -218,54 +189,43 @@ export default function FarmerLogin() {
           await setActive({ session: result.createdSessionId });
         }
 
-        const clerkUserId = clerk.user?.id || clerk.session?.user?.id || (result as any).createdUserId || '';
+        const clerkUserId = clerk.user?.id || clerk.session?.user?.id || (result as any).createdUserId || (result as any).userData?.id || '';
         const cleanEmail = email.trim().toLowerCase();
 
-        // Load Supabase farmer profile strictly by clerkUserId / email
-        let effectiveProfile: any = null;
-        if (isSupabaseConfigured()) {
-          try {
-            if (clerkUserId) {
-              const { data: byClerk } = await supabase
-                .from('farmer_profiles')
-                .select('*')
-                .eq('clerk_user_id', clerkUserId)
-                .maybeSingle();
-              if (byClerk) effectiveProfile = byClerk;
-            }
+        // 1. Primary lookup using robust multi-tier resolution (RPCs bypass RLS)
+        let effectiveProfile = await fetchFarmerProfile(clerkUserId, cleanEmail);
 
-            if (!effectiveProfile && cleanEmail) {
-              const { data: byEmail } = await supabase
-                .from('farmer_profiles')
-                .select('*')
-                .ilike('email', cleanEmail)
-                .maybeSingle();
-              if (byEmail) {
-                effectiveProfile = byEmail;
-                // Auto-link clerk_user_id in Supabase
-                if (clerkUserId && byEmail.clerk_user_id !== clerkUserId) {
-                  try {
-                    await supabase
-                      .from('farmer_profiles')
-                      .update({ clerk_user_id: clerkUserId, role: 'FARMER' })
-                      .eq('id', byEmail.id);
-                  } catch {}
-                }
+        // 2. If not found immediately, give the Clerk session a moment to settle and retry
+        if (!effectiveProfile) {
+          await new Promise(r => setTimeout(r, 400));
+          const settledClerkId = clerk.user?.id || clerk.session?.user?.id || clerkUserId;
+          effectiveProfile = await fetchFarmerProfile(settledClerkId, cleanEmail);
+        }
+
+        // 3. Fallback to localStorage if this farmer was previously cached on device
+        if (!effectiveProfile) {
+          try {
+            const saved = localStorage.getItem('kishan_farmer_profile');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              if (parsed && (
+                (cleanEmail && parsed.email?.toLowerCase() === cleanEmail) ||
+                (clerkUserId && parsed.clerk_user_id === clerkUserId)
+              )) {
+                effectiveProfile = parsed;
               }
             }
-          } catch (dbFetchErr) {
-            console.error('[Kishan Seva] Error fetching farmer profile on login:', dbFetchErr);
-          }
+          } catch {}
         }
 
         if (!effectiveProfile) {
+          setLoading(false); // Enable the UI again so the user sees the error
           toast.error('Farmer account not found. Please register first.', {
             action: {
               label: 'Register now',
               onClick: () => navigate('/farmer/register'),
             },
           });
-          navigate('/farmer/register', { replace: true });
           return;
         }
 
@@ -281,9 +241,12 @@ export default function FarmerLogin() {
           localStorage.setItem('kishan_farmer_profile', JSON.stringify(effectiveProfile));
         } catch {}
 
-        await refreshProfile().catch(() => {});
+        await refreshProfile(clerkUserId, cleanEmail).catch(() => {});
         toast.success('Welcome back to Kishan Seva!');
-        navigate('/farmer/dashboard', { replace: true });
+        
+        // DO NOT navigate manually.
+        // We wait for Clerk's `isSignedIn` to become true, which will trigger the `useEffect` above.
+        // DO NOT set loading to false here, to keep the spinner visible until navigation.
       } else {
         throw new Error('Verification could not be completed. Please try again.');
       }
@@ -299,7 +262,9 @@ export default function FarmerLogin() {
         toast.error(clerkError?.message || 'Invalid OTP. Please check the code and try again.');
       }
     } finally {
-      setLoading(false);
+      if (!success) {
+        setLoading(false);
+      }
     }
   };
 

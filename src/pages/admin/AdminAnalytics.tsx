@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { useKishanData } from '@/context/DataContext';
 import { 
@@ -6,7 +6,8 @@ import {
  BarChart, Bar, Legend,
  PieChart, Pie, Cell
 } from 'recharts';
-import { TrendingUp, Users, Sprout, Building2, Calendar } from 'lucide-react';
+import { TrendingUp, Users, Sprout, Building2, Calendar, Star } from 'lucide-react';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { format, subDays } from 'date-fns';
 
 export default function AdminAnalytics() {
@@ -26,6 +27,25 @@ export default function AdminAnalytics() {
  });
  }, []);
 
+  // Generate future timeline data for Expected Arrivals (Next 7 Days)
+  const futureData = useMemo(() => {
+    return Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() + i + 1);
+      
+      // Simulate aggregated FPO and Farmer bookings
+      const individualBookings = 150 + ((i * 37) % 100);
+      const fpoBulkBookings = i === 2 || i === 5 ? 300 : 50; 
+      
+      return {
+        date: format(d, 'dd MMM'),
+        individual: individualBookings,
+        fpo: fpoBulkBookings,
+        totalExpected: individualBookings + fpoBulkBookings
+      };
+    });
+  }, []);
+
  // Prepare Pie Chart data (Crop Distribution)
  const cropData = [
  { name: 'Paddy (Grade A)', value: 65, color: '#047857' },
@@ -40,61 +60,87 @@ export default function AdminAnalytics() {
  capacity: c.daily_capacity_quintals / 10, // Scaled for visual comparison
  }));
 
- return (
- <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
- <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
- <div>
- <h1 className="text-2xl font-black text-slate-900">Analytics & Reports</h1>
- <p className="text-slate-500 text-sm mt-1">Statewide procurement insights and financial disbursals.</p>
- </div>
- <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 shadow-sm">
- <Calendar className="w-4 h-4 text-slate-500" />
- Last 7 Days
- </div>
- </div>
+  const [avgRating, setAvgRating] = useState<number | null>(null);
+  
+  useEffect(() => {
+    if (isSupabaseConfigured()) {
+      supabase.from('centre_feedback').select('overall_rating')
+        .then(({ data }) => {
+          if (data && data.length > 0) {
+            const sum = data.reduce((a, c) => a + c.overall_rating, 0);
+            setAvgRating(Number((sum / data.length).toFixed(1)));
+          }
+        });
+    }
+  }, []);
 
- {/* KPI Cards */}
- <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
- <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
- <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700">
- <Sprout className="w-6 h-6" />
- </div>
- <div>
- <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Procured</p>
- <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
- </div>
- </Card>
+  return (
+  <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+  <div>
+  <h1 className="text-2xl font-black text-slate-900">Analytics & Reports</h1>
+  <p className="text-slate-500 text-sm mt-1">Statewide procurement insights and financial disbursals.</p>
+  </div>
+  <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 shadow-sm">
+  <Calendar className="w-4 h-4 text-slate-500" />
+  Last 7 Days
+  </div>
+  </div>
 
- <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
- <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
- <TrendingUp className="w-6 h-6" />
- </div>
- <div>
- <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">DBT Disbursed</p>
- <h3 className="text-2xl font-black text-slate-900 font-mono">₹{stats.totalDisbursedCrores} Cr</h3>
- </div>
- </Card>
+  {/* KPI Cards */}
+  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
+  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
+  <Sprout className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Procured</p>
+  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
+  </div>
+  </Card>
 
- <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
- <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700">
- <Users className="w-6 h-6" />
- </div>
- <div>
- <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Farmers</p>
- <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.totalFarmers.toLocaleString()}</h3>
- </div>
- </Card>
+  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
+  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+  <TrendingUp className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">DBT Disbursed</p>
+  <h3 className="text-xl font-black text-slate-900 font-mono">₹{stats.totalDisbursedCrores} Cr</h3>
+  </div>
+  </Card>
 
- <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
- <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-700">
- <Building2 className="w-6 h-6" />
- </div>
- <div>
- <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Active Mandis</p>
- <h3 className="text-2xl font-black text-slate-900 font-mono">{stats.activeCentres} / {centres.length}</h3>
- </div>
- </Card>
- </div>
+  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
+  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
+  <Users className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Farmers</p>
+  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.totalFarmers.toLocaleString()}</h3>
+  </div>
+  </Card>
+
+  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
+  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 shrink-0">
+  <Building2 className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Mandis</p>
+  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.activeCentres} / {centres.length}</h3>
+  </div>
+  </Card>
+
+  <Card className={`p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white ${(avgRating && avgRating < 3.0) ? 'border-red-300 bg-red-50' : ''}`}>
+  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${(avgRating && avgRating < 3.0) ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
+  <Star className="w-6 h-6" />
+  </div>
+  <div>
+  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Service Quality</p>
+  <h3 className={`text-xl font-black font-mono flex items-center gap-1 ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-slate-900'}`}>
+    {avgRating ? `${avgRating}/5.0` : 'N/A'}
+  </h3>
+  </div>
+  </Card>
+  </div>
 
  {/* Charts Section */}
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -176,6 +222,32 @@ export default function AdminAnalytics() {
  <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
  <Bar dataKey="queue" name="Active Queue" fill="#ca8a04" radius={[4, 4, 0, 0]} />
  <Bar dataKey="capacity" name="Scaled Capacity" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
+ </BarChart>
+ </ResponsiveContainer>
+ </div>
+ </Card>
+ 
+ {/* Expected Arrivals (Next 7 Days) */}
+ <Card className="lg:col-span-3 p-6 border-slate-200 shadow-sm rounded-2xl bg-white mt-2">
+ <div className="flex justify-between items-start mb-6">
+  <div>
+    <h3 className="font-bold text-slate-900">Pre-Harvest Arrival Forecast (Quintals)</h3>
+    <p className="text-xs text-slate-500">Based on FPO bulk bookings and individual farmer slot bookings.</p>
+  </div>
+ </div>
+ <div className="h-[300px] w-full">
+ <ResponsiveContainer width="100%" height="100%">
+ <BarChart data={futureData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={40}>
+ <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+ <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
+ <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+ <RechartsTooltip 
+ cursor={{ fill: '#f1f5f9' }}
+ contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+ />
+ <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+ <Bar dataKey="individual" name="Individual Farmers" stackId="a" fill="#3b82f6" />
+ <Bar dataKey="fpo" name="FPO / Group Bookings" stackId="a" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
  </BarChart>
  </ResponsiveContainer>
  </div>

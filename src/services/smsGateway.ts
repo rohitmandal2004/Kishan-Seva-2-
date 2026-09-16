@@ -14,10 +14,10 @@ export class SmsGateway {
     // Simulate network delay
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    console.log(`[SMS Gateway — SIMULATED] Sending SMS to ${phone}: ${message}`);
+    console.log(`[Simulated SMS via Kishan Seva] Sending SMS to ${phone}: ${message}`);
 
     // Simulated delivery toast (not a real SMS)
-    toast.success(`📱 SMS Sent to ${phone} [Simulated]`, {
+    toast.success(`📱 SMS Sent to ${phone} [Simulated SMS via Kishan Seva]`, {
       description: message,
       duration: 6000,
     });

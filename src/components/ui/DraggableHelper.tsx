@@ -51,7 +51,7 @@ export function DraggableHelper() {
         <button 
           className="relative w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center shadow-2xl border-2 border-emerald-500 hover:bg-slate-800 transition-colors"
           title="Need Help? Drag me!"
-        >
+         aria-label="Need Help? Drag me!">
           <MessageSquare className="w-6 h-6 text-emerald-400" />
           
           <div className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-slate-900">

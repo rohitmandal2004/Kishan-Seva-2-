@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home, MapPin, CalendarClock, Ticket, Bell, LogOut, PhoneCall,
     User, CreditCard, BookOpen, HelpCircle, ShieldCheck, Sun, CheckCircle2, Droplets, ArrowDownToLine, Menu, X,
-    WifiOff
+    WifiOff, Users
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
@@ -64,6 +64,7 @@ export default function FarmerLayout() {
     const navItems = [
         { icon: Home, label: 'Dashboard', path: '/farmer/dashboard' },
         { icon: CalendarClock, label: 'Book Slot', path: '/farmer/book' },
+        { icon: Users, label: 'FPO Bulk Booking', path: '/farmer/bulk-book' },
         { icon: Ticket, label: 'Live Queue', path: '/farmer/queue', badge: activeBooking ? 'Active' : undefined },
         { icon: MapPin, label: 'Procurement Centres', path: '/farmer/centres' },
         { icon: BookOpen, label: 'My Bookings', path: '/farmer/bookings' },
@@ -107,7 +108,7 @@ export default function FarmerLayout() {
                         type="button"
                         className="p-2 rounded-full hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors"
                         title="Sign Out"
-                    >
+                     aria-label="Sign Out">
                         <LogOut className="w-4 h-4" />
                     </button>
                 </div>

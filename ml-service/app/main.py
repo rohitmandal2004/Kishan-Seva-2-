@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import os
@@ -9,7 +10,30 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title="Kishan Seva ML Prediction Service")
+app = FastAPI(
+    title="Kishan Seva ML Prediction Service",
+    description="Wait-time prediction API for the Kishan Seva procurement platform",
+    version="2.0.0",
+)
+
+# ── CORS — allow the frontend to call this API from any origin ──
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Tighten in production if needed
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+@app.get("/")
+async def root():
+    return {"service": "Kishan Seva ML Prediction Service", "status": "running", "version": "2.0.0"}
+
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "model_loaded": model is not None}
 
 # Setup Supabase client for logging predictions
 url = os.environ.get("VITE_SUPABASE_URL")

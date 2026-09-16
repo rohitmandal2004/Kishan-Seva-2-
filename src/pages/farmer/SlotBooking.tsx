@@ -243,7 +243,7 @@ export default function SlotBooking() {
   return (
     <div className="relative min-h-screen">
       {/* Sleek Gradient Background */}
-      <div className="absolute inset-0 bg-zinc-50 z-0 pointer-events-none"></div>
+      <div className="absolute inset-0 bg-slate-50 z-0 pointer-events-none"></div>
 
       <div className="relative z-10 p-4 md:p-8 max-w-4xl mx-auto w-full pb-24 font-sans">
 
@@ -251,19 +251,19 @@ export default function SlotBooking() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => currentStep > (rescheduleBookingId ? 2 : 1) && currentStep < 4 ? setCurrentStep((prev) => (prev - 1) as any) : navigate('/farmer/dashboard')}
-            className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-[0_2px_10px_rgb(0,0,0,0.06)] border border-zinc-100 hover:scale-105 transition-transform"
+            className="w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-[0_2px_10px_rgb(0,0,0,0.06)] border border-slate-100 hover:scale-105 transition-transform"
           >
-            <ChevronLeft className="w-5 h-5 text-zinc-600" />
+            <ChevronLeft className="w-5 h-5 text-slate-600" />
           </button>
           <div>
-            <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">{t('book_slot_title')}</h1>
-            <p className="text-xs text-zinc-500 font-medium mt-0.5">Assured MSP • Zero Middlemen</p>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('book_slot_title')}</h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">Assured MSP • Zero Middlemen</p>
           </div>
         </div>
 
         {/* Minimalist Stepper */}
         <div className="flex justify-between items-center mb-8 relative">
-          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-zinc-100 -z-10 transform -translate-y-1/2"></div>
+          <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-slate-100 -z-10 transform -translate-y-1/2"></div>
           {[
             { num: 1, title: t('step_produce') },
             { num: 2, title: t('step_mandi') },
@@ -276,11 +276,11 @@ export default function SlotBooking() {
               <div key={s.num} className="flex flex-col items-center gap-2 bg-transparent">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors duration-200 ease-out ${isCurrent ? 'bg-emerald-600 text-white shadow-[0_0_15px_rgba(5,150,105,0.3)] ring-4 ring-emerald-50' :
                     isDone ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-600' :
-                      'bg-white text-zinc-500 border-2 border-zinc-100'
+                      'bg-white text-slate-500 border-2 border-slate-100'
                   }`}>
                   {isDone ? <CheckCircle2 className="w-4 h-4" /> : s.num}
                 </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider ${isCurrent ? 'text-emerald-800' : 'text-zinc-500'}`}>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${isCurrent ? 'text-emerald-800' : 'text-slate-500'}`}>
                   {s.title}
                 </span>
               </div>
@@ -290,12 +290,12 @@ export default function SlotBooking() {
 
         {/* STEP 1: Produce */}
         {currentStep === 1 && (
-          <div className="bg-white border-zinc-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="bg-white border-slate-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
                 <Sprout className="w-6 h-6 text-emerald-600" /> {t('produce_transport')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">{t('tell_us_bringing')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('tell_us_bringing')}</p>
             </div>
 
             {anomalyReport.isSuspicious && (
@@ -310,11 +310,11 @@ export default function SlotBooking() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-zinc-700 uppercase tracking-wider">{t('select_crop')}</Label>
+                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">{t('select_crop')}</Label>
                 <select
                   value={selectedCrop}
                   onChange={(e) => setSelectedCrop(e.target.value)}
-                  className="w-full h-12 px-4 bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/60 rounded-lg text-sm font-bold text-zinc-800 transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full h-12 px-4 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-lg text-sm font-bold text-slate-800 transition-colors focus:outline-hidden focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
                 >
                   {OFFICIAL_MSP_RATES.map((m, idx) => (
                     <option key={idx} value={m.crop}>{m.crop} ({m.crop_hi})</option>
@@ -323,9 +323,9 @@ export default function SlotBooking() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-bold text-zinc-700 uppercase tracking-wider flex justify-between">
+                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex justify-between">
                   <span>{t('expected_qty')}</span>
-                  <span className="text-zinc-500 font-medium normal-case">{t('in_quintals')}</span>
+                  <span className="text-slate-500 font-medium normal-case">{t('in_quintals')}</span>
                 </Label>
                 <Input
                   type="number"
@@ -334,18 +334,18 @@ export default function SlotBooking() {
                   value={quantity}
                   onChange={(e) => setQuantity(e.target.value)}
                   placeholder="e.g. 45"
-                  className="h-12 bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/60 rounded-lg text-sm font-bold text-zinc-800 transition-colors focus:ring-emerald-500/20"
+                  className="h-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-lg text-sm font-bold text-slate-800 transition-colors focus:ring-emerald-500/20"
                 />
               </div>
 
               <div className="space-y-2 sm:col-span-2">
-                <Label className="text-xs font-bold text-zinc-700 uppercase tracking-wider">{t('vehicle_no')}</Label>
+                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider">{t('vehicle_no')}</Label>
                 <Input
                   type="text"
                   value={vehicleNumber}
                   onChange={(e) => setVehicleNumber(e.target.value)}
                   placeholder="e.g. WB 25 B 4821"
-                  className="h-12 bg-zinc-50/50 hover:bg-zinc-50 border border-zinc-200/60 rounded-lg text-sm font-bold text-zinc-800 uppercase transition-colors focus:ring-emerald-500/20"
+                  className="h-12 bg-slate-50/50 hover:bg-slate-50 border border-slate-200/60 rounded-lg text-sm font-bold text-slate-800 uppercase transition-colors focus:ring-emerald-500/20"
                 />
               </div>
             </div>
@@ -377,12 +377,12 @@ export default function SlotBooking() {
 
         {/* STEP 2: Centre */}
         {currentStep === 2 && (
-          <div className="bg-white border-zinc-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
+          <div className="bg-white border-slate-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
                 <MapPin className="w-6 h-6 text-emerald-600" /> {t('select_mandi')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">{t('smart_recs')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('smart_recs')}</p>
             </div>
 
             
@@ -396,7 +396,7 @@ export default function SlotBooking() {
                     onClick={() => setSelectedCentreId(rec.centre.id)}
                     className={`relative p-5 rounded-md border-2 cursor-pointer transition-all duration-200 overflow-hidden ${isSelected
                         ? 'border-emerald-500 bg-emerald-50/30 shadow-[0_4px_20px_rgba(16,185,129,0.15)]'
-                        : 'border-zinc-100 bg-white hover:border-zinc-200 hover:shadow-sm'
+                        : 'border-slate-100 bg-white hover:border-slate-200 hover:shadow-sm'
                       }`}
                   >
                     {rec.is_optimal && (
@@ -407,24 +407,24 @@ export default function SlotBooking() {
 
                     <div className="flex justify-between items-start gap-4">
                       <div>
-                        <h3 className="font-bold text-base text-zinc-900 leading-tight mb-1">{rec.centre.name}</h3>
-                        <p className="text-xs text-zinc-500 mb-4">{rec.centre.address}</p>
+                        <h3 className="font-bold text-base text-slate-900 leading-tight mb-1">{rec.centre.name}</h3>
+                        <p className="text-xs text-slate-500 mb-4">{rec.centre.address}</p>
 
                         <div className="flex flex-wrap gap-4 text-xs">
                           <div className="flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-zinc-500" />
-                            <span className="font-semibold text-zinc-700">{rec.distance_km} km</span>
+                            <MapPin className="w-4 h-4 text-slate-500" />
+                            <span className="font-semibold text-slate-700">{rec.distance_km} km</span>
                           </div>
                           <div className="flex items-center gap-1.5">
-                            <Clock className="w-4 h-4 text-zinc-500" />
+                            <Clock className="w-4 h-4 text-slate-500" />
                             <span className="font-semibold text-emerald-700">~{rec.predicted_wait_mins}m {t('wait_mins')}</span>
                           </div>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-end gap-1 mt-1">
-                        <div className="text-2xl font-semibold text-zinc-900">{rec.journey_score}</div>
-                        <div className="text-[9px] font-bold uppercase text-zinc-500 tracking-wider">{t('score')}</div>
+                        <div className="text-2xl font-semibold text-slate-900">{rec.journey_score}</div>
+                        <div className="text-[9px] font-bold uppercase text-slate-500 tracking-wider">{t('score')}</div>
                       </div>
                     </div>
                   </div>
@@ -435,7 +435,7 @@ export default function SlotBooking() {
 
 
             <div className="mt-8 flex justify-between">
-                <Button variant="ghost" onClick={() => setCurrentStep(rescheduleBookingId ? 2 : 1)} className="rounded-lg h-12 px-6 text-zinc-500 hover:bg-zinc-100 font-bold">
+                <Button variant="ghost" onClick={() => setCurrentStep(rescheduleBookingId ? 2 : 1)} className="rounded-lg h-12 px-6 text-slate-500 hover:bg-slate-100 font-bold">
                   {t('back_btn')}
                 </Button>
               <Button onClick={() => setCurrentStep(3)} className="bg-slate-900 hover:bg-slate-800 text-white rounded-lg h-12 px-8 text-sm font-bold shadow-md transition-transform active:scale-[0.97] gap-2">
@@ -447,16 +447,16 @@ export default function SlotBooking() {
 
         {/* STEP 3: Slot */}
         {currentStep === 3 && (
-          <div className="bg-white border-zinc-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
+          <div className="bg-white border-slate-200 shadow-sm rounded-md p-6 sm:p-8 animate-in fade-in slide-in-from-right-8 duration-500">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-zinc-900 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
                 <Calendar className="w-6 h-6 text-emerald-600" /> {t('pick_date_time')}
               </h2>
-              <p className="text-sm text-zinc-500 mt-1">{t('select_optimal')}</p>
+              <p className="text-sm text-slate-500 mt-1">{t('select_optimal')}</p>
             </div>
 
             <div className="mb-8">
-              <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block mb-3">{t('delivery_date')}</Label>
+              <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest block mb-3">{t('delivery_date')}</Label>
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {availableDates.map((date, idx) => {
                   const isSelected = format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
@@ -466,10 +466,10 @@ export default function SlotBooking() {
                       onClick={() => setSelectedDate(date)}
                       className={`flex-shrink-0 w-[72px] h-[84px] rounded-lg flex flex-col items-center justify-center transition-all ${isSelected
                           ? 'bg-emerald-600 text-white shadow-md ring-2 ring-emerald-600 ring-offset-2'
-                          : 'bg-zinc-50 text-zinc-600 hover:bg-zinc-100 border border-zinc-100'
+                          : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-100'
                         }`}
                     >
-                      <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isSelected ? 'text-emerald-200' : 'text-zinc-500'}`}>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${isSelected ? 'text-emerald-200' : 'text-slate-500'}`}>
                         {format(date, 'EEE')}
                       </span>
                       <span className="text-xl font-semibold">{format(date, 'd')}</span>
@@ -481,7 +481,7 @@ export default function SlotBooking() {
 
             <div className="mb-8">
               <div className="flex items-center justify-between mb-3">
-                <Label className="text-xs font-bold text-zinc-500 uppercase tracking-widest block">{t('time_slot')}</Label>
+                <Label className="text-xs font-bold text-slate-500 uppercase tracking-widest block">{t('time_slot')}</Label>
                 <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
                   <TrendingUp className="w-3 h-3 inline mr-1 -mt-0.5" /> {t('afternoon_faster')}
                 </span>
@@ -495,7 +495,7 @@ export default function SlotBooking() {
                       onClick={() => setSelectedSlot(s.time)}
                       className={`relative p-4 rounded-lg border-2 transition-all flex flex-col items-start ${isSelected
                           ? 'border-emerald-500 bg-emerald-50/50 shadow-sm'
-                          : 'border-zinc-100 bg-white hover:border-zinc-200'
+                          : 'border-slate-100 bg-white hover:border-slate-200'
                         }`}
                     >
                       {s.isRecommended && (
@@ -503,14 +503,14 @@ export default function SlotBooking() {
                           Best
                         </div>
                       )}
-                      <span className="font-bold text-zinc-900 text-sm mb-1.5">{s.time}</span>
+                      <span className="font-bold text-slate-900 text-sm mb-1.5">{s.time}</span>
                       <div className="flex items-center gap-2 text-xs">
                         <span className={`px-2 py-0.5 rounded font-bold ${s.rushLevel === 'Low' ? 'bg-emerald-100 text-emerald-700' :
                             s.rushLevel === 'Medium' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
                           }`}>
                           {s.rushLevel === 'Low' ? t('fast') : s.rushLevel === 'Medium' ? t('normal') : t('peak')}
                         </span>
-                        <span className="text-zinc-500 font-medium">~{s.waitMins}m {t('wait_mins')}</span>
+                        <span className="text-slate-500 font-medium">~{s.waitMins}m {t('wait_mins')}</span>
                       </div>
                     </button>
                   );
@@ -538,7 +538,7 @@ export default function SlotBooking() {
         {/* STEP 4: Success */}
         {currentStep === 4 && confirmedBooking && (
           <div className="max-w-md mx-auto animate-in fade-in zoom-in-95 duration-500">
-            <div className="bg-white rounded-[32px] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-zinc-100">
+            <div className="bg-white rounded-[32px] overflow-hidden shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-slate-100">
 
               <div className="bg-gradient-to-br from-emerald-600 to-teal-800 p-8 text-center text-white relative">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
@@ -554,7 +554,7 @@ export default function SlotBooking() {
 
               <div className="p-8">
                 <div className="flex justify-center mb-6">
-                  <div className="p-4 bg-white border border-zinc-100 rounded-md shadow-sm">
+                  <div className="p-4 bg-white border border-slate-100 rounded-md shadow-sm">
                     <QRCode
                       value={JSON.stringify({ token: confirmedBooking.token_number })}
                       size={140}
@@ -565,20 +565,20 @@ export default function SlotBooking() {
 
                 <div className="space-y-4 text-sm">
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">{t('farmer_label')}</span>
-                    <span className="font-bold text-zinc-800">{farmer.full_name}</span>
+                    <span className="text-slate-500 font-medium">{t('farmer_label')}</span>
+                    <span className="font-bold text-slate-800">{farmer.full_name}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">{t('centre_label')}</span>
-                    <span className="font-bold text-zinc-800 text-right max-w-[60%]">{confirmedBooking.centre_name}</span>
+                    <span className="text-slate-500 font-medium">{t('centre_label')}</span>
+                    <span className="font-bold text-slate-800 text-right max-w-[60%]">{confirmedBooking.centre_name}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-50 pb-3">
-                    <span className="text-zinc-500 font-medium">{t('produce_label')}</span>
+                    <span className="text-slate-500 font-medium">{t('produce_label')}</span>
                     <span className="font-bold text-emerald-600">{confirmedBooking.expected_quantity_q} Q {confirmedBooking.crop_name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-zinc-500 font-medium">{t('time_label')}</span>
-                    <span className="font-bold text-zinc-800">{confirmedBooking.slot_time}</span>
+                    <span className="text-slate-500 font-medium">{t('time_label')}</span>
+                    <span className="font-bold text-slate-800">{confirmedBooking.slot_time}</span>
                   </div>
                 </div>
 
@@ -589,7 +589,7 @@ export default function SlotBooking() {
                     className="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white font-bold h-12 rounded-lg shadow-md gap-2">
                     <Share2 className="w-4 h-4" /> {t('share_whatsapp')}
                   </Button>
-                  <Button onClick={() => navigate('/farmer/queue')} variant="outline" className="w-full h-12 rounded-lg font-bold border-zinc-200 text-zinc-700 hover:bg-zinc-50">
+                  <Button onClick={() => navigate('/farmer/queue')} variant="outline" className="w-full h-12 rounded-lg font-bold border-slate-200 text-slate-700 hover:bg-slate-50">
                     {t('track_queue')}
                   </Button>
                 </div>

@@ -112,8 +112,8 @@ export default function FarmerProfile() {
     <div className="p-4 md:p-8 max-w-3xl mx-auto space-y-6 pb-24">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">My Profile</h1>
-          <p className="text-zinc-500 text-sm mt-1">Manage your Kishan Seva account and Aadhaar linkage.</p>
+          <h1 className="text-2xl font-semibold text-slate-900">My Profile</h1>
+          <p className="text-slate-500 text-sm mt-1">Manage your Kishan Seva account and Aadhaar linkage.</p>
         </div>
         {!isEditing ? (
           <Button variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 gap-2 font-bold shadow-sm" onClick={handleEdit}>
@@ -132,15 +132,15 @@ export default function FarmerProfile() {
       </div>
 
       {/* Identity */}
-      <Card className="p-6 border-zinc-200 bg-white shadow-sm rounded-lg">
+      <Card className="p-6 border-slate-200 bg-white shadow-sm rounded-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="w-24 h-24 rounded-full bg-emerald-100 border-4 border-emerald-50 text-emerald-700 flex items-center justify-center shadow-inner">
             <User className="w-10 h-10" />
           </div>
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl font-semibold text-zinc-900">{farmer?.full_name || 'Verified Farmer'}</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">{farmer?.full_name || 'Verified Farmer'}</h2>
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-2">
-              <span className="text-sm text-zinc-500 font-mono">ID: {farmer?.farmer_code || 'KS-DEMO-999'}</span>
+              <span className="text-sm text-slate-500 font-mono">ID: {farmer?.farmer_code || 'KS-DEMO-999'}</span>
               <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 border border-emerald-200">
                 <ShieldCheck className="w-3 h-3" /> Aadhaar Verified
               </span>
@@ -151,45 +151,45 @@ export default function FarmerProfile() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Contact Card */}
-        <Card className="p-5 border-zinc-200 bg-white shadow-sm rounded-lg space-y-5">
-          <h3 className="font-bold text-zinc-800 border-b border-zinc-100 pb-2">Contact Details</h3>
+        <Card className="p-5 border-slate-200 bg-white shadow-sm rounded-lg space-y-5">
+          <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Contact Details</h3>
 
           <div className="flex items-start gap-3">
-            <Phone className="w-4 h-4 text-zinc-500 mt-3 shrink-0" />
+            <Phone className="w-4 h-4 text-slate-500 mt-3 shrink-0" />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Mobile Number</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase mb-1.5">Mobile Number</p>
               {isEditing ? (
                 <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="+91 XXXXX XXXXX" className="h-10 text-sm rounded-md border-zinc-200 bg-zinc-50" />
+                  placeholder="+91 XXXXX XXXXX" className="h-10 text-sm rounded-md border-slate-200 bg-slate-50" />
               ) : (
-                <p className="font-medium text-zinc-900">{farmer?.phone || '+91 99XXXXXX99'}</p>
+                <p className="font-medium text-slate-900">{farmer?.phone || '+91 99XXXXXX99'}</p>
               )}
             </div>
           </div>
 
           <div className="flex items-start gap-3">
-            <Mail className="w-4 h-4 text-zinc-500 mt-0.5 shrink-0" />
+            <Mail className="w-4 h-4 text-slate-500 mt-0.5 shrink-0" />
             <div>
-              <p className="text-[10px] font-bold text-zinc-500 uppercase">Email Address</p>
-              <p className="font-medium text-zinc-900">{user?.email || 'farmer@example.com'}</p>
-              <p className="text-[10px] text-zinc-400 mt-0.5">Linked via Aadhaar — cannot be changed</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase">Email Address</p>
+              <p className="font-medium text-slate-900">{user?.email || 'farmer@example.com'}</p>
+              <p className="text-[10px] text-slate-400 mt-0.5">Linked via Aadhaar — cannot be changed</p>
             </div>
           </div>
 
           <div className="flex items-start gap-3">
             <MapPin className="w-4 h-4 text-emerald-600 mt-3 shrink-0" />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Farm Village</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase mb-1.5">Farm Village</p>
               {isEditing ? (
                 <select value={formData.village} onChange={(e) => setFormData({ ...formData, village: e.target.value })}
-                  className="w-full h-10 px-3 text-sm bg-zinc-50 border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                  className="w-full h-10 px-3 text-sm bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                   {VILLAGE_OPTIONS.map(v => <option key={v} value={v}>{v}</option>)}
                 </select>
               ) : (
                 <>
-                  <p className="font-bold text-zinc-900 text-sm">{farmer?.village || 'Basirhat'}, {farmer?.district || 'North 24 Parganas'}</p>
+                  <p className="font-bold text-slate-900 text-sm">{farmer?.village || 'Basirhat'}, {farmer?.district || 'North 24 Parganas'}</p>
                   {farmer?.latitude && (
-                    <p className="text-[10px] text-zinc-400 font-mono mt-0.5">{farmer.latitude.toFixed(4)}°N, {farmer.longitude?.toFixed(4)}°E</p>
+                    <p className="text-[10px] text-slate-400 font-mono mt-0.5">{farmer.latitude.toFixed(4)}°N, {farmer.longitude?.toFixed(4)}°E</p>
                   )}
                 </>
               )}
@@ -198,22 +198,22 @@ export default function FarmerProfile() {
         </Card>
 
         {/* Agricultural Card */}
-        <Card className="p-5 border-zinc-200 bg-white shadow-sm rounded-lg space-y-5">
-          <h3 className="font-bold text-zinc-800 border-b border-zinc-100 pb-2">Agricultural Details</h3>
+        <Card className="p-5 border-slate-200 bg-white shadow-sm rounded-lg space-y-5">
+          <h3 className="font-bold text-slate-800 border-b border-slate-100 pb-2">Agricultural Details</h3>
 
           <div className="flex items-start gap-3">
-            <Sprout className="w-4 h-4 text-zinc-500 mt-3 shrink-0" />
+            <Sprout className="w-4 h-4 text-slate-500 mt-3 shrink-0" />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Total Verified Land</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase mb-1.5">Total Verified Land</p>
               {isEditing ? (
                 <div className="relative">
                   <Input type="number" value={formData.land_area_acres}
                     onChange={(e) => setFormData({ ...formData, land_area_acres: e.target.value })}
-                    placeholder="e.g. 4" className="h-10 text-sm rounded-md border-zinc-200 bg-zinc-50 pr-14" />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-zinc-400 font-medium pointer-events-none">acres</span>
+                    placeholder="e.g. 4" className="h-10 text-sm rounded-md border-slate-200 bg-slate-50 pr-14" />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-medium pointer-events-none">acres</span>
                 </div>
               ) : (
-                <p className="font-bold text-zinc-900 text-lg">{farmer?.land_area_acres || '4'} Acres</p>
+                <p className="font-bold text-slate-900 text-lg">{farmer?.land_area_acres || '4'} Acres</p>
               )}
             </div>
           </div>
@@ -221,10 +221,10 @@ export default function FarmerProfile() {
           <div className="flex items-start gap-3">
             <Sprout className="w-4 h-4 text-amber-500 mt-3 shrink-0" />
             <div className="flex-1">
-              <p className="text-[10px] font-bold text-zinc-500 uppercase mb-1.5">Primary Crop</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase mb-1.5">Primary Crop</p>
               {isEditing ? (
                 <select value={formData.crop_name} onChange={(e) => setFormData({ ...formData, crop_name: e.target.value })}
-                  className="w-full h-10 px-3 text-sm bg-zinc-50 border border-zinc-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                  className="w-full h-10 px-3 text-sm bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
                   {OFFICIAL_MSP_RATES.map(m => <option key={m.crop} value={m.crop}>{m.crop}</option>)}
                 </select>
               ) : (

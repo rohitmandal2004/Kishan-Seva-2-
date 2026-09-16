@@ -103,7 +103,7 @@ export default function OperatorQueue() {
             toast.success(`Calling Token ${waiting.token_number} (${waiting.farmer_name})`);
             SmsGateway.sendSmsNotification(
                 waiting.farmer_phone || '+91 9999999999', 
-                `Kishan Seva: Your Token ${waiting.token_number} has been called. Please proceed to the inspection bay with your vehicle.`
+                `[Simulated SMS] Kishan Seva: Your Token ${waiting.token_number} has been called. Please proceed to the inspection bay with your vehicle.`
             );
         } else {
             toast.info('No waiting tokens in queue to call');
@@ -117,7 +117,7 @@ export default function OperatorQueue() {
         toast.success(`Calling Token ${item.token_number}`);
         SmsGateway.sendSmsNotification(
             item.farmer_phone || '+91 9999999999', 
-            `Kishan Seva: Your Token ${item.token_number} has been called. Please proceed to the weighbridge platform immediately.`
+            `[Simulated SMS] Kishan Seva: Your Token ${item.token_number} has been called. Please proceed to the weighbridge platform immediately.`
         );
     };
 

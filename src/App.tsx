@@ -34,6 +34,8 @@ const FarmerPayments = lazy(() => import('./pages/farmer/FarmerPayments'));
 const FarmerProfile = lazy(() => import('./pages/farmer/FarmerProfile'));
 const FarmerNotifications = lazy(() => import('./pages/farmer/FarmerNotifications'));
 const FarmerSupport = lazy(() => import('./pages/farmer/FarmerSupport'));
+const QRCheckIn = lazy(() => import('./pages/farmer/QRCheckIn'));
+const FpoBulkBooking = lazy(() => import('./pages/farmer/FpoBulkBooking'));
 
 // Operator Pages
 const OperatorDashboard = lazy(() => import('./pages/operator/OperatorDashboard'));
@@ -47,6 +49,7 @@ const AdminCentres = lazy(() => import('./pages/admin/AdminCentres'));
 const AdminSlots = lazy(() => import('./pages/admin/AdminSlots'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
+const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 
 function AnimatedRoutes() {
  const location = useLocation();
@@ -68,6 +71,7 @@ function AnimatedRoutes() {
  <Route path="farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
  <Route index element={<Navigate to="/farmer/dashboard" replace />} />
  <Route path="dashboard" element={<FarmerDashboard />} />
+ <Route path="bulk-book" element={<FpoBulkBooking />} />
  <Route path="bookings" element={<FarmerBookings />} />
  <Route path="centres" element={<CentreDiscovery />} />
  <Route path="book" element={<SlotBooking />} />
@@ -76,6 +80,7 @@ function AnimatedRoutes() {
  <Route path="profile" element={<FarmerProfile />} />
  <Route path="notifications" element={<FarmerNotifications />} />
  <Route path="support" element={<FarmerSupport />} />
+ <Route path="check-in" element={<QRCheckIn />} />
  </Route>
  
  {/* Mandi Operator Console with Layout */}
@@ -95,6 +100,7 @@ function AnimatedRoutes() {
  <Route path="slots" element={<AdminSlots />} />
  <Route path="analytics" element={<AdminAnalytics />} />
  <Route path="transactions" element={<AdminTransactions />} />
+ <Route path="disputes" element={<AdminDisputes />} />
  </Route>
 
  {/* User-friendly Route Aliases */}

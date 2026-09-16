@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,14 @@ const registrationSchema = z.object({
   land_area_acres: z.string().refine(val => !isNaN(parseFloat(val)) && parseFloat(val) > 0, "Enter a valid positive land area"),
   crop_name: z.string().min(1, "Crop name is required"),
   crop_area: z.string().optional(),
-  expected_quantity: z.string().optional()
+  expected_quantity: z.string().optional(),
+  bank_name: z.string().min(3, "Bank name is required"),
+  account_number: z.string().min(8, "Valid account number is required"),
+  account_number_confirm: z.string().min(8, "Please confirm account number"),
+  ifsc_code: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, "Invalid IFSC code format (e.g. SBIN0001245)")
+}).refine(data => data.account_number === data.account_number_confirm, {
+  message: "Account numbers don't match",
+  path: ["account_number_confirm"]
 });
 
 type RegistrationFormData = z.infer<typeof registrationSchema>;
@@ -73,18 +80,17 @@ export default function FarmerRegistration() {
       land_area_acres: '',
       crop_name: 'Paddy (Dhan)',
       crop_area: '',
-      expected_quantity: ''
+      expected_quantity: '',
+      bank_name: '',
+      account_number: '',
+      account_number_confirm: '',
+      ifsc_code: ''
     }
   });
 
   const emailValue = watch('email');
 
-  // Auto-redirect if already fully registered with active farmer profile
-  useEffect(() => {
-    if (isConfigured && !isProfileLoading && farmer) {
-      navigate('/farmer/dashboard', { replace: true });
-    }
-  }, [farmer, isConfigured, isProfileLoading, navigate]);
+  // We will handle redirect at the end of the hooks to avoid hook order violations
 
   // Sync email if Clerk already has an active session
   useEffect(() => {
@@ -152,15 +158,8 @@ export default function FarmerRegistration() {
     setCreationError(null);
 
     try {
-      // Step 1: Pre-auth check in Supabase
-      const alreadyRegistered = await checkSupabaseDuplicate(cleanEmail);
-      if (alreadyRegistered) {
-        setDuplicateEmailError(true);
-        toast.error('Email already exists. Please log in instead.', {
-          action: { label: 'Go to Login', onClick: () => navigate('/farmer/login') },
-        });
-        return;
-      }
+      // We removed checkSupabaseDuplicate to allow users with an existing profile 
+      // but no Clerk account to register and link their identity.
 
       if (isResend) {
         if (authMode === 'signin' && signInLoaded && signIn) {
@@ -378,6 +377,12 @@ export default function FarmerRegistration() {
     if (step === 2) {
       const valid = await trigger(['aadhaar']);
       if (valid) setStep(3);
+      return;
+    }
+
+    if (step === 3) {
+      const valid = await trigger(['state', 'district', 'village', 'land_area_acres', 'crop_name']);
+      if (valid) setStep(4);
     }
   };
 
@@ -391,7 +396,7 @@ export default function FarmerRegistration() {
    *    Show error message with Retry.
    */
   const onSubmitFinal = async (data: RegistrationFormData) => {
-    if (step < 3) {
+    if (step < 4) {
       onNextStep();
       return;
     }
@@ -471,50 +476,95 @@ export default function FarmerRegistration() {
         latitude: villageCoords.latitude,
         longitude: villageCoords.longitude,
         land_area_acres: parseFloat(data.land_area_acres) || 0,
-        bank_name: 'State Bank of India',
-        account_number_masked: 'XXXX-XXXX-0000',
-        ifsc_code: 'SBIN0001245',
-        verification_status: 'VERIFIED' as const,
+        bank_name: data.bank_name.trim(),
+        account_number_masked: data.account_number.slice(-4).padStart(data.account_number.length, 'X'),
+        ifsc_code: data.ifsc_code.toUpperCase().trim(),
+        verification_status: 'PENDING' as const,
         role: 'FARMER' as const,
         updated_at: new Date().toISOString()
       };
 
       // 4. Create or update farmer profile in Supabase
+      // PRIMARY: Use SECURITY DEFINER RPC (bypasses RLS, works without JWT template)
       let savedProfile: any = null;
-      const { data: existingProfile } = await supabase
-        .from('farmer_profiles')
-        .select('id')
-        .or(`clerk_user_id.eq.${clerkUserId},email.ilike.${cleanEmail}`)
-        .maybeSingle();
+      
+      // Try the register_farmer_profile SECURITY DEFINER RPC first
+      const { data: rpcResult, error: rpcError } = await supabase.rpc('register_farmer_profile', {
+        p_clerk_user_id:   clerkUserId,
+        p_farmer_code:     farmerCode,
+        p_full_name:       (data.full_name || '').trim(),
+        p_email:           cleanEmail,
+        p_phone:           cleanPhone,
+        p_state:           (data.state || 'West Bengal').trim(),
+        p_district:        (data.district || '').trim(),
+        p_village:         (data.village || '').trim(),
+        p_land_area_acres: parseFloat(data.land_area_acres) || 0,
+        p_latitude:        villageCoords.latitude || null,
+        p_longitude:       villageCoords.longitude || null,
+        p_crop_name:       data.crop_name || 'Paddy (Grade A)',
+        p_bank_name:       (data.bank_name || '').trim() || null,
+        p_account_masked:  data.account_number ? 
+          data.account_number.slice(-4).padStart(data.account_number.length, 'X') : null,
+        p_ifsc_code:       data.ifsc_code ? data.ifsc_code.toUpperCase().trim() : null,
+        p_aadhaar_ref:     'VERIFIED',
+        p_aadhaar_last4:   data.aadhaar ? data.aadhaar.slice(-4) : '0000',
+      });
 
-      if (existingProfile?.id) {
-        const { data: updated, error: updateError } = await supabase
-          .from('farmer_profiles')
-          .update(profilePayload)
-          .eq('id', existingProfile.id)
-          .select()
-          .maybeSingle();
-        if (updateError) {
-          console.error('[Kishan Seva] Profile update error:', updateError);
-          throw updateError;
-        }
-        savedProfile = updated;
+      if (!rpcError && rpcResult) {
+        // RPC succeeded — result is the saved profile JSON
+        savedProfile = rpcResult;
+        console.log('[Kishan Seva] Farmer profile saved via RPC:', savedProfile?.id);
       } else {
-        const { data: inserted, error: insertError } = await supabase
-          .from('farmer_profiles')
-          .insert(profilePayload)
-          .select()
-          .maybeSingle();
-        if (insertError) {
-          console.error('[Kishan Seva] Profile insert error:', insertError);
-          throw insertError;
+        // FALLBACK: RPC not available yet — try direct insert/update
+        if (rpcError && !rpcError.message?.includes('could not find')) {
+          console.error('[Kishan Seva] register_farmer_profile RPC error:', rpcError);
         }
-        savedProfile = inserted;
+
+        const { data: existingProfile } = await supabase
+          .from('farmer_profiles')
+          .select('id')
+          .or(`clerk_user_id.eq.${clerkUserId},email.ilike.${cleanEmail}`)
+          .maybeSingle();
+
+        if (existingProfile?.id) {
+          // Try to link first
+          try {
+            await supabase.rpc('link_farmer_profile', {
+              p_email: cleanEmail,
+              p_clerk_user_id: clerkUserId
+            });
+          } catch (rpcErr) {
+            console.warn('[Kishan Seva] Registration auto-link via RPC failed:', rpcErr);
+          }
+
+          const { data: updated, error: updateError } = await supabase
+            .from('farmer_profiles')
+            .update(profilePayload)
+            .eq('id', existingProfile.id)
+            .select()
+            .maybeSingle();
+          if (updateError) {
+            console.error('[Kishan Seva] Profile update error:', updateError);
+            throw updateError;
+          }
+          savedProfile = updated;
+        } else {
+          const { data: inserted, error: insertError } = await supabase
+            .from('farmer_profiles')
+            .insert(profilePayload)
+            .select()
+            .maybeSingle();
+          if (insertError) {
+            console.error('[Kishan Seva] Profile insert error:', insertError);
+            throw insertError;
+          }
+          savedProfile = inserted;
+        }
       }
 
       // Transaction verification check
       if (!savedProfile?.id) {
-        throw new Error('Supabase did not return a valid saved profile');
+        throw new Error('Supabase did not return a valid saved profile. Please check your Supabase database setup.');
       }
 
       // 5. Save crop details into public.farmer_crops
@@ -592,53 +642,69 @@ export default function FarmerRegistration() {
     }
   };
 
+  // Auto-redirect ONLY when the user is actually signed in AND has a complete farmer profile in the DB.
+  // Do NOT redirect based on stale context state alone — require isSignedIn to be true.
+  if (isConfigured && !isProfileLoading && isSignedIn && farmer && farmer.id) {
+    return <Navigate to="/farmer/dashboard" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f8faf8] flex flex-col md:flex-row font-sans">
-      <div className="w-full md:w-1/3 bg-green-900 text-white p-5 sm:p-8 md:p-12 flex flex-col relative overflow-hidden">
-        <Link to="/farmer/login" className="flex items-center gap-2 text-green-100 hover:text-white mb-6 md:mb-12 z-10 w-fit text-xs sm:text-sm font-semibold">
+      <div className="w-full md:w-1/3 bg-emerald-900 text-white p-5 sm:p-8 md:p-12 flex flex-col relative overflow-hidden">
+        <Link to="/farmer/login" className="flex items-center gap-2 text-emerald-100 hover:text-white mb-6 md:mb-12 z-10 w-fit text-xs sm:text-sm font-semibold">
           <ArrowLeft className="w-4 h-4" /> Back to Login
         </Link>
         <div className="z-10">
           <div className="mb-4 md:mb-6">
             <KishanSevaLogo size="lg" theme="dark" showSubtitle={false} />
-            <p className="text-xs text-green-200 mt-1 ml-1.5 font-bold tracking-wide">Farmer Registration Portal</p>
+            <p className="text-xs text-emerald-200 mt-1 ml-1.5 font-bold tracking-wide">
+              {emailVerified ? 'Profile Completion Portal' : 'Farmer Registration Portal'}
+            </p>
           </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 md:mb-4">Farmer Registration</h2>
-          <p className="text-green-100 text-xs sm:text-sm md:text-base mb-4 md:mb-8">Join Kishan Seva and get guaranteed MSP prices for your produce.</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 md:mb-4">
+            {emailVerified ? 'Complete Your Profile' : 'Farmer Registration'}
+          </h2>
+          <p className="text-emerald-100 text-xs sm:text-sm md:text-base mb-4 md:mb-8">
+            {emailVerified ? 'Please complete your farmer details to access the dashboard.' : 'Join Kishan Seva and get guaranteed MSP prices for your produce.'}
+          </p>
           
           <ul className="space-y-3 sm:space-y-4 md:space-y-6">
             <li className={`flex items-start gap-3 sm:gap-4 transition-opacity ${step >= 1 ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step > 1 ? 'bg-green-500 text-white' : step === 1 ? 'bg-white text-green-900' : 'bg-green-800 text-green-300'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step > 1 ? 'bg-emerald-500 text-white' : step === 1 ? 'bg-white text-emerald-900' : 'bg-emerald-800 text-emerald-300'}`}>
                 {step > 1 ? <Check className="w-4 h-4" /> : '1'}
               </div>
               <div>
-                <h4 className="font-semibold text-sm sm:text-base md:text-lg leading-tight">Basic Details & Email OTP</h4>
-                <p className="text-green-200 text-xs">Name, mobile & email verification</p>
+                <h4 className="font-semibold text-sm sm:text-base md:text-lg leading-tight">
+                  {emailVerified ? 'Basic Details' : 'Basic Details & Email OTP'}
+                </h4>
+                <p className="text-emerald-200 text-xs">
+                  {emailVerified ? 'Name & mobile number' : 'Name, mobile & email verification'}
+                </p>
               </div>
             </li>
             
             <li className={`flex items-start gap-3 sm:gap-4 transition-opacity ${step >= 2 ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step > 2 ? 'bg-green-500 text-white' : step === 2 ? 'bg-white text-green-900' : 'bg-green-800 text-green-300'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step > 2 ? 'bg-emerald-500 text-white' : step === 2 ? 'bg-white text-emerald-900' : 'bg-emerald-800 text-emerald-300'}`}>
                 {step > 2 ? <Check className="w-4 h-4" /> : '2'}
               </div>
               <div>
                 <h4 className="font-semibold text-sm sm:text-base md:text-lg leading-tight">Identity Verification</h4>
-                <p className="text-green-200 text-xs">Aadhaar details for authenticity</p>
+                <p className="text-emerald-200 text-xs">Aadhaar details for authenticity</p>
               </div>
             </li>
             
             <li className={`flex items-start gap-3 sm:gap-4 transition-opacity ${step >= 3 ? 'opacity-100' : 'opacity-50'}`}>
-              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step === 3 ? 'bg-white text-green-900' : 'bg-green-800 text-green-300'}`}>
+              <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold shrink-0 text-xs sm:text-sm ${step === 3 ? 'bg-white text-emerald-900' : 'bg-emerald-800 text-emerald-300'}`}>
                 3
               </div>
               <div>
                 <h4 className="font-semibold text-sm sm:text-base md:text-lg leading-tight">Land & Crops</h4>
-                <p className="text-green-200 text-xs">Add your cultivation details</p>
+                <p className="text-emerald-200 text-xs">Add your cultivation details</p>
               </div>
             </li>
           </ul>
         </div>
-        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-green-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-emerald-800 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
       </div>
 
       <div className="flex-1 p-4 sm:p-6 md:p-12 flex flex-col justify-center max-w-3xl mx-auto w-full">
@@ -928,6 +994,44 @@ export default function FarmerRegistration() {
               </div>
             )}
 
+            {step === 4 && (
+              <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+                <h3 className="text-2xl font-bold text-slate-900 border-b pb-2">Banking Details</h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="bank_name">Bank Name</Label>
+                    <Input id="bank_name" {...register('bank_name')} placeholder="e.g. State Bank of India" className="h-12"/>
+                    {errors.bank_name && <p className="text-red-500 text-xs mt-1">{errors.bank_name.message}</p>}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="account_number">Account Number</Label>
+                      <Input id="account_number" type="password" {...register('account_number')} placeholder="Enter Account Number" className="h-12"/>
+                      {errors.account_number && <p className="text-red-500 text-xs mt-1">{errors.account_number.message}</p>}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="account_number_confirm">Confirm Account Number</Label>
+                      <Input id="account_number_confirm" type="text" {...register('account_number_confirm')} placeholder="Re-enter Account Number" className="h-12"/>
+                      {errors.account_number_confirm && <p className="text-red-500 text-xs mt-1">{errors.account_number_confirm.message}</p>}
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ifsc_code">IFSC Code</Label>
+                    <Input id="ifsc_code" {...register('ifsc_code', { onChange: e => setValue('ifsc_code', e.target.value.toUpperCase()) })} placeholder="e.g. SBIN0001245" className="h-12 uppercase tracking-widest"/>
+                    {errors.ifsc_code && <p className="text-red-500 text-xs mt-1">{errors.ifsc_code.message}</p>}
+                  </div>
+                  
+                  <div className="p-4 mt-6 bg-slate-50 border border-slate-200 rounded-lg flex gap-3 text-sm text-slate-700">
+                    <AlertCircle className="w-5 h-5 text-slate-400 shrink-0" />
+                    <p>Your banking details will be securely saved and require administrator verification before DBT payments can be processed.</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Clerk Turnstile / Bot Protection Container */}
             <div id="clerk-captcha" className="my-2 flex justify-center" />
 
@@ -940,14 +1044,9 @@ export default function FarmerRegistration() {
                 <div className="hidden sm:block"></div>
               )}
               
-              <Button 
-                type="button" 
-                onClick={step < 3 ? onNextStep : handleSubmit(onSubmitFinal)} 
-                className="h-11 sm:h-12 px-8 bg-green-700 hover:bg-green-800 text-white font-bold justify-center shadow-md gap-2" 
-                disabled={loading}
-              >
-                {loading && <Loader2 className="w-5 h-5 animate-spin" />}
-                {step < 3 ? (step === 1 && otpSent && !emailVerified ? 'Verify OTP' : 'Continue') : 'Complete Registration'}
+              <Button type="button" onClick={handleSubmit(onSubmitFinal)} disabled={loading} className="bg-emerald-700 hover:bg-emerald-800 text-white h-11 sm:h-12 px-8 font-bold justify-center w-full sm:w-auto shadow-md">
+                {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
+                {step === 4 ? 'Complete Registration' : (step === 1 && !otpSent) ? 'Send OTP' : 'Continue'}
               </Button>
             </div>
           </form>

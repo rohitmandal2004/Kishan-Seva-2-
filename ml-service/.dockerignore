@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+.env
+.env.local
+training/
+ingestion/
+insert_dummy_farmer.py
+MODELS.md
+.git

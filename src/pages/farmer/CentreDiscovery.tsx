@@ -211,27 +211,27 @@ export default function CentreDiscovery() {
     return (
         <div className="flex flex-col h-[calc(100dvh-4.5rem)] md:h-screen w-full relative font-sans">
             {/* Top Header & Smart Action Bar */}
-            <div className="bg-white px-4 sm:px-6 py-2.5 border-b border-zinc-200 z-10 shrink-0 flex flex-col gap-2 shadow-xs">
+            <div className="bg-white px-4 sm:px-6 py-2.5 border-b border-slate-200 z-10 shrink-0 flex flex-col gap-2 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigate('/farmer/dashboard')}
-                            className="p-2 bg-zinc-50 hover:bg-zinc-100 rounded-full border border-zinc-200 text-zinc-600 transition-colors shrink-0 shadow-xs"
+                            className="p-2 bg-slate-50 hover:bg-slate-100 rounded-full border border-slate-200 text-slate-600 transition-colors shrink-0 shadow-xs"
                             title="Back to Dashboard"
                         >
                             <ChevronLeft className="w-5 h-5" />
                         </button>
                         <div>
                             <div className="flex items-center gap-2">
-                                <h1 className="text-base sm:text-lg font-semibold text-zinc-900 leading-tight">
+                                <h1 className="text-base sm:text-lg font-semibold text-slate-900 leading-tight">
                                     Smart Centre Locator
                                 </h1>
                                 <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
                                     <Sparkles className="w-3 h-3 text-emerald-600" /> Dynamic Geo Engine
                                 </span>
                             </div>
-                            <p className="text-[11px] text-zinc-500">
-                                Calculates real road distance & live queue times from your farm in <strong className="text-zinc-700">{activeVillage}</strong>.
+                            <p className="text-[11px] text-slate-500">
+                                Calculates real road distance & live queue times from your farm in <strong className="text-slate-700">{activeVillage}</strong>.
                             </p>
                         </div>
                     </div>
@@ -251,21 +251,21 @@ export default function CentreDiscovery() {
                         )}
 
                         <div className="relative flex-1 min-w-[130px] sm:flex-initial">
-                            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+                            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search mandi..."
-                                className="pl-8 pr-3 py-1 bg-zinc-50 border border-zinc-200 rounded-full text-xs w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium h-8"
+                                className="pl-8 pr-3 py-1 bg-slate-50 border border-slate-200 rounded-full text-xs w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium h-8"
                             />
                         </div>
 
                         {/* Sort Filter */}
-                        <div className="flex rounded-full border border-zinc-200 p-0.5 bg-zinc-50 text-xs shrink-0">
+                        <div className="flex rounded-full border border-slate-200 p-0.5 bg-slate-50 text-xs shrink-0">
                             <button
                                 onClick={() => setSortBy('RECOMMENDED')}
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${sortBy === 'RECOMMENDED' ? 'bg-emerald-700 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${sortBy === 'RECOMMENDED' ? 'bg-emerald-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                                     }`}
                                 title="Sort by AI Smart Score"
                             >
@@ -273,7 +273,7 @@ export default function CentreDiscovery() {
                             </button>
                             <button
                                 onClick={() => setSortBy('NEAREST')}
-                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${sortBy === 'NEAREST' ? 'bg-emerald-700 text-white shadow-xs' : 'text-zinc-600 hover:text-zinc-900'
+                                className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-colors ${sortBy === 'NEAREST' ? 'bg-emerald-700 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900'
                                     }`}
                                 title="Sort strictly by nearest distance"
                             >
@@ -281,16 +281,16 @@ export default function CentreDiscovery() {
                             </button>
                         </div>
 
-                        <div className="md:hidden flex rounded-full border border-zinc-200 p-0.5 bg-zinc-50 text-xs shrink-0 ml-auto">
+                        <div className="md:hidden flex rounded-full border border-slate-200 p-0.5 bg-slate-50 text-xs shrink-0 ml-auto">
                             <button
                                 onClick={() => setViewMode('MAP')}
-                                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${viewMode === 'MAP' ? 'bg-emerald-700 text-white' : 'text-zinc-600'}`}
+                                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${viewMode === 'MAP' ? 'bg-emerald-700 text-white' : 'text-slate-600'}`}
                             >
                                 Map
                             </button>
                             <button
                                 onClick={() => setViewMode('LIST')}
-                                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${viewMode === 'LIST' ? 'bg-emerald-700 text-white' : 'text-zinc-600'}`}
+                                className={`px-3 py-1 rounded-full text-[11px] font-bold transition-colors ${viewMode === 'LIST' ? 'bg-emerald-700 text-white' : 'text-slate-600'}`}
                             >
                                 List
                             </button>
@@ -299,8 +299,8 @@ export default function CentreDiscovery() {
                 </div>
 
                 {/* Dedicated Farm Address & Quick Village Selector Bar */}
-                <div className="flex items-center gap-2 pt-1 border-t border-zinc-100 overflow-x-auto no-scrollbar">
-                    <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-700 shrink-0">
+                <div className="flex items-center gap-2 pt-1 border-t border-slate-100 overflow-x-auto no-scrollbar">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700 shrink-0">
                         <span className="flex items-center gap-1 bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full text-[11px]">
                             <MapPin className="w-3 h-3 text-emerald-600" />
                             <span>Farm Village:</span>
@@ -312,7 +312,7 @@ export default function CentreDiscovery() {
 
                     {/* Quick select village chips */}
                     <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase shrink-0">Quick Select:</span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase shrink-0">Quick Select:</span>
                         {POPULAR_VILLAGES.slice(0, 7).map((v) => {
                             const isCurrent = activeVillage.toLowerCase() === v.name.toLowerCase();
                             return (
@@ -321,7 +321,7 @@ export default function CentreDiscovery() {
                                     onClick={() => handleSelectVillage(v.name)}
                                     className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold transition shrink-0 border ${isCurrent
                                             ? 'bg-emerald-700 text-white border-emerald-700 shadow-xs font-bold'
-                                            : 'bg-white hover:bg-zinc-100 text-zinc-600 border-zinc-200'
+                                            : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-200'
                                         }`}
                                 >
                                     {v.name}
@@ -333,10 +333,10 @@ export default function CentreDiscovery() {
                         <button
                             onClick={handleUseDeviceGps}
                             disabled={isLocating}
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-100 hover:bg-slate-200 text-zinc-700 border border-zinc-200 shrink-0 transition-colors"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 shrink-0 transition-colors"
                             title="Use Device GPS"
-                        >
-                            <LocateFixed className={`w-3 h-3 text-zinc-600 ${isLocating ? 'animate-spin' : ''}`} />
+                         aria-label="Use Device GPS">
+                            <LocateFixed className={`w-3 h-3 text-slate-600 ${isLocating ? 'animate-spin' : ''}`} />
                             <span>{isLocating ? 'Locating...' : 'GPS'}</span>
                         </button>
                     </div>
@@ -379,10 +379,10 @@ export default function CentreDiscovery() {
                                     <span className="bg-red-100 text-red-800 text-[9px] font-semibold px-1.5 py-0.5 rounded uppercase">
                                         Your Farm Origin
                                     </span>
-                                    <p className="font-semibold text-xs text-zinc-900 mt-1">
+                                    <p className="font-semibold text-xs text-slate-900 mt-1">
                                         {activeVillage} ({activeDistrict})
                                     </p>
-                                    <p className="text-[10px] text-zinc-500">
+                                    <p className="text-[10px] text-slate-500">
                                         GPS: {farmerLocation[0].toFixed(4)}°N, {farmerLocation[1].toFixed(4)}°E
                                     </p>
                                 </div>
@@ -404,18 +404,18 @@ export default function CentreDiscovery() {
                                     <Popup>
                                         <div className="font-sans p-1 text-left min-w-44">
                                             <div className="flex items-center justify-between mb-1">
-                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${item.is_optimal ? 'bg-emerald-100 text-emerald-900' : item.is_nearest ? 'bg-amber-100 text-amber-900' : 'bg-zinc-100 text-zinc-700'
+                                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${item.is_optimal ? 'bg-emerald-100 text-emerald-900' : item.is_nearest ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-700'
                                                     }`}>
                                                     {item.is_optimal ? '★ BEST MATCH' : item.is_nearest ? '⚡ NEAREST MANDI' : `${item.journey_score}/100 SCORE`}
                                                 </span>
-                                                <span className="text-[10px] font-semibold text-zinc-800">
+                                                <span className="text-[10px] font-semibold text-slate-800">
                                                     {item.distance_km} km
                                                 </span>
                                             </div>
-                                            <p className="font-bold text-xs text-zinc-900 leading-tight">
+                                            <p className="font-bold text-xs text-slate-900 leading-tight">
                                                 {tLocation(item.centre.name, language, 'city')}
                                             </p>
-                                            <p className="text-[10px] text-zinc-500 mt-0.5">
+                                            <p className="text-[10px] text-slate-500 mt-0.5">
                                                 {item.distance_km} km away from {activeVillage}
                                             </p>
                                             <p className="text-[10px] font-bold text-emerald-700 mt-1">
@@ -449,7 +449,7 @@ export default function CentreDiscovery() {
                     <div className="absolute bottom-4 left-4 z-[400] flex gap-2">
                         <button
                             onClick={handleRecenterOnFarm}
-                            className="bg-white/95 hover:bg-white text-zinc-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-zinc-200 flex items-center gap-1.5 backdrop-blur-xs transition-transform active:scale-[0.97]"
+                            className="bg-white/95 hover:bg-white text-slate-800 text-xs font-bold px-3 py-1.5 rounded-full shadow-lg border border-slate-200 flex items-center gap-1.5 backdrop-blur-xs transition-transform active:scale-[0.97]"
                         >
                             <Crosshair className="w-3.5 h-3.5 text-red-600" />
                             <span>Center on Farm ({activeVillage})</span>
@@ -457,10 +457,10 @@ export default function CentreDiscovery() {
                     </div>
 
                     {/* Map Legend Overlay */}
-                    <div className="absolute top-3 right-3 z-[400] bg-white/95 p-2 rounded-md shadow-md border border-zinc-200 text-[10px] font-medium space-y-1 backdrop-blur-xs hidden sm:block">
+                    <div className="absolute top-3 right-3 z-[400] bg-white/95 p-2 rounded-md shadow-md border border-slate-200 text-[10px] font-medium space-y-1 backdrop-blur-xs hidden sm:block">
                         <div className="flex items-center gap-1.5">
                             <span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" />
-                            <span className="font-bold text-zinc-800">Your Farm ({activeVillage})</span>
+                            <span className="font-bold text-slate-800">Your Farm ({activeVillage})</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block" />
@@ -474,17 +474,17 @@ export default function CentreDiscovery() {
                 </div>
 
                 {/* Sidebar Recommended Centres List */}
-                <div className={`w-full md:w-80 lg:w-[440px] bg-zinc-50 border-l border-zinc-200 flex flex-col ${viewMode === 'MAP' ? 'h-[55vh] md:h-auto' : 'h-full md:h-auto'} shrink-0 z-10`}>
-                    <div className="p-3 bg-white border-b border-zinc-200 shrink-0 flex items-center justify-between">
+                <div className={`w-full md:w-80 lg:w-[440px] bg-slate-50 border-l border-slate-200 flex flex-col ${viewMode === 'MAP' ? 'h-[55vh] md:h-auto' : 'h-full md:h-auto'} shrink-0 z-10`}>
+                    <div className="p-3 bg-white border-b border-slate-200 shrink-0 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <span className="font-semibold text-zinc-800 text-xs sm:text-sm">
+                            <span className="font-semibold text-slate-800 text-xs sm:text-sm">
                                 Mandis from {activeVillage}
                             </span>
                             <Badge variant="outline" className="bg-emerald-50 text-emerald-800 border-emerald-200 text-[11px] font-bold">
                                 {filteredRecs.length} Found
                             </Badge>
                         </div>
-                        <span className="text-[10px] text-zinc-500 font-medium">
+                        <span className="text-[10px] text-slate-500 font-medium">
                             {sortBy === 'NEAREST' ? 'Sorted by Distance' : 'Sorted by Efficiency'}
                         </span>
                     </div>
@@ -496,7 +496,7 @@ export default function CentreDiscovery() {
                             return (
                                 <Card
                                     key={item.centre.id}
-                                    className={`p-0 overflow-hidden cursor-pointer transition border-2 rounded-lg ${isSelected ? 'border-emerald-600 shadow-md ring-1 ring-emerald-600/20' : 'border-zinc-200/80 hover:border-slate-300 shadow-xs'
+                                    className={`p-0 overflow-hidden cursor-pointer transition border-2 rounded-lg ${isSelected ? 'border-emerald-600 shadow-md ring-1 ring-emerald-600/20' : 'border-slate-200/80 hover:border-slate-300 shadow-xs'
                                         }`}
                                     onClick={() => handleCentreCardClick(item)}
                                 >
@@ -526,10 +526,10 @@ export default function CentreDiscovery() {
                                     <div className="p-4 bg-white">
                                         <div className="flex justify-between items-start gap-2 mb-1.5">
                                             <div>
-                                                <span className="text-[9px] font-mono font-bold bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded">
+                                                <span className="text-[9px] font-mono font-bold bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
                                                     {item.centre.centre_code}
                                                 </span>
-                                                <h4 className="font-bold text-zinc-900 leading-tight">
+                                                <h4 className="font-bold text-slate-900 leading-tight">
                                                     {tLocation(item.centre.name, language, 'city')}
                                                 </h4>
                                             </div>
@@ -540,7 +540,7 @@ export default function CentreDiscovery() {
                                             </div>
                                         </div>
 
-                                        <p className="text-xs text-zinc-500 mt-0.5 flex items-center gap-1">
+                                        <p className="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
                                             <MapPin className="w-3 h-3" />
                                             {tLocation(item.centre.district, language, 'district')} •
                                             <span className="truncate">{item.centre.address}</span>
@@ -552,15 +552,15 @@ export default function CentreDiscovery() {
                                                 }`}>
                                                 <Clock className="w-3.5 h-3.5 shrink-0" />
                                                 <div>
-                                                    <p className="text-[9px] uppercase font-bold text-zinc-500">Est. Wait</p>
+                                                    <p className="text-[9px] uppercase font-bold text-slate-500">Est. Wait</p>
                                                     <p className="text-xs font-bold">~{item.predicted_wait_mins} mins</p>
                                                 </div>
                                             </div>
 
-                                            <div className="p-2 rounded-md bg-zinc-50 text-zinc-800 font-semibold flex items-center gap-2 border border-zinc-100">
-                                                <Users className="w-3.5 h-3.5 text-zinc-500 shrink-0" />
+                                            <div className="p-2 rounded-md bg-slate-50 text-slate-800 font-semibold flex items-center gap-2 border border-slate-100">
+                                                <Users className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                                                 <div>
-                                                    <p className="text-[9px] uppercase font-bold text-zinc-500">In Queue</p>
+                                                    <p className="text-[9px] uppercase font-bold text-slate-500">In Queue</p>
                                                     <p className="text-xs font-bold">{item.current_queue} Vehicles</p>
                                                 </div>
                                             </div>
@@ -588,7 +588,7 @@ export default function CentreDiscovery() {
                                         </div>
 
                                         {/* Actions */}
-                                        <div className="pt-2 border-t border-zinc-100 flex gap-2">
+                                        <div className="pt-2 border-t border-slate-100 flex gap-2">
                                             <Button
                                                 className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded-md text-xs font-bold h-9 shadow-xs gap-1.5"
                                                 onClick={(e) => {
@@ -601,7 +601,7 @@ export default function CentreDiscovery() {
                                             <a
                                                 href={`tel:${item.centre.contact_number}`}
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="p-2 border border-zinc-200 rounded-md hover:bg-zinc-50 text-zinc-600 flex items-center justify-center"
+                                                className="p-2 border border-slate-200 rounded-md hover:bg-slate-50 text-slate-600 flex items-center justify-center"
                                                 title="Call Mandi"
                                             >
                                                 <Phone className="w-4 h-4" />
@@ -621,7 +621,7 @@ export default function CentreDiscovery() {
                     <div className="bg-white rounded-md max-w-2xl w-full p-5 sm:p-7 shadow-2xl relative animate-in fade-in zoom-in-95 max-h-[90vh] overflow-y-auto">
                         <button
                             onClick={() => setShowComparison(false)}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-zinc-100 text-zinc-500 hover:text-zinc-700"
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-700"
                         >
                             <X className="w-5 h-5" />
                         </button>
@@ -630,10 +630,10 @@ export default function CentreDiscovery() {
                             <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full">
                                 Algorithmic Mandi Comparison
                             </span>
-                            <h2 className="text-xl sm:text-2xl font-semibold text-zinc-900 mt-2">
+                            <h2 className="text-xl sm:text-2xl font-semibold text-slate-900 mt-2">
                                 Nearest vs Optimal Mandi Trade-off
                             </h2>
-                            <p className="text-xs text-zinc-500 mt-1 max-w-md mx-auto">
+                            <p className="text-xs text-slate-500 mt-1 max-w-md mx-auto">
                                 Comparing Mandis from your farm in <strong>{activeVillage}</strong>.
                             </p>
                         </div>
@@ -641,7 +641,7 @@ export default function CentreDiscovery() {
                         {/* Comparison Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                             {/* Nearest Card */}
-                            <div className="p-4 rounded-lg border-2 border-amber-200 bg-amber-50/40 text-zinc-800">
+                            <div className="p-4 rounded-lg border-2 border-amber-200 bg-amber-50/40 text-slate-800">
                                 <div className="flex justify-between items-center mb-2">
                                     <Badge className="bg-amber-100 text-amber-900 border-amber-300 text-[10px] font-bold">
                                         Nearest Centre
@@ -650,27 +650,27 @@ export default function CentreDiscovery() {
                                         {nearestMatch.journey_score}/100 Score
                                     </span>
                                 </div>
-                                <h3 className="font-semibold text-sm text-zinc-900 mb-1">{nearestMatch.centre.name}</h3>
-                                <p className="text-[11px] text-zinc-500 mb-3">{nearestMatch.centre.address}</p>
+                                <h3 className="font-semibold text-sm text-slate-900 mb-1">{nearestMatch.centre.name}</h3>
+                                <p className="text-[11px] text-slate-500 mb-3">{nearestMatch.centre.address}</p>
 
                                 <div className="space-y-2 text-xs">
                                     <div className="flex justify-between py-1 border-b border-amber-200/60">
-                                        <span className="text-zinc-500">Distance from {activeVillage}:</span>
-                                        <span className="font-bold text-zinc-900">{nearestMatch.distance_km} km</span>
+                                        <span className="text-slate-500">Distance from {activeVillage}:</span>
+                                        <span className="font-bold text-slate-900">{nearestMatch.distance_km} km</span>
                                     </div>
                                     <div className="flex justify-between py-1 border-b border-amber-200/60">
-                                        <span className="text-zinc-500">Vehicles in Queue:</span>
+                                        <span className="text-slate-500">Vehicles in Queue:</span>
                                         <span className="font-bold text-red-600">{nearestMatch.current_queue} Vehicles</span>
                                     </div>
                                     <div className="flex justify-between py-1 border-b border-amber-200/60">
-                                        <span className="text-zinc-500">Predicted Wait Time:</span>
+                                        <span className="text-slate-500">Predicted Wait Time:</span>
                                         <span className="font-bold text-red-600">~{nearestMatch.predicted_wait_mins} mins</span>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Optimal Match Card */}
-                            <div className="p-4 rounded-lg border-2 border-emerald-500 bg-emerald-50/70 text-zinc-800 relative overflow-hidden">
+                            <div className="p-4 rounded-lg border-2 border-emerald-500 bg-emerald-50/70 text-slate-800 relative overflow-hidden">
                                 <div className="flex justify-between items-center mb-2">
                                     <Badge className="bg-emerald-600 text-white text-[10px] font-bold">
                                         ★ Recommended Best Match
@@ -679,20 +679,20 @@ export default function CentreDiscovery() {
                                         {optimalMatch.journey_score}/100 Score
                                     </span>
                                 </div>
-                                <h3 className="font-semibold text-sm text-zinc-900 mb-1">{optimalMatch.centre.name}</h3>
-                                <p className="text-[11px] text-zinc-500 mb-3">{optimalMatch.centre.address}</p>
+                                <h3 className="font-semibold text-sm text-slate-900 mb-1">{optimalMatch.centre.name}</h3>
+                                <p className="text-[11px] text-slate-500 mb-3">{optimalMatch.centre.address}</p>
 
                                 <div className="space-y-2 text-xs">
                                     <div className="flex justify-between py-1 border-b border-emerald-200">
-                                        <span className="text-zinc-500">Distance from {activeVillage}:</span>
-                                        <span className="font-bold text-zinc-900">{optimalMatch.distance_km} km</span>
+                                        <span className="text-slate-500">Distance from {activeVillage}:</span>
+                                        <span className="font-bold text-slate-900">{optimalMatch.distance_km} km</span>
                                     </div>
                                     <div className="flex justify-between py-1 border-b border-emerald-200">
-                                        <span className="text-zinc-500">Vehicles in Queue:</span>
+                                        <span className="text-slate-500">Vehicles in Queue:</span>
                                         <span className="font-bold text-emerald-700">{optimalMatch.current_queue} Vehicles</span>
                                     </div>
                                     <div className="flex justify-between py-1 border-b border-emerald-200">
-                                        <span className="text-zinc-500">Predicted Wait Time:</span>
+                                        <span className="text-slate-500">Predicted Wait Time:</span>
                                         <span className="font-bold text-emerald-700">~{optimalMatch.predicted_wait_mins} mins</span>
                                     </div>
                                 </div>
