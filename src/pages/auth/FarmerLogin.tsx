@@ -274,7 +274,7 @@ export default function FarmerLogin() {
     setResendCooldown(0);
   };
 
-  const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
+  const isDemoModeEnabled = true; // Hardcoded for hackathon demo
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/40 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">

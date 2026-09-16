@@ -30,7 +30,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
   }, [isProfileLoading]);
 
   // STATE A: Clerk still initializing — NEVER redirect during this phase
-  if (!clerkLoaded) {
+  if (!clerkLoaded && !user) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />

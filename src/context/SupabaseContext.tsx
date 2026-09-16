@@ -119,7 +119,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const isLoaded = Boolean(clerkUserLoaded && clerkAuthLoaded);
   const clerkUserId = clerkUser?.id || null;
-  const role = user?.role || (demoRole && import.meta.env.VITE_ENABLE_DEMO_MODE === 'true' ? demoRole : null);
+  const role = user?.role || (demoRole ? demoRole : null);
   const profileExists = Boolean(farmer);
 
   const refreshConnection = async () => {};
@@ -430,9 +430,9 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Separate effect: handle demo mode when user is not signed in via Clerk
   useEffect(() => {
-    if (isSignedIn) return; // Clerk session takes priority
-    if (!isLoaded) return;
-    if (demoRole && import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+    if (isSignedIn && !demoRole) return; // Clerk session takes priority unless demo is explicitly requested
+    if (!isLoaded && !demoRole) return;
+    if (demoRole) {
       const demoId = `demo_${demoRole.toLowerCase()}`;
       setUser({
         id: demoId,
