@@ -101,7 +101,49 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
         SupabaseDataService.getBookings(),
         SupabaseDataService.getCentres()
       ]);
-      setBookings(fetchedBookings || []);
+      
+      let allBookings = fetchedBookings || [];
+      
+      if (import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+        const demoBookingsStr = localStorage.getItem('kishan_demo_bookings');
+        const customDemoBookings = demoBookingsStr ? JSON.parse(demoBookingsStr) : [];
+        
+        const pastCompletedBooking: Booking = {
+          id: 'demo-completed-1',
+          farmer_id: 'demo-farmer-001',
+          farmer_name: 'Demo Farmer (Ramesh Kumar)',
+          farmer_code: 'KIS-FMR-DEMO01',
+          centre_id: 'centre-1',
+          centre_name: 'Memari Kishan Mandi',
+          crop_name: 'Paddy (Grade A)',
+          expected_quantity_q: 45,
+          slot_date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          slot_time: '10:00 AM - 11:00 AM',
+          token_number: 'DEMO-8492',
+          status: 'COMPLETED',
+          created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+          updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          weighment_data: {
+            gross_weight_q: 45.2,
+            tare_weight_q: 0.2,
+            net_weight_q: 45.0,
+            msp_rate_per_q: 2203,
+            gross_amount: 99135,
+            handling_charge: 0,
+            moisture_deduction: 0,
+            net_payable: 99135,
+            slip_number: 'WS-DEMO-1',
+            weighbridge_operator: 'Demo Operator',
+            timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            dbt_status: 'SUCCESS',
+            transaction_ref: 'DBT-DEMO-94827361'
+          }
+        };
+        
+        allBookings = [...customDemoBookings, pastCompletedBooking, ...allBookings];
+      }
+
+      setBookings(allBookings);
       setCentres(fetchedCentres || []);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch data');
@@ -123,6 +165,38 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
   }, [refreshData]);
 
   const createBooking = async (params: any) => {
+    if (params.farmer_id === 'demo-farmer-001' || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+      const mockBooking: Booking = {
+        id: 'demo-booking-' + Date.now(),
+        farmer_id: params.farmer_id || 'demo-farmer-001',
+        farmer_name: params.farmer_name || 'Demo Farmer',
+        farmer_phone: params.farmer_phone || '9876543210',
+        farmer_email: params.farmer_email,
+        farmer_code: params.farmer_code || 'KIS-FMR-DEMO01',
+        clerk_user_id: params.clerk_user_id,
+        centre_id: params.centre_id,
+        centre_name: centres.find(c => c.id === params.centre_id)?.name || 'Demo Centre',
+        crop_name: params.crop_name,
+        expected_quantity_q: params.expected_quantity_q,
+        slot_date: params.slot_date,
+        slot_time: params.slot_time,
+        token_number: `DEMO-${Math.floor(1000 + Math.random() * 9000)}`,
+        status: 'BOOKED',
+        vehicle_number: params.vehicle_number,
+        vehicle_type: params.vehicle_type,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const demoBookingsStr = localStorage.getItem('kishan_demo_bookings');
+      const demoBookings = demoBookingsStr ? JSON.parse(demoBookingsStr) : [];
+      demoBookings.unshift(mockBooking);
+      localStorage.setItem('kishan_demo_bookings', JSON.stringify(demoBookings));
+      
+      setBookings(prev => [mockBooking, ...prev]);
+      return mockBooking;
+    }
+
     const booking = await SupabaseDataService.createBooking(params);
     await refreshData();
     return booking;

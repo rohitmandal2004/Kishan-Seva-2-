@@ -8,10 +8,13 @@ import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
+import { useSupabase } from '@/context/SupabaseContext';
+import { toast } from 'sonner';
 
 export default function RoleSelection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { setDemoRole } = useSupabase();
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
@@ -185,6 +188,24 @@ export default function RoleSelection() {
           </Card>
         </div>
         
+      </div>
+
+      {/* Demo Mode Action */}
+      <div className="mt-10 flex flex-col items-center relative z-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-both">
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <span className="text-sm font-semibold text-slate-500">Just want to look around?</span>
+          <Button 
+            onClick={() => {
+              setDemoRole('FARMER');
+              toast.success('Logged in with Demo Farmer Profile');
+              navigate('/farmer/dashboard');
+            }}
+            className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold border border-emerald-300 shadow-sm rounded-full px-6 transition-all duration-300 hover:shadow-md gap-2 cursor-pointer"
+          >
+            <Leaf className="w-4 h-4" />
+            Quick Demo: Farmer Dashboard
+          </Button>
+        </div>
       </div>
 
       <div className="mt-12 text-center text-xs text-slate-400 font-medium relative z-10">

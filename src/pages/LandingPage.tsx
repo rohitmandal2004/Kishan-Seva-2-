@@ -17,12 +17,15 @@ import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import { useGSAP, gsap } from '@/lib/gsap';
 import { useRef } from 'react';
+import { useSupabase } from '@/context/SupabaseContext';
+import { toast } from 'sonner';
 
 import { defaultMapIcon } from '@/lib/leaflet-icons';
 export default function LandingPage() {
     const navigate = useNavigate();
     const store = useKishanData();
     const { lang, t } = useLanguage();
+    const { setDemoRole } = useSupabase();
     const containerRef = useRef<HTMLDivElement>(null);
 
     useGSAP(() => {
@@ -360,7 +363,7 @@ export default function LandingPage() {
                             {t('hero_desc')}
                         </p>
 
-                        <div className="hero-anim flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-10">
+                        <div className="hero-anim flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-4">
                             <Link to="/farmer/book" className="w-full sm:w-auto">
                                 <Button className="w-full sm:w-auto bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-sm px-7 h-12 rounded-full shadow-lg hover:shadow-xl transition gap-2 justify-center">
                                     {t('book_slot_now')}
@@ -370,10 +373,23 @@ export default function LandingPage() {
                             <Button
                                 onClick={() => setIsVideoModalOpen(true)}
                                 variant="outline"
-                                className="w-full sm:w-auto text-sm px-6 h-12 rounded-full border-emerald-700 text-emerald-800 hover:bg-emerald-50 gap-2 font-bold bg-white justify-center"
+                                className="w-full sm:w-auto text-sm px-6 h-12 rounded-full border-emerald-700 text-emerald-800 hover:bg-emerald-50 gap-2 font-bold bg-white justify-center cursor-pointer"
                             >
                                 <Play className="w-4 h-4 text-emerald-700 fill-emerald-700" />
                                 {t('watch_tour')}
+                            </Button>
+                        </div>
+                        <div className="hero-anim mb-10">
+                            <Button
+                                onClick={() => {
+                                    setDemoRole('FARMER');
+                                    toast.success('Logged in with Demo Farmer Profile');
+                                    navigate('/farmer/dashboard');
+                                }}
+                                variant="secondary"
+                                className="w-full sm:w-auto text-sm px-6 h-10 rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-200 gap-2 font-bold justify-center cursor-pointer shadow-sm border border-emerald-200"
+                            >
+                                ⚡ Quick Demo: Farmer Dashboard
                             </Button>
                         </div>
 
