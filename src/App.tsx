@@ -124,6 +124,7 @@ function AnimatedRoutes() {
 
 function App() {
   const [isSplashVisible, setIsSplashVisible] = useState(true);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -137,16 +138,30 @@ function App() {
       <ScrollToTop />
       <Toaster position="top-right" richColors closeButton />
       <ReloadPrompt />
-      
-      {isSplashVisible ? (
-        <PageLoader />
-      ) : (
-        <Suspense fallback={<PageLoader />}>
+
+      {/* PageLoader stays mounted until routes are fully ready — no remount blink */}
+      {(!isReady || isSplashVisible) && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 50 }}>
+          <PageLoader />
+        </div>
+      )}
+
+      {!isSplashVisible && (
+        <Suspense fallback={null}>
+          <AppReady onReady={() => setIsReady(true)} />
           <AnimatedRoutes />
         </Suspense>
       )}
     </Router>
   );
+}
+
+/** Invisible component that signals when Suspense has resolved (lazy chunks loaded). */
+function AppReady({ onReady }: { onReady: () => void }) {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+  return null;
 }
 
 export default App;
