@@ -18,6 +18,7 @@ import { evaluateCentreRecommendationsAsync } from '@/services/recommendationEng
 import { CentreRecommendation } from '@/types';
 import { getCoordinatesForVillage } from '@/services/locationNames';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageLoader from '@/components/ui/PageLoader';
 import AnimatedPage from '@/components/ui/AnimatedPage';
 import QRCode from 'react-qr-code';
 import { getLiveWeatherForecast } from '@/services/weatherService';
@@ -85,19 +86,9 @@ export default function FarmerDashboard() {
     fetchWeather();
   }, [farmer?.village]);
 
-  // Route is guarded by RequireRole; render skeleton while farmer resolves
+  // Route is guarded by RequireRole; render splash screen while farmer resolves
   if (!farmer) {
-    return (
-      <div className="p-4 md:p-6 max-w-6xl mx-auto w-full space-y-4 pt-12">
-        <Skeleton className="h-48 w-full rounded-lg" />
-        <Skeleton className="h-40 w-full rounded-lg" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Skeleton className="h-32 w-full rounded-lg" />
-          <Skeleton className="h-32 w-full rounded-lg" />
-        </div>
-        <Skeleton className="h-64 w-full rounded-lg" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   const totalQuintalsSold = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || b.expected_quantity_q), 0);
@@ -448,25 +439,33 @@ export default function FarmerDashboard() {
               <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2"><Sun className="w-4 h-4 text-amber-500" /> Harvest Weather Advisory</h3>
               <span className="text-[10px] text-slate-500 font-medium">{farmer.village}</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {weatherForecast.map((w, idx) => (
-                <div key={idx} className={`p-2.5 rounded-md border ${w.isGoodForHarvest ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} text-center flex flex-col items-center justify-between h-full`}>
-                  <p className="text-[10px] font-bold text-slate-600 mb-1">{idx === 0 ? 'Today' : format(addDays(today, idx), 'EEE')}</p>
-                  <div className={`w-8 h-8 rounded-full mb-1 flex items-center justify-center ${w.isGoodForHarvest ? 'bg-emerald-100' : 'bg-red-100'}`}>
-                    {w.icon === 'sun' && <Sun className="w-4 h-4 text-amber-500" />}
-                    {w.icon === 'cloud' && <Cloud className="w-4 h-4 text-slate-500" />}
-                    {(w.icon === 'rain' || w.icon === 'cloud-rain') && <CloudRain className="w-4 h-4 text-blue-500" />}
+            <div className="grid grid-cols-3 gap-2 h-[100px]">
+              {weatherForecast.length === 0 ? (
+                <>
+                  <Skeleton className="h-full w-full rounded-md" />
+                  <Skeleton className="h-full w-full rounded-md" />
+                  <Skeleton className="h-full w-full rounded-md" />
+                </>
+              ) : (
+                weatherForecast.map((w, idx) => (
+                  <div key={idx} className={`p-2.5 rounded-md border ${w.isGoodForHarvest ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} text-center flex flex-col items-center justify-between h-full`}>
+                    <p className="text-[10px] font-bold text-slate-600 mb-1">{idx === 0 ? 'Today' : format(addDays(today, idx), 'EEE')}</p>
+                    <div className={`w-8 h-8 rounded-full mb-1 flex items-center justify-center ${w.isGoodForHarvest ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                      {w.icon === 'sun' && <Sun className="w-4 h-4 text-amber-500" />}
+                      {w.icon === 'cloud' && <Cloud className="w-4 h-4 text-slate-500" />}
+                      {(w.icon === 'rain' || w.icon === 'cloud-rain') && <CloudRain className="w-4 h-4 text-blue-500" />}
+                    </div>
+                    <p className="text-[11px] font-semibold text-slate-800">{w.temp}°C</p>
+                    <div className="mt-2 text-[9px] font-bold leading-tight">
+                      {w.isGoodForHarvest ? (
+                        <span className="text-emerald-700">Clear</span>
+                      ) : (
+                        <span className="text-red-700">{w.message}</span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-[11px] font-semibold text-slate-800">{w.temp}°C</p>
-                  <div className="mt-2 text-[9px] font-bold leading-tight">
-                    {w.isGoodForHarvest ? (
-                      <span className="text-emerald-700">Clear</span>
-                    ) : (
-                      <span className="text-red-700">{w.message}</span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </Card>
 

@@ -62,7 +62,16 @@
   }
 }
 
-/* Responsive custom utility for hiding scrollbar while keeping scrollability */
+/* Global rule to hide scrollbars on the screen but keep mouse scrollability */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Maintain custom utility class for legacy support */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

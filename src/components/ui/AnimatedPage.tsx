@@ -25,8 +25,8 @@ const pageVariants = {
 };
 
 const pageTransition = {
- duration: 0.4,
- ease: 'easeOut',
+  duration: 0.5,
+  ease: [0.22, 1, 0.36, 1], // Premium smooth ease-out
 };
 
 export default function AnimatedPage({ children, className = '' }: AnimatedPageProps) {

@@ -74,7 +74,7 @@ export default function FarmerLayout() {
     ];
 
     return (
-        <div className="bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-20 md:pb-0 flex flex-col font-sans relative">
+        <div className="bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col font-sans relative">
             {/* Mobile Top Bar */}
             <div className="md:hidden bg-white/95 backdrop-blur-md px-3.5 py-2.5 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200 shadow-xs">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -422,7 +422,7 @@ export default function FarmerLayout() {
             )}
 
             {/* Mobile Bottom Navigation with Enhanced Touch Targets & Active Indicator */}
-            <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 grid grid-cols-4 items-center px-1 py-1 pb-[max(0.6rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+            <div className="md:hidden fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-full grid grid-cols-4 items-center px-1 py-1 pb-[max(0.2rem,env(safe-area-inset-bottom))] z-40 shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
                 {navItems.slice(0, 4).map((item) => {
                     const Icon = item.icon;
                     const isActive = currentPath === item.path;

@@ -5,7 +5,8 @@ import { AnimatedLink } from '@/components/ui/animated-link';
 import {
     Leaf, Clock, ShieldCheck, Banknote, Building2, CalendarCheck,
     CheckCircle2, Play, User, ChevronRight, BarChart3,
-    Search, MapPin, ArrowRight, X, PhoneCall, ChevronDown, Menu
+    Search, MapPin, ArrowRight, X, PhoneCall, ChevronDown, Menu,
+    Home, HelpCircle, TrendingUp
 } from 'lucide-react';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { useKishanData } from '@/context/DataContext';
@@ -64,6 +65,19 @@ export default function LandingPage() {
                 toggleActions: "play none none reverse"
             }
         });
+
+        // Animate FAQ items on scroll
+        gsap.from(".faq-item", {
+            y: 30,
+            opacity: 0,
+            stagger: 0.1,
+            duration: 0.8,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: "#faqs",
+                start: "top 80%",
+            }
+        });
     }, { scope: containerRef });
 
     // State
@@ -71,7 +85,6 @@ export default function LandingPage() {
     const [selectedCropFilter, setSelectedCropFilter] = useState('All');
     const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const westBengalCenter: [number, number] = [22.9868, 87.8550];
 
@@ -155,7 +168,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <AnimatedPage className="flex flex-col min-h-screen bg-slate-50 font-sans">
+        <AnimatedPage className="flex flex-col min-h-screen bg-slate-50 font-sans pb-24 lg:pb-0">
             {/* Static Fixed Top Header: Govt Notice Bar + Main Nav + Live MSP Ticker */}
             <header className="fixed top-0 left-0 right-0 z-50 shadow-sm bg-white">
                 {/* Top Govt of India Notice Bar */}
@@ -182,7 +195,12 @@ export default function LandingPage() {
                 {/* Main Navigation with Prominent Large Logo & Mobile Responsive Menu */}
                 <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-16 py-2.5 sm:py-3 bg-white border-b border-slate-200">
                     <div className="flex items-center">
-                        <KishanSevaLogo size="lg" />
+                        <div className="hidden sm:block">
+                            <KishanSevaLogo size="lg" animated={false} />
+                        </div>
+                        <div className="block sm:hidden">
+                            <KishanSevaLogo size="md" animated={false} showSubtitle={false} />
+                        </div>
                     </div>
 
                     {/* Desktop Nav Links */}
@@ -214,74 +232,15 @@ export default function LandingPage() {
                             </Button>
                         </a>
                         <Link to="/roles">
-                            <Button className="bg-[#143d23] hover:bg-[#0b2415] text-white rounded-full px-4 sm:px-5 h-9 sm:h-10 text-xs font-bold gap-1.5 shadow-sm transition hover:shadow-md">
-                                <User className="w-3.5 h-3.5" />
-                                {t('login_btn')}
+                            <Button className="bg-[#143d23] hover:bg-[#0b2415] text-white rounded-full px-3 sm:px-5 h-9 sm:h-10 text-xs font-bold gap-1.5 shadow-sm transition hover:shadow-md">
+                                <User className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+                                <span className="hidden sm:inline-block">{t('login_btn')}</span>
                             </Button>
                         </Link>
 
-                        {/* Mobile Menu Hamburger Button */}
-                        <button
-                            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                            className="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 transition-colors"
-                            title="Toggle Navigation Menu"
-                        >
-                            {mobileMenuOpen ? <X className="w-5 h-5 text-slate-800" /> : <Menu className="w-5 h-5 text-slate-800" />}
-                        </button>
+                        {/* Desktop only empty div or just close */}
                     </div>
                 </nav>
-
-                {/* Mobile Navigation Drawer Dropdown */}
-                {mobileMenuOpen && (
-                    <div className="lg:hidden bg-white border-b border-slate-200 px-6 py-4 space-y-3 shadow-md animate-in slide-in-from-top-2 duration-200 z-40">
-                        <div className="flex flex-col space-y-2.5 font-semibold text-sm text-slate-700">
-                            <a
-                                href="#"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="py-1.5 px-3 rounded-lg hover:bg-emerald-50 text-emerald-800 font-bold"
-                            >
-                                {t('nav_home')}
-                            </a>
-                            <a
-                                href="#centres"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="py-1.5 px-3 rounded-lg hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                                {t('nav_centres')}
-                            </a>
-                            <a
-                                href="#msp-rates"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="py-1.5 px-3 rounded-lg hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                                {t('nav_msp')}
-                            </a>
-                            <a
-                                href="#how-it-works"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="py-1.5 px-3 rounded-lg hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                                {t('nav_how_it_works')}
-                            </a>
-                            <a
-                                href="#faqs"
-                                onClick={() => setMobileMenuOpen(false)}
-                                className="py-1.5 px-3 rounded-lg hover:bg-emerald-50 hover:text-emerald-700"
-                            >
-                                {t('nav_faqs')}
-                            </a>
-                        </div>
-
-                        <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                            <LanguageSelector variant="compact" />
-                            <a href="#centres" onClick={() => setMobileMenuOpen(false)}>
-                                <Button size="sm" variant="outline" className="text-xs font-bold gap-1 rounded-full cursor-pointer">
-                                    <MapPin className="w-3.5 h-3.5 text-emerald-600" /> {t('find_mandi_btn')}
-                                </Button>
-                            </a>
-                        </div>
-                    </div>
-                )}
 
                 {/* Live MSP Ticker Bar - Auto-moving Infinite Marquee */}
                 <div id="msp-rates" className="bg-amber-50/95 border-b border-amber-200/80 py-2 relative overflow-hidden select-none">
@@ -394,20 +353,20 @@ export default function LandingPage() {
                         </div>
 
                         {/* Feature Badges */}
-                        <div className="hero-anim grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-6 border-t border-slate-200">
-                            <div className="flex items-center gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 pt-6 border-t border-slate-200">
+                            <div className="hero-anim flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50 hover:-translate-y-1 transition-all duration-200 ease-out border border-transparent hover:border-emerald-100 cursor-default">
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><Leaf className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_msp')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="hero-anim flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50 hover:-translate-y-1 transition-all duration-200 ease-out border border-transparent hover:border-emerald-100 cursor-default">
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><Clock className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_waiting')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="hero-anim flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50 hover:-translate-y-1 transition-all duration-200 ease-out border border-transparent hover:border-emerald-100 cursor-default">
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><ShieldCheck className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_weight')}</span>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="hero-anim flex items-center gap-2 p-2 rounded-xl hover:bg-emerald-50 hover:-translate-y-1 transition-all duration-200 ease-out border border-transparent hover:border-emerald-100 cursor-default">
                                 <div className="p-2 bg-emerald-100 rounded-xl text-emerald-800 shrink-0"><Banknote className="w-4 h-4" /></div>
                                 <span className="font-bold text-[11px] sm:text-xs text-slate-800">{t('feat_dbt')}</span>
                             </div>
@@ -673,114 +632,7 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Role Selection Section */}
-            <section className="relative z-10 py-16 px-6 lg:px-16 bg-white border-b border-slate-200 features-grid">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-10">
-                        <p className="text-emerald-700 font-bold text-xs uppercase tracking-widest mb-1">
-                            {t('roles_header_badge')}
-                        </p>
-                        <h2 className="text-3xl font-black text-slate-900">
-                            {t('roles_title')}
-                        </h2>
-                        <p className="text-slate-500 text-sm mt-1">
-                            {t('roles_subtitle')}
-                        </p>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {/* Farmer Card */}
-                        <Link to="/farmer/login" className="group feature-card">
-                            <div className="bg-gradient-to-b from-white to-emerald-50/40 rounded-3xl border-2 border-emerald-100 hover:border-emerald-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
-                                <div>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-800">
-                                                <Leaf className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-slate-900 text-lg">{t('role_farmer_title')}</h3>
-                                                <p className="text-xs text-emerald-700 font-bold">{t('role_farmer_subtitle')}</p>
-                                            </div>
-                                        </div>
-                                        <div className="w-8 h-8 bg-emerald-700 text-white rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                                            <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                                        {t('role_farmer_desc')}
-                                    </p>
-                                </div>
-                                <div className="pt-4 border-t border-emerald-100/80 space-y-2 text-xs text-slate-600 font-semibold">
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> 1-Click OTP Login (Aadhaar/Mobile)</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Live Token & Wait Time Tracker</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Download Digital e-J-Form Slip</div>
-                                </div>
-                            </div>
-                        </Link>
-
-                        {/* Operator Card */}
-                        <Link to="/operator/dashboard" className="group feature-card">
-                            <div className="bg-gradient-to-b from-white to-blue-50/40 rounded-3xl border-2 border-slate-200 hover:border-blue-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
-                                <div>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-800">
-                                                <Building2 className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-slate-900 text-lg">{t('role_operator_title')}</h3>
-                                                <p className="text-xs text-blue-700 font-bold">{t('role_operator_subtitle')}</p>
-                                            </div>
-                                        </div>
-                                        <div className="w-8 h-8 bg-blue-700 text-white rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                                            <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                                        {t('role_operator_desc')}
-                                    </p>
-                                </div>
-                                <div className="pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-600 font-semibold">
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-blue-600" /> Live Token Queue Management</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-blue-600" /> Automated Grade Classification</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-blue-600" /> Instant Weighment Certificate Gen</div>
-                                </div>
-                            </div>
-                        </Link>
-
-                        {/* Admin Card */}
-                        <Link to="/admin/dashboard" className="group feature-card">
-                            <div className="bg-gradient-to-b from-white to-purple-50/40 rounded-3xl border-2 border-slate-200 hover:border-purple-500 p-6 hover:shadow-xl transition duration-300 h-full flex flex-col justify-between">
-                                <div>
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-800">
-                                                <BarChart3 className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-black text-slate-900 text-lg">{t('role_admin_title')}</h3>
-                                                <p className="text-xs text-purple-700 font-bold">{t('role_admin_subtitle')}</p>
-                                            </div>
-                                        </div>
-                                        <div className="w-8 h-8 bg-purple-700 text-white rounded-full flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                                            <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-slate-600 mb-4 leading-relaxed">
-                                        {t('role_admin_desc')}
-                                    </p>
-                                </div>
-                                <div className="pt-4 border-t border-slate-100 space-y-2 text-xs text-slate-600 font-semibold">
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> State Procurement Heatmaps</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> Mandi Status & Capacity Controls</div>
-                                    <div className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> 1-Click CSV Financial Auditing</div>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                </div>
-            </section>
 
             {/* Frequently Asked Questions */}
             <section id="faqs" className="relative z-10 py-16 px-6 lg:px-16 bg-slate-50 border-b border-slate-200">
@@ -798,7 +650,7 @@ export default function LandingPage() {
                         {faqs.map((faq, idx) => (
                             <div
                                 key={idx}
-                                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs"
+                                className="faq-item bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs"
                             >
                                 <button
                                     onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
@@ -925,6 +777,31 @@ export default function LandingPage() {
                     </div>
                 </div>
             </footer>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-full z-50 px-2 py-2 flex justify-between items-center shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
+                <a href="#" className="flex flex-col items-center p-2 text-emerald-800 flex-1">
+                    <Home className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-bold text-center leading-tight truncate w-full">{t('nav_home')}</span>
+                </a>
+                <a href="#centres" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
+                    <MapPin className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">{t('nav_centres')}</span>
+                </a>
+                <a href="#msp-rates" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
+                    <TrendingUp className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">MSP</span>
+                </a>
+                <a href="#faqs" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
+                    <HelpCircle className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">FAQ</span>
+                </a>
+                <Link to="/roles" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors relative">
+                    <User className="w-5 h-5 mb-1" />
+                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">Login</span>
+                </Link>
+            </div>
         </AnimatedPage>
     );
 }
+

@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
@@ -123,17 +123,30 @@ function AnimatedRoutes() {
 }
 
 function App() {
- return (
- <Router>
- <ScrollToTop />
- <Toaster position="top-right" richColors closeButton />
- <ReloadPrompt />
- 
- <Suspense fallback={<PageLoader />}>
- <AnimatedRoutes />
- </Suspense>
- </Router>
- );
+  const [isSplashVisible, setIsSplashVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsSplashVisible(false);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <Router>
+      <ScrollToTop />
+      <Toaster position="top-right" richColors closeButton />
+      <ReloadPrompt />
+      
+      {isSplashVisible ? (
+        <PageLoader />
+      ) : (
+        <Suspense fallback={<PageLoader />}>
+          <AnimatedRoutes />
+        </Suspense>
+      )}
+    </Router>
+  );
 }
 
 export default App;
