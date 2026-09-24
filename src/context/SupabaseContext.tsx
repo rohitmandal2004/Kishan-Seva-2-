@@ -510,7 +510,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const setDemoRole = (targetRole: AppRole) => {
-    if (import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+    if (import.meta.env.VITE_ENABLE_DEMO_MODE !== 'false') {
       setDemoRoleState(targetRole);
       const demoId = `demo_${targetRole.toLowerCase()}`;
       setUser({

@@ -104,7 +104,7 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
       
       let allBookings = fetchedBookings || [];
       
-      if (import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+      if (import.meta.env.VITE_ENABLE_DEMO_MODE !== 'false') {
         const demoBookingsStr = localStorage.getItem('kishan_demo_bookings');
         const customDemoBookings = demoBookingsStr ? JSON.parse(demoBookingsStr) : [];
         
@@ -170,7 +170,7 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
   }, [refreshData]);
 
   const createBooking = async (params: any) => {
-    if (params.farmer_id === 'demo-farmer-001' || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+    if (params.farmer_id === 'demo-farmer-001' || import.meta.env.VITE_ENABLE_DEMO_MODE !== 'false') {
       const mockBooking: Booking = {
         id: 'demo-booking-' + Date.now(),
         farmer_id: params.farmer_id || 'demo-farmer-001',

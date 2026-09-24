@@ -1,6 +1,6 @@
 import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
 
 // Standard Components
@@ -140,11 +140,18 @@ function App() {
       <ReloadPrompt />
 
       {/* PageLoader stays mounted until routes are fully ready — no remount blink */}
-      {(!isReady || isSplashVisible) && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 50 }}>
-          <PageLoader />
-        </div>
-      )}
+      <AnimatePresence>
+        {(!isReady || isSplashVisible) && (
+          <motion.div 
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: 'fixed', inset: 0, zIndex: 50 }}
+          >
+            <PageLoader />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {!isSplashVisible && (
         <Suspense fallback={null}>
