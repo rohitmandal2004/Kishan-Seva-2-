@@ -121,9 +121,14 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
           slot_time: '10:00 AM - 11:00 AM',
           token_number: 'DEMO-8492',
           status: 'COMPLETED',
+          farmer_phone: '9876543210',
+          vehicle_number: 'WB-00-DEMO-1234',
+          vehicle_type: 'Tractor',
+          booked_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
           created_at: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
           updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
           weighment_data: {
+            booking_id: 'demo-completed-1',
             gross_weight_q: 45.2,
             tare_weight_q: 0.2,
             net_weight_q: 45.0,
@@ -135,7 +140,7 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
             slip_number: 'WS-DEMO-1',
             weighbridge_operator: 'Demo Operator',
             timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            dbt_status: 'SUCCESS',
+            dbt_status: 'DISBURSED',
             transaction_ref: 'DBT-DEMO-94827361'
           }
         };
@@ -184,6 +189,7 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
         status: 'BOOKED',
         vehicle_number: params.vehicle_number,
         vehicle_type: params.vehicle_type,
+        booked_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
