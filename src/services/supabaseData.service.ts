@@ -1,5 +1,7 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { ProcurementCentre, Booking, QualityCheck, Weighment, BookingStatus, QueuePrediction } from '@/types';
+import { getNextBookingStatus } from '@/lib/bookingStateMachine';
+import { getNextBookingStatus } from '@/lib/bookingStateMachine';
 
 /**
  * Kishan Seva Data Service — v2 (Optimized Backend)
@@ -304,14 +306,7 @@ export const SupabaseDataService = {
  try {
  const { data: booking } = await supabase.from('bookings').select('status').eq('id', bookingId).single();
  if (booking) {
- const currentStatus = booking.status;
- let nextStatus: BookingStatus | null = null;
- if (currentStatus === 'BOOKED') nextStatus = 'CHECKED_IN';
- else if (currentStatus === 'CHECKED_IN') nextStatus = 'WAITING';
- else if (currentStatus === 'WAITING') nextStatus = 'CALLED';
- else if (currentStatus === 'CALLED') nextStatus = 'QUALITY_TESTING';
- else if (currentStatus === 'QUALITY_TESTING') nextStatus = 'WEIGHMENT';
- else if (currentStatus === 'WEIGHMENT') nextStatus = 'COMPLETED';
+ const nextStatus = getNextBookingStatus(booking.status as BookingStatus);
  
  if (nextStatus) {
  await SupabaseDataService.updateBookingStatus(bookingId, nextStatus);

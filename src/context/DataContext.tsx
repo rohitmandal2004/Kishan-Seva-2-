@@ -4,6 +4,7 @@ import { SupabaseDataService } from '@/services/supabaseData.service';
 import { toast } from 'sonner';
 import localforage from 'localforage';
 import React, { ReactNode, useEffect } from 'react';
+import { getNextBookingStatus } from '@/lib/bookingStateMachine';
 
 // --- OFFLINE DB CONFIG ---
 const offlineQueueDB = localforage.createInstance({ name: 'kishan-offline-queue' });
@@ -13,7 +14,10 @@ interface QueuedMutation {
   id: string;
   type: 'UPDATE_STATUS' | 'ADVANCE_BOOKING' | 'CREATE_BOOKING';
   payload: any;
-  timestamp: number;
+  createdAt: string;
+  retryCount: number;
+  lastAttemptAt?: string;
+  lastError?: string;
 }
 
 export const getOfflineQueue = async (): Promise<QueuedMutation[]> => {
@@ -25,12 +29,13 @@ export const getOfflineQueue = async (): Promise<QueuedMutation[]> => {
   }
 };
 
-const addToOfflineQueue = async (mutation: Omit<QueuedMutation, 'id' | 'timestamp'>) => {
+const addToOfflineQueue = async (mutation: Omit<QueuedMutation, 'id' | 'createdAt' | 'retryCount'>) => {
   const queue = await getOfflineQueue();
   queue.push({
     ...mutation,
     id: Math.random().toString(36).substring(7),
-    timestamp: Date.now()
+    createdAt: new Date().toISOString(),
+    retryCount: 0
   });
   await offlineQueueDB.setItem('queue', queue);
 };
@@ -40,7 +45,27 @@ export const processOfflineQueue = async (): Promise<number> => {
   if (queue.length === 0) return 0;
 
   let successCount = 0;
+  const remainingQueue: QueuedMutation[] = [];
+
   for (const item of queue) {
+    // Basic exponential backoff if it failed before
+    if (item.retryCount > 0 && item.lastAttemptAt) {
+      const waitTime = Math.min(5000 * Math.pow(3, item.retryCount - 1), 5 * 60 * 1000); // max 5 min
+      if (Date.now() - new Date(item.lastAttemptAt).getTime() < waitTime) {
+        remainingQueue.push(item);
+        continue; // skip until backoff expires
+      }
+    }
+
+    if (item.retryCount >= 5) {
+      // Don't retry indefinitely
+      toast.error('Some offline changes could not be synchronized.');
+      item.lastError = 'SYNC_FAILED_MAX_RETRIES';
+      // We drop it from the queue if we give up completely, or keep it in a dead-letter queue. 
+      // For now we'll drop it so it doesn't block forever.
+      continue;
+    }
+
     try {
       if (item.type === 'UPDATE_STATUS') {
         const { bookingId, status, qualityData, weighmentData } = item.payload;
@@ -53,13 +78,18 @@ export const processOfflineQueue = async (): Promise<number> => {
         await SupabaseDataService.createBooking(payload);
       }
       successCount++;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to sync offline mutation:', item, error);
+      remainingQueue.push({
+        ...item,
+        retryCount: item.retryCount + 1,
+        lastAttemptAt: new Date().toISOString(),
+        lastError: error.message || 'Unknown error'
+      });
     }
   }
 
-  // Clear queue after processing
-  await offlineQueueDB.setItem('queue', []);
+  await offlineQueueDB.setItem('queue', remainingQueue);
   return successCount;
 };
 
@@ -289,13 +319,12 @@ export const useKishanData = create<AppStore>((set, get) => ({
       set(state => ({
         bookings: state.bookings.map(b => {
           if (b.id !== bookingId) return b;
-          let nextStatus = b.status;
-          if (b.status === 'BOOKED') nextStatus = 'CHECKED_IN';
-          else if (b.status === 'CHECKED_IN') nextStatus = 'QUALITY_TESTING';
-          else if (b.status === 'QUALITY_TESTING') nextStatus = 'WEIGHMENT';
-          else if (b.status === 'WEIGHMENT') nextStatus = 'COMPLETED';
-          nextStatusRet = { ...b, status: nextStatus };
-          return nextStatusRet as any;
+          const nextStatus = getNextBookingStatus(b.status as BookingStatus);
+          if (nextStatus) {
+            nextStatusRet = { ...b, status: nextStatus };
+            return nextStatusRet as any;
+          }
+          return b;
         })
       }));
       return nextStatusRet;
