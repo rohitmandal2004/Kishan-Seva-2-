@@ -37,7 +37,7 @@ export default function AnimatedPage({ children, className = '' }: AnimatedPageP
  exit="out"
  variants={pageVariants}
  transition={pageTransition as any}
- className={`w-full h-full ${className}`}
+ className={`w-full ${className}`}
  >
  {children}
  </motion.div>

@@ -6,7 +6,7 @@ import {
   Ticket, Navigation, CheckCircle2, ArrowRight,
   Smartphone,
   Volume2, Share2, WifiOff,
-  RefreshCw, Wifi, ShieldCheck, Beaker, Scale, Wallet
+  RefreshCw, Wifi, ShieldCheck, Beaker, Scale, Wallet, Truck
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { SupabaseDataService } from '@/services/supabaseData.service';
@@ -386,6 +386,22 @@ export default function LiveQueue() {
             <p className="text-xs font-semibold text-slate-500 mt-2 relative z-10 bg-slate-100/50 inline-block px-2 py-1 rounded-md">
               {farmersAhead} vehicles ahead
             </p>
+            
+            {/* Visual Queue Graphic */}
+            <div className="flex items-center gap-1.5 mt-4 relative z-10 w-full overflow-hidden">
+                <div className="text-[9px] font-bold text-slate-400 uppercase shrink-0">Gate</div>
+                <div className="w-1 h-6 border-l-2 border-slate-300 border-dashed shrink-0"></div>
+                <div className="flex items-center gap-1 flex-row-reverse overflow-hidden w-full">
+                    <div className="relative shrink-0 ml-1">
+                        <Truck className="w-6 h-6 text-emerald-600 drop-shadow-md transform -scale-x-100" />
+                        <span className="absolute -top-1.5 -right-1.5 text-[8px] bg-amber-400 text-amber-900 font-bold px-1 rounded-sm shadow-sm">You</span>
+                    </div>
+                    {Array.from({ length: Math.min(farmersAhead, 5) }).map((_, i) => (
+                        <Truck key={i} className="w-5 h-5 text-slate-300 shrink-0 transform -scale-x-100" />
+                    ))}
+                    {farmersAhead > 5 && <span className="text-[10px] font-bold text-slate-400 shrink-0">+{farmersAhead - 5}</span>}
+                </div>
+            </div>
           </div>
 
           <div className="relative group bg-emerald-500/5 backdrop-blur-xl rounded-2xl p-6 border border-emerald-500/20 shadow-[0_8px_30px_rgba(16,185,129,0.04)] hover:shadow-[0_8px_30px_rgba(16,185,129,0.12)] transition-all duration-300 overflow-hidden">

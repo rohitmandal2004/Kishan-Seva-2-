@@ -74,6 +74,7 @@ export default function RoleSelection() {
         {/* Farmer Card */}
         <div className="role-card">
           <Card 
+            onMouseEnter={() => import('./auth/FarmerLogin')}
             onClick={() => navigate('/farmer/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
           >
@@ -113,6 +114,7 @@ export default function RoleSelection() {
         {/* Operator Card */}
         <div className="role-card">
           <Card 
+            onMouseEnter={() => import('./auth/OperatorLogin')}
             onClick={() => navigate('/operator/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
           >
@@ -152,6 +154,7 @@ export default function RoleSelection() {
         {/* Admin Card */}
         <div className="role-card">
           <Card 
+            onMouseEnter={() => import('./auth/AdminLogin')}
             onClick={() => navigate('/admin/login')}
             className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
           >

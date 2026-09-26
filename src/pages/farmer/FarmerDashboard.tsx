@@ -28,6 +28,7 @@ import { PriceHistoryChart } from '@/components/ui/PriceHistoryChart';
 import { useLanguage } from '@/services/i18n';
 import { usePushNotifications, getNotificationPermission } from '@/services/usePushNotifications';
 import { usePwaInstall } from '@/services/usePwaInstall';
+import { SellPredictorWidget } from '@/components/ui/SellPredictorWidget';
 
 export default function FarmerDashboard() {
   const { t } = useLanguage();
@@ -90,6 +91,20 @@ export default function FarmerDashboard() {
   if (!farmer) {
     return <PageLoader />;
   }
+  
+  if (store.isLoading) {
+    return (
+      <div className="p-4 md:p-6 max-w-6xl mx-auto w-full space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => (
+            <Skeleton key={i} className="h-[120px] rounded-lg w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-[300px] rounded-lg w-full" />
+        <Skeleton className="h-[160px] rounded-lg w-full" />
+      </div>
+    );
+  }
 
   const totalQuintalsSold = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || b.expected_quantity_q), 0);
   const totalAmountReceived = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_payable || 0), 0);
@@ -111,7 +126,7 @@ export default function FarmerDashboard() {
   };
 
   return (
-    <AnimatedPage className="relative w-full h-full flex flex-col">
+    <AnimatedPage className="relative w-full min-h-full flex flex-col">
       {/* Absolute background for the top right hero effect */}
       <div className="absolute top-0 right-0 w-[500px] h-[250px] z-0 pointer-events-none opacity-40">
         <img src="/hero-bg.jpg" alt="Farmer Background" className="w-full h-full object-cover" style={{ maskImage: 'linear-gradient(to bottom left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)' }} />
@@ -432,8 +447,8 @@ export default function FarmerDashboard() {
           </Card>
         </div>
 
-        {/* WEATHER & NOTIFICATIONS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* WEATHER, NOTIFICATIONS & AI PREDICTOR */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-5 border border-slate-200/80 shadow-sm bg-white rounded-lg transition">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2"><Sun className="w-4 h-4 text-amber-500" /> Harvest Weather Advisory</h3>
@@ -493,6 +508,8 @@ export default function FarmerDashboard() {
               )}
             </div>
           </Card>
+
+          <SellPredictorWidget farmerVillage={farmer.village} cropName={farmer.crop_name} />
         </div>
 
         {/* RECENT PROCUREMENT HISTORY & PAYMENT TRACKER */}

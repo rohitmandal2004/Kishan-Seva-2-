@@ -18,6 +18,7 @@ import {
   TrendingUp,
   AlertTriangle,
   MapPin,
+  MessageCircle
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
@@ -219,7 +220,17 @@ export default function SlotBooking() {
       }
 
       setCurrentStep(4);
-      toast.success(rescheduleBookingId ? 'Procurement slot rescheduled successfully!' : 'Procurement slot confirmed & token generated!');
+      toast.custom((t) => (
+        <div className="bg-[#075E54] text-white p-4 rounded-xl shadow-lg w-80 flex gap-3 pointer-events-auto items-start animate-in fade-in slide-in-from-top-2 mx-auto">
+          <div className="bg-[#25D366] rounded-full p-2 shrink-0">
+            <MessageCircle className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="font-bold text-sm mb-1">WhatsApp • Kishan Seva</p>
+            <p className="text-xs text-[#DCF8C6]">Namaste {f.full_name.split(' ')[0]}, your slot at {selectedCentre.name} is confirmed! Token: <span className="font-bold">{booking.token_number}</span></p>
+          </div>
+        </div>
+      ), { duration: 6000, position: 'top-center' });
 
       speakBookingConfirmed(booking.token_number, selectedCentre.name, 'bn');
 

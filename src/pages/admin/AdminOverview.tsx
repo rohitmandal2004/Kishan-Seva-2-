@@ -5,6 +5,9 @@ import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { toast } from 'sonner';
+import { LiveMandiHeatmap } from '@/components/ui/LiveMandiHeatmap';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import React, { useRef } from 'react';
 
 // Isolated clock component to prevent full-page re-renders
 function LiveClock() {
@@ -45,6 +48,17 @@ export default function AdminOverview() {
   const stats = store.getStats();
   const storeBookings = store.bookings || [];
 
+  const sortedCentres = [...centres].sort((a, b) => b.current_queue_length - a.current_queue_length);
+  const overloadedCentres = centres.filter(c => c.current_queue_length > (c.daily_capacity_quintals * 0.05));
+
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: sortedCentres.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 52, // Estimated row height (52px)
+    overscan: 5,
+  });
+
   const [pendingFarmers, setPendingFarmers] = useState<any[]>([]);
   const [isApproving, setIsApproving] = useState<string | null>(null);
 
@@ -69,10 +83,6 @@ export default function AdminOverview() {
     }
   };
 
-  // Sort centres by queue length descending for the Centre Operations table
-  const sortedCentres = [...centres].sort((a, b) => b.current_queue_length - a.current_queue_length);
-  // Using 5% as overload threshold heuristic for demonstration
-  const overloadedCentres = centres.filter(c => c.current_queue_length > (c.daily_capacity_quintals * 0.05));
 
   // Data export function
   const handleExportData = () => {
@@ -266,10 +276,10 @@ export default function AdminOverview() {
               <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Centre Performance & Queue Load</h3>
               <button className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border border-slate-200 px-2 py-1 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-sm">Export CSV</button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50/50">
+            <div ref={parentRef} className="overflow-x-auto max-h-[400px] overflow-y-auto relative no-scrollbar">
+              <table className="w-full text-left text-xs min-w-full table-fixed">
+                <thead className="sticky top-0 z-10">
+                  <tr className="border-b border-slate-200 bg-slate-50">
                     <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest w-16">Status</th>
                     <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Centre</th>
                     <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest text-right">Queue</th>
@@ -277,20 +287,30 @@ export default function AdminOverview() {
                     <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest w-48">Capacity Utilization</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 font-sans">
-                  {sortedCentres.slice(0, 8).map((centre) => {
-                    // Quick heuristic for overload: > 5% of capacity in queue
+                <tbody 
+                    className="divide-y divide-slate-100 font-sans" 
+                    style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
+                >
+                  {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                    const centre = sortedCentres[virtualRow.index];
                     const overloadThreshold = centre.daily_capacity_quintals * 0.05;
                     const isOverloaded = centre.current_queue_length > overloadThreshold;
                     const utilPercent = Math.min(100, Math.round((centre.current_queue_length / overloadThreshold) * 100));
                     
                     return (
-                      <tr key={centre.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-3 px-4">
+                      <tr 
+                        key={centre.id} 
+                        className="hover:bg-slate-50 transition-colors absolute top-0 left-0 w-full"
+                        style={{
+                            height: `${virtualRow.size}px`,
+                            transform: `translateY(${virtualRow.start}px)`,
+                        }}
+                      >
+                        <td className="py-3 px-4 w-16">
                           <div className={`w-2 h-2 rounded-none ${centre.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
                         </td>
                         <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900">{centre.name}</div>
+                          <div className="font-bold text-slate-900 truncate">{centre.name}</div>
                           <div className="font-mono text-[9px] text-slate-500">{centre.centre_code}</div>
                         </td>
                         <td className={`py-3 px-4 font-mono tabular-nums text-right font-bold ${isOverloaded ? 'text-amber-600' : 'text-slate-700'}`}>
@@ -299,7 +319,7 @@ export default function AdminOverview() {
                         <td className="py-3 px-4 font-mono tabular-nums text-slate-600">
                           {centre.est_wait_time_mins}m
                         </td>
-                        <td className="py-3 px-4">
+                        <td className="py-3 px-4 w-48">
                           <div className="flex items-center gap-3">
                             <div className="w-full h-[1px] bg-slate-200 relative">
                               <div 
@@ -317,7 +337,7 @@ export default function AdminOverview() {
               </table>
             </div>
             <div className="p-3 border-t border-slate-200 bg-slate-50 text-center">
-              <button className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 rounded-sm px-2 py-1">View All {centres.length} Centres</button>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 rounded-sm px-2 py-1">Virtualization Active ({centres.length} Centres)</span>
             </div>
           </div>
 
@@ -364,6 +384,11 @@ export default function AdminOverview() {
                 </div>
               </div>
             </div>
+          </div>
+          </div>
+
+          <div className="mt-8">
+            <LiveMandiHeatmap />
           </div>
 
         </div>

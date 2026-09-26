@@ -52,18 +52,22 @@ export default function LandingPage() {
             }
         });
 
-        // Animate feature cards on scroll
-        gsap.from(".feature-card", {
-            y: 50,
-            opacity: 0,
-            stagger: 0.1,
-            duration: 0.8,
-            ease: "power2.out",
+        // Advanced GSAP Scroll Storytelling for feature cards
+        const tl = gsap.timeline({
             scrollTrigger: {
                 trigger: ".features-grid",
-                start: "top 80%",
-                toggleActions: "play none none reverse"
+                start: "top 75%",
+                end: "bottom 80%",
+                scrub: 1, // Smooth scrub effect
             }
+        });
+
+        tl.from(".feature-card", {
+            y: 80,
+            opacity: 0,
+            scale: 0.9,
+            stagger: 0.2,
+            ease: "back.out(1.5)"
         });
 
         // Animate FAQ items on scroll
@@ -211,9 +215,7 @@ export default function LandingPage() {
                         <AnimatedLink href="#centres" className="hover:text-emerald-700 transition-colors">
                             {t('nav_centres')}
                         </AnimatedLink>
-                        <AnimatedLink href="#msp-rates" className="hover:text-emerald-700 transition-colors">
-                            {t('nav_msp')}
-                        </AnimatedLink>
+
                         <AnimatedLink href="#how-it-works" className="hover:text-emerald-700 transition-colors">
                             {t('nav_how_it_works')}
                         </AnimatedLink>
@@ -779,26 +781,27 @@ export default function LandingPage() {
             </footer>
 
             {/* Mobile Bottom Navigation Bar */}
-            <div className="lg:hidden fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-200 rounded-full z-50 px-2 py-2 flex justify-between items-center shadow-[0_8px_30px_rgba(0,0,0,0.12)]">
-                <a href="#" className="flex flex-col items-center p-2 text-emerald-800 flex-1">
-                    <Home className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-bold text-center leading-tight truncate w-full">{t('nav_home')}</span>
-                </a>
-                <a href="#centres" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
-                    <MapPin className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">{t('nav_centres')}</span>
-                </a>
-                <a href="#msp-rates" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
-                    <TrendingUp className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">MSP</span>
-                </a>
-                <a href="#faqs" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
-                    <HelpCircle className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">FAQ</span>
-                </a>
-                <Link to="/roles" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors relative">
+            <div className="lg:hidden fixed bottom-4 left-4 right-4 z-50 flex gap-2">
+                {/* Main Navigation Pill */}
+                <div className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-full px-2 py-2 flex justify-around items-center shadow-[0_8px_30px_rgba(0,0,0,0.12)] flex-1">
+                    <a href="#" className="flex flex-col items-center p-2 text-emerald-800 flex-1">
+                        <Home className="w-5 h-5 mb-1" />
+                        <span className="text-[10px] font-bold text-center leading-tight truncate w-full">{t('nav_home')}</span>
+                    </a>
+                    <a href="#centres" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
+                        <MapPin className="w-5 h-5 mb-1" />
+                        <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">{t('nav_centres')}</span>
+                    </a>
+                    <a href="#faqs" className="flex flex-col items-center p-2 text-slate-500 hover:text-emerald-700 flex-1 transition-colors">
+                        <HelpCircle className="w-5 h-5 mb-1" />
+                        <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">FAQ</span>
+                    </a>
+                </div>
+
+                {/* Separate Login Button Pill */}
+                <Link to="/roles" className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-full px-5 py-2 flex flex-col justify-center items-center shadow-[0_8px_30px_rgba(0,0,0,0.12)] shrink-0 transition-all hover:bg-emerald-50/50 active:scale-95 h-auto text-emerald-800">
                     <User className="w-5 h-5 mb-1" />
-                    <span className="text-[10px] font-semibold text-center leading-tight truncate w-full">Login</span>
+                    <span className="text-[10px] font-bold text-center leading-tight">Login</span>
                 </Link>
             </div>
         </AnimatedPage>

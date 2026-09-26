@@ -16,6 +16,8 @@ import { playMandiChime, speakAnnouncement } from '@/services/soundAndSpeech';
 import { useLanguage } from '@/services/i18n';
 import { SmsGateway } from '@/services/smsGateway';
 import { toast } from 'sonner';
+import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
+import { useEffect } from 'react';
 
 export default function OperatorQueue() {
     const navigate = useNavigate();
@@ -27,6 +29,56 @@ export default function OperatorQueue() {
     const [showQrScanner, setShowQrScanner] = useState(false);
     const [qrInput, setQrInput] = useState('');
     const [scanMessage, setScanMessage] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (!showQrScanner) return;
+        
+        let scanner: Html5QrcodeScanner;
+        
+        // Timeout to allow the DOM element to be created before initializing scanner
+        const timer = setTimeout(() => {
+            scanner = new Html5QrcodeScanner(
+                "qr-reader", 
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+                }, 
+                false
+            );
+            
+            scanner.render((decodedText) => {
+                try {
+                    // Try to parse the QR code if it's our JSON format
+                    const data = JSON.parse(decodedText);
+                    if (data.token) {
+                        setQrInput(data.token);
+                        handleQrSubmit(undefined, data.token);
+                    } else {
+                        setQrInput(decodedText);
+                        handleQrSubmit(undefined, decodedText);
+                    }
+                } catch {
+                    // If not JSON, just treat as string token
+                    setQrInput(decodedText);
+                    handleQrSubmit(undefined, decodedText);
+                }
+                
+                // Optional: Stop after successful scan
+                scanner.pause(true);
+                setTimeout(() => scanner.resume(), 2000);
+            }, (error) => {
+                // Ignore scan errors, they happen on every frame
+            });
+        }, 100);
+
+        return () => {
+            clearTimeout(timer);
+            if (scanner) {
+                scanner.clear().catch(console.error);
+            }
+        };
+    }, [showQrScanner]);
 
     const { isProfileLoading } = useSupabase();
 
@@ -121,9 +173,9 @@ export default function OperatorQueue() {
         );
     };
 
-    const handleQrSubmit = (e?: React.FormEvent) => {
+    const handleQrSubmit = (e?: React.FormEvent, overrideToken?: string) => {
         if (e) e.preventDefault();
-        const tokenQuery = qrInput.trim().toUpperCase();
+        const tokenQuery = (overrideToken || qrInput).trim().toUpperCase();
         const found = bookings.find(b => b.token_number.toUpperCase() === tokenQuery);
         if (found) {
             playMandiChime();
@@ -138,6 +190,7 @@ export default function OperatorQueue() {
             }, 1400);
         } else {
             setScanMessage('Invalid Token Number. Please verify QR.');
+            toast.error('Invalid Token Number');
             setTimeout(() => setScanMessage(null), 2000);
         }
     };
@@ -353,22 +406,12 @@ export default function OperatorQueue() {
                             </p>
                         </div>
 
-                        {/* Simulated Camera Viewfinder */}
-                        <div className="relative w-full aspect-square max-w-[260px] mx-auto bg-slate-950 rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-inner flex flex-col items-center justify-center mb-4">
-                            {/* Corner markers */}
-                            <div className="absolute top-3 left-3 w-6 h-6 border-t-2 border-l-2 border-emerald-400"></div>
-                            <div className="absolute top-3 right-3 w-6 h-6 border-t-2 border-r-2 border-emerald-400"></div>
-                            <div className="absolute bottom-3 left-3 w-6 h-6 border-b-2 border-l-2 border-emerald-400"></div>
-                            <div className="absolute bottom-3 right-3 w-6 h-6 border-b-2 border-r-2 border-emerald-400"></div>
-
-                            {/* Laser Scanning Line Animation */}
-                            <div className="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent animate-bounce shadow-lg shadow-emerald-500"></div>
-
-                            <Camera className="w-10 h-10 text-emerald-400/40 mb-2" />
-                            <p className="text-[10px] font-mono text-emerald-300/80">OPTICAL QR ENGINE ACTIVE</p>
-
+                        {/* Actual Camera Viewfinder via Html5QrcodeScanner */}
+                        <div className="relative w-full aspect-square max-w-[300px] mx-auto rounded-2xl overflow-hidden border-2 border-emerald-500 shadow-inner flex flex-col items-center justify-center mb-4 bg-slate-100">
+                            <div id="qr-reader" className="w-full h-full [&>div]:!border-0 [&_video]:object-cover [&_video]:w-full [&_video]:h-full"></div>
+                            
                             {scanMessage && (
-                                <div className="absolute inset-0 bg-emerald-950/90 flex flex-col items-center justify-center p-3 text-center animate-in fade-in">
+                                <div className="absolute inset-0 bg-emerald-950/90 flex flex-col items-center justify-center p-3 text-center animate-in fade-in z-50">
                                     <CheckCircle2 className="w-8 h-8 text-emerald-400 mb-2" />
                                     <p className="text-xs font-bold text-white">{scanMessage}</p>
                                 </div>

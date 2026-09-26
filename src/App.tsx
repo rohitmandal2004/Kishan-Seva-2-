@@ -56,19 +56,20 @@ function AnimatedRoutes() {
  return (
  <AnimatePresence mode="wait">
  <Routes location={location} key={location.pathname}>
- <Route path="/" element={<RootLayout />}>
- {/* Public Landing & Role Selection */}
- <Route index element={<LandingPage />} />
- <Route path="roles" element={<RoleSelection />} />
  
- {/* Authentication Routes */}
- <Route path="farmer/login" element={<FarmerLogin />} />
- <Route path="operator/login" element={<OperatorLogin />} />
- <Route path="admin/login" element={<AdminLogin />} />
- <Route path="farmer/register" element={<FarmerRegistration />} />
+ {/* Public Landing, Auth & Roles (Uses GSAP ScrollSmoother) */}
+ <Route element={<RootLayout />}>
+ <Route path="/" element={<LandingPage />} />
+ <Route path="/roles" element={<RoleSelection />} />
+ <Route path="/farmer/login" element={<FarmerLogin />} />
+ <Route path="/operator/login" element={<OperatorLogin />} />
+ <Route path="/admin/login" element={<AdminLogin />} />
+ <Route path="/farmer/register" element={<FarmerRegistration />} />
+ <Route path="*" element={<NotFound />} />
+ </Route>
  
- {/* Farmer Portal with Layout */}
- <Route path="farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
+ {/* Farmer Portal with Layout (Native Scroll) */}
+ <Route path="/farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
  <Route index element={<Navigate to="/farmer/dashboard" replace />} />
  <Route path="dashboard" element={<FarmerDashboard />} />
  <Route path="bulk-book" element={<FpoBulkBooking />} />
@@ -83,8 +84,8 @@ function AnimatedRoutes() {
  <Route path="check-in" element={<QRCheckIn />} />
  </Route>
  
- {/* Mandi Operator Console with Layout */}
- <Route path="operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
+ {/* Mandi Operator Console with Layout (Native Scroll) */}
+ <Route path="/operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
  <Route index element={<Navigate to="/operator/dashboard" replace />} />
  <Route path="dashboard" element={<OperatorDashboard />} />
  <Route path="queue" element={<OperatorQueue />} />
@@ -92,8 +93,8 @@ function AnimatedRoutes() {
  <Route path="weighment" element={<Weighment />} />
  </Route>
  
- {/* State Admin Routes */}
- <Route path="admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
+ {/* State Admin Routes (Native Scroll) */}
+ <Route path="/admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
  <Route index element={<Navigate to="/admin/dashboard" replace />} />
  <Route path="dashboard" element={<AdminOverview />} />
  <Route path="centres" element={<AdminCentres />} />
@@ -104,19 +105,16 @@ function AnimatedRoutes() {
  </Route>
 
  {/* User-friendly Route Aliases */}
- <Route path="login" element={<Navigate to="/roles" replace />} />
- <Route path="register" element={<Navigate to="/farmer/register" replace />} />
- <Route path="dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
- <Route path="centres" element={<Navigate to="/farmer/centres" replace />} />
- <Route path="mandis" element={<Navigate to="/farmer/centres" replace />} />
- <Route path="book" element={<Navigate to="/farmer/book" replace />} />
- <Route path="queue" element={<Navigate to="/farmer/queue" replace />} />
- <Route path="quality" element={<Navigate to="/operator/quality" replace />} />
- <Route path="weighment" element={<Navigate to="/operator/weighment" replace />} />
+ <Route path="/login" element={<Navigate to="/roles" replace />} />
+ <Route path="/register" element={<Navigate to="/farmer/register" replace />} />
+ <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
+ <Route path="/centres" element={<Navigate to="/farmer/centres" replace />} />
+ <Route path="/mandis" element={<Navigate to="/farmer/centres" replace />} />
+ <Route path="/book" element={<Navigate to="/farmer/book" replace />} />
+ <Route path="/queue" element={<Navigate to="/farmer/queue" replace />} />
+ <Route path="/quality" element={<Navigate to="/operator/quality" replace />} />
+ <Route path="/weighment" element={<Navigate to="/operator/weighment" replace />} />
  
- {/* 404 Route Not Found Page */}
- <Route path="*" element={<NotFound />} />
- </Route>
  </Routes>
  </AnimatePresence>
  );

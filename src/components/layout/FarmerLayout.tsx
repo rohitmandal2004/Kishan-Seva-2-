@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home, MapPin, CalendarClock, Ticket, Bell, LogOut, PhoneCall,
-    User, CreditCard, BookOpen, HelpCircle, ShieldCheck, Sun, CheckCircle2, Droplets, ArrowDownToLine, Menu, X,
+    User, CreditCard, BookOpen, HelpCircle, ShieldCheck, Sun, Moon, Mic, MicOff, CheckCircle2, Droplets, ArrowDownToLine, Menu, X,
     WifiOff, Users
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 
 export default function FarmerLayout() {
     const navigate = useNavigate();
@@ -17,11 +18,23 @@ export default function FarmerLayout() {
     const currentPath = location.pathname;
     const store = useKishanData();
     const activeBooking = store.getActiveFarmerBookingForFarmer(farmer?.id, user?.email);
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isOffline, setIsOffline] = useState(!navigator.onLine);
+    const [isSunlightMode, setIsSunlightMode] = useState(() => localStorage.getItem('kishan_sunlight_mode') === 'true');
+    const { isListening, startListening, stopListening, isSupported } = useSpeechRecognition();
+
+    useEffect(() => {
+        if (isSunlightMode) {
+            document.documentElement.classList.add('sunlight-mode');
+            localStorage.setItem('kishan_sunlight_mode', 'true');
+        } else {
+            document.documentElement.classList.remove('sunlight-mode');
+            localStorage.setItem('kishan_sunlight_mode', 'false');
+        }
+    }, [isSunlightMode]);
 
     useEffect(() => {
         try {
@@ -74,7 +87,7 @@ export default function FarmerLayout() {
     ];
 
     return (
-        <div className="bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col font-sans relative">
+        <div className={`bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col relative ${language === 'en' ? 'font-poppins' : 'font-sans'}`}>
             {/* Mobile Top Bar */}
             <div className="md:hidden bg-white/95 backdrop-blur-md px-3.5 py-2.5 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200 shadow-xs">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -94,6 +107,22 @@ export default function FarmerLayout() {
                 </div>
 
                 <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                        onClick={() => setIsSunlightMode(!isSunlightMode)}
+                        className={`p-2 rounded-full transition-colors ${isSunlightMode ? 'bg-amber-100 text-amber-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                        title="Toggle Sunlight Mode"
+                    >
+                        {isSunlightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
+                    {isSupported && (
+                        <button
+                            onClick={isListening ? stopListening : startListening}
+                            className={`p-2 rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'hover:bg-slate-100 text-slate-500'}`}
+                            title="Voice Commands"
+                        >
+                            {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                        </button>
+                    )}
                     <Link to="/farmer/queue" className="relative p-2 rounded-full hover:bg-slate-100 text-slate-600 transition-colors" title="Live Queue">
                         <Bell className="w-5 h-5" />
                         {activeBooking && (
@@ -114,7 +143,7 @@ export default function FarmerLayout() {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col md:flex-row w-full md:overflow-hidden">
+            <div className="flex-1 flex flex-col md:flex-row w-full md:overflow-hidden min-h-0">
                 {/* Desktop & Tablet Sidebar */}
                 <aside className="hidden md:flex w-56 lg:w-64 shrink-0 flex-col bg-[#0A2E1A] text-white h-full overflow-y-auto shadow-2xl relative z-50 border-r border-emerald-950">
                     <div className="px-5 py-6 flex items-center gap-3">
@@ -175,14 +204,11 @@ export default function FarmerLayout() {
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="flex-1 w-full min-w-0 md:overflow-y-auto flex flex-col relative bg-[#F5F8F6]">
+                <main className="flex-1 min-w-0 overflow-y-auto flex flex-col relative bg-[#F5F8F6] h-full">
                     {/* Desktop Top Bar */}
-                    <div className="hidden md:flex bg-white/95 backdrop-blur-md px-6 py-3 border-b border-slate-200 sticky top-0 z-40 items-center justify-between shadow-xs">
+                    <div className="hidden md:flex bg-white/95 backdrop-blur-md px-6 py-3 border-b border-slate-200 sticky top-0 z-40 items-center justify-between shadow-xs shrink-0">
                         {/* Left side */}
                         <div className="flex items-center gap-4">
-                            <button className="text-emerald-800 hover:bg-emerald-50 p-2 rounded-lg transition-colors">
-                                <Menu className="w-6 h-6" />
-                            </button>
                             <div>
                                 <p className="text-[11px] text-slate-500 font-medium">{getGreeting()}</p>
                                 <div className="flex items-center gap-3">
@@ -221,6 +247,24 @@ export default function FarmerLayout() {
 
                         {/* Right side (Profile & Notifications) */}
                         <div className="flex items-center gap-4 ml-4">
+                            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+                                <button
+                                    onClick={() => setIsSunlightMode(!isSunlightMode)}
+                                    className={`p-2 rounded-full transition-colors ${isSunlightMode ? 'bg-amber-100 text-amber-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                    title="Toggle Sunlight Mode"
+                                >
+                                    {isSunlightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                                </button>
+                                {isSupported && (
+                                    <button
+                                        onClick={isListening ? stopListening : startListening}
+                                        className={`p-2 rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'hover:bg-slate-100 text-slate-500'}`}
+                                        title="Voice Commands"
+                                    >
+                                        {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                                    </button>
+                                )}
+                            </div>
                             <div className="relative">
                                 <button
                                     onClick={() => setShowNotifications(!showNotifications)}
