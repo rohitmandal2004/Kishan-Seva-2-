@@ -80,31 +80,8 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const { signOut: clerkSignOut } = useClerk();
 
   const [authState, setAuthState] = useState<AuthState>('AUTH_LOADING');
-  const [user, setUser] = useState<AuthSessionUser | null>(() => {
-    try {
-      const saved = localStorage.getItem('kishan_farmer_profile');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed?.id) {
-          return {
-            id: parsed.clerk_user_id || parsed.id,
-            email: parsed.email,
-            role: 'FARMER',
-          };
-        }
-      }
-    } catch {}
-    return null;
-  });
-  const [farmer, setFarmerState] = useState<FarmerProfile | null>(() => {
-    try {
-      const saved = localStorage.getItem('kishan_farmer_profile');
-      return saved ? JSON.parse(saved) : null;
-    } catch {
-      return null;
-    }
-  });
-
+  const [user, setUser] = useState<AuthSessionUser | null>(null);
+  const [farmer, setFarmerState] = useState<FarmerProfile | null>(null);
   const setFarmer = useCallback((profile: FarmerProfile | null) => {
     setFarmerState(profile);
   }, []);
@@ -260,21 +237,6 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
 
-      // 5. Local storage fallback if profile was cached on this client
-      try {
-        const cached = localStorage.getItem('kishan_farmer_profile');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && (
-            (cleanEmail && parsed.email?.toLowerCase() === cleanEmail) ||
-            (targetClerkId && parsed.clerk_user_id === targetClerkId)
-          )) {
-            setProfileError(null);
-            return await enrichFarmerCrops(parsed);
-          }
-        }
-      } catch {}
-
       // Profile genuinely not found in database
       setProfileError(null);
       return null;
@@ -299,68 +261,97 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
 
     const cleanEmail = email?.trim().toLowerCase();
-
-    // 1. Check admin_profiles
+    
+    let intendedRole: string | null = null;
     try {
-      if (targetClerkId) {
-        const { data: adminByClerk } = await supabase
-          .from('admin_profiles')
-          .select('id')
-          .eq('clerk_user_id', targetClerkId)
-          .maybeSingle();
-        if (adminByClerk) return { role: 'ADMIN', farmerProfile: null };
-      }
-      if (cleanEmail) {
-        const { data: adminByEmail } = await supabase
-          .from('admin_profiles')
-          .select('id')
-          .ilike('email', cleanEmail)
-          .maybeSingle();
-        if (adminByEmail) {
-          if (targetClerkId) {
-            try {
-              await supabase.from('admin_profiles').update({ clerk_user_id: targetClerkId }).eq('id', adminByEmail.id);
-            } catch {}
-          }
-          return { role: 'ADMIN', farmerProfile: null };
-        }
-      }
+      intendedRole = localStorage.getItem('kishan_intended_role');
     } catch {}
 
-    // 2. Check operator_profiles
-    try {
-      if (targetClerkId) {
-        const { data: opByClerk } = await supabase
-          .from('operator_profiles')
-          .select('id')
-          .eq('clerk_user_id', targetClerkId)
-          .maybeSingle();
-        if (opByClerk) return { role: 'OPERATOR', farmerProfile: null };
-      }
-      if (cleanEmail) {
-        const { data: opByEmail } = await supabase
-          .from('operator_profiles')
-          .select('id')
-          .ilike('email', cleanEmail)
-          .maybeSingle();
-        if (opByEmail) {
-          if (targetClerkId) {
-            try {
-              await supabase.from('operator_profiles').update({ clerk_user_id: targetClerkId }).eq('id', opByEmail.id);
-            } catch {}
-          }
-          return { role: 'OPERATOR', farmerProfile: null };
+    const checkAdmin = async () => {
+      try {
+        if (targetClerkId) {
+          const { data: adminByClerk } = await supabase
+            .from('admin_profiles')
+            .select('id')
+            .eq('clerk_user_id', targetClerkId)
+            .maybeSingle();
+          if (adminByClerk) return true;
         }
-      }
-    } catch {}
+        if (cleanEmail) {
+          const { data: adminByEmail } = await supabase
+            .from('admin_profiles')
+            .select('id')
+            .ilike('email', cleanEmail)
+            .maybeSingle();
+          if (adminByEmail) {
+            if (targetClerkId) {
+              try {
+                await supabase.from('admin_profiles').update({ clerk_user_id: targetClerkId }).eq('id', adminByEmail.id);
+              } catch {}
+            }
+            return true;
+          }
+        }
+      } catch {}
+      return false;
+    };
 
-    // 3. Check farmer_profiles
-    const farmerProfile = await fetchFarmerProfile(targetClerkId, cleanEmail);
-    if (farmerProfile) {
-      return { role: 'FARMER', farmerProfile };
+    const checkOperator = async () => {
+      try {
+        if (targetClerkId) {
+          const { data: opByClerk } = await supabase
+            .from('operator_profiles')
+            .select('id')
+            .eq('clerk_user_id', targetClerkId)
+            .maybeSingle();
+          if (opByClerk) return true;
+        }
+        if (cleanEmail) {
+          const { data: opByEmail } = await supabase
+            .from('operator_profiles')
+            .select('id')
+            .ilike('email', cleanEmail)
+            .maybeSingle();
+          if (opByEmail) {
+            if (targetClerkId) {
+              try {
+                await supabase.from('operator_profiles').update({ clerk_user_id: targetClerkId }).eq('id', opByEmail.id);
+              } catch {}
+            }
+            return true;
+          }
+        }
+      } catch {}
+      return false;
+    };
+
+    const checkFarmer = async () => {
+      const farmerProfile = await fetchFarmerProfile(targetClerkId, cleanEmail);
+      if (farmerProfile) {
+        return farmerProfile;
+      }
+      return null;
+    };
+
+    // Prioritize intended role
+    if (intendedRole === 'FARMER') {
+      const p = await checkFarmer();
+      if (p) return { role: 'FARMER', farmerProfile: p };
+    } else if (intendedRole === 'OPERATOR') {
+      if (await checkOperator()) return { role: 'OPERATOR', farmerProfile: null };
+    } else if (intendedRole === 'ADMIN') {
+      if (await checkAdmin()) return { role: 'ADMIN', farmerProfile: null };
     }
 
-    // 4. No profile found in database
+    // Fallbacks if not found in intended role (or intended role is missing)
+    if (intendedRole !== 'ADMIN' && await checkAdmin()) return { role: 'ADMIN', farmerProfile: null };
+    if (intendedRole !== 'OPERATOR' && await checkOperator()) return { role: 'OPERATOR', farmerProfile: null };
+    if (intendedRole !== 'FARMER') {
+      const p = await checkFarmer();
+      if (p) return { role: 'FARMER', farmerProfile: p };
+    }
+
+    // No profile found in database
     return { role: null, farmerProfile: null };
   }, [fetchFarmerProfile]);
 
@@ -487,6 +478,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     setFarmerState(prev => farmerProfile || prev);
     setIsProfileLoading(false);
+    return farmerProfile;
   }, [clerkUser, user, resolveRole, setFarmer]);
 
   const signOut = async () => {
@@ -510,7 +502,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const setDemoRole = (targetRole: AppRole) => {
-    if (import.meta.env.VITE_ENABLE_DEMO_MODE !== 'false') {
+    if (import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
       setDemoRoleState(targetRole);
       const demoId = `demo_${targetRole.toLowerCase()}`;
       setUser({

@@ -87,13 +87,13 @@ export default function OperatorDashboard() {
         </div>
 
         {/* Table Skeleton */}
-        <div className="border border-slate-300 bg-white">
-          <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between">
+        <div className="border-2 border-slate-900 bg-white">
+          <div className="p-4 border-b-2 border-slate-900 bg-slate-100 flex justify-between">
             <div className="h-3 w-48 bg-slate-300 animate-pulse"></div>
           </div>
           <div className="p-4 space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-4">
+              <div key={i} className="flex justify-between items-center border-b-2 border-slate-900 pb-4">
                 <div className="h-4 w-16 bg-slate-200 animate-pulse"></div>
                 <div className="h-4 w-48 bg-slate-200 animate-pulse"></div>
                 <div className="h-4 w-24 bg-slate-300 animate-pulse"></div>
@@ -143,7 +143,7 @@ export default function OperatorDashboard() {
         </div>
 
         {/* 2. PRIMARY ACTION & CURRENT TOKEN (Command Box) */}
-        <div className="border-2 border-slate-900 bg-white mb-8">
+        <div className="border-2 border-slate-900 bg-white mb-12 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
           <div className="p-4 border-b-2 border-slate-900 bg-slate-50 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <h2 className="text-xs font-bold uppercase tracking-widest text-slate-900">{t('immediate_action')}</h2>
             <div className="flex flex-wrap gap-3 text-[10px] font-bold font-mono text-slate-500 uppercase tracking-widest">
@@ -236,8 +236,8 @@ export default function OperatorDashboard() {
         </div>
 
         {/* 3. THE LIVE QUEUE */}
-        <div className="border border-slate-300 bg-white mb-12">
-          <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between items-center">
+        <div className="border-2 border-slate-900 bg-white mb-12 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 border-b-2 border-slate-900 bg-slate-100 flex justify-between items-center">
             <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Live Operational Queue</h3>
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-slate-500">{queueList.length} Farmers Waiting</span>
           </div>
@@ -245,19 +245,19 @@ export default function OperatorDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50/50">
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Token</th>
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Farmer</th>
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Commodity</th>
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Wait Time</th>
-                  <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest text-right">Action</th>
+                <tr className="border-b-2 border-slate-900 bg-white">
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Token</th>
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Farmer</th>
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Commodity</th>
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Status</th>
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Wait Time</th>
+                  <th className="py-4 px-4 font-bold text-[9px] text-slate-900 uppercase tracking-widest text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 font-mono">
+              <tbody className="divide-y-2 divide-slate-900 font-mono">
                 {queueList.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400 font-sans font-bold">No other farmers in the live queue.</td>
+                    <td colSpan={6} className="py-12 text-center text-slate-900 font-sans font-bold uppercase tracking-widest text-xs">No other farmers in the live queue.</td>
                   </tr>
                 ) : queueList.map((booking, index) => {
                   // Mocking wait duration based on index for visual realism
@@ -265,30 +265,30 @@ export default function OperatorDashboard() {
                   const isDelayed = waitTime > 45;
                   
                   return (
-                    <tr key={booking.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-bold text-slate-900">{booking.token_number}</td>
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-slate-900 font-sans">{booking.farmer_name}</div>
-                        <div className="text-[9px] text-slate-500">{booking.farmer_phone}</div>
+                    <tr key={booking.id} className="hover:bg-slate-100 transition-colors">
+                      <td className="py-4 px-4 font-bold text-slate-900 border-r-2 border-slate-900">{booking.token_number}</td>
+                      <td className="py-4 px-4 border-r-2 border-slate-900">
+                        <div className="font-bold text-slate-900 font-sans uppercase tracking-widest text-xs">{booking.farmer_name}</div>
+                        <div className="text-[10px] text-slate-600 font-bold">{booking.farmer_phone}</div>
                       </td>
-                      <td className="py-3 px-4 text-slate-700">
-                        {booking.expected_quantity_q} Q <br/> <span className="text-[9px] text-slate-400">{booking.crop_name}</span>
+                      <td className="py-4 px-4 text-slate-900 font-bold border-r-2 border-slate-900">
+                        {booking.expected_quantity_q} Q <br/> <span className="text-[10px] text-slate-600 uppercase tracking-widest">{booking.crop_name}</span>
                       </td>
-                      <td className="py-3 px-4">
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 border uppercase ${
-                          booking.status === 'BOOKED' ? 'bg-slate-100 text-slate-600 border-slate-300' :
-                          booking.status === 'QUALITY_TESTING' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                          'bg-amber-50 text-amber-700 border-amber-200'
+                      <td className="py-4 px-4 border-r-2 border-slate-900">
+                        <span className={`text-[10px] font-bold px-2 py-1 border-2 uppercase tracking-widest ${
+                          booking.status === 'BOOKED' ? 'bg-slate-100 text-slate-900 border-slate-900' :
+                          booking.status === 'QUALITY_TESTING' ? 'bg-amber-100 text-amber-900 border-amber-900' :
+                          'bg-blue-100 text-blue-900 border-blue-900'
                         }`}>
-                          [{booking.status.replace('_', ' ')}]
+                          {booking.status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td className={`py-3 px-4 font-bold ${isDelayed ? 'text-amber-600' : 'text-slate-600'}`}>
+                      <td className={`py-4 px-4 font-bold border-r-2 border-slate-900 ${isDelayed ? 'text-amber-600' : 'text-slate-900'}`}>
                         {waitTime}m
                       </td>
-                      <td className="py-3 px-4 text-right">
-                        <button className="text-[10px] font-bold uppercase tracking-widest text-slate-900 underline hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-sm">
-                          {booking.status === 'BOOKED' ? 'Call' : 'Manage'}
+                      <td className="py-4 px-4 text-right">
+                        <button className="text-[10px] font-bold uppercase tracking-widest text-white bg-slate-900 border-2 border-slate-900 hover:bg-white hover:text-slate-900 px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-none">
+                          {booking.status === 'BOOKED' ? 'CALL' : 'MANAGE'}
                         </button>
                       </td>
                     </tr>
@@ -300,7 +300,7 @@ export default function OperatorDashboard() {
         </div>
 
         {/* 4. SECONDARY ANALYTICS */}
-        <div className="border border-slate-300 bg-white p-6">
+        <div className="border-2 border-slate-900 bg-white p-6 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-bold text-slate-900 text-sm uppercase tracking-widest">Queue Analytics (End of Day)</h3>
             <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 font-bold font-mono uppercase tracking-widest">HISTORICAL</span>

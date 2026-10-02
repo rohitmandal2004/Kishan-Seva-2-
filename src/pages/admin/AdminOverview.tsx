@@ -5,7 +5,7 @@ import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { toast } from 'sonner';
-import { LiveMandiHeatmap } from '@/components/ui/LiveMandiHeatmap';
+
 import { useVirtualizer } from '@tanstack/react-virtual';
 import React, { useRef } from 'react';
 
@@ -115,9 +115,9 @@ export default function AdminOverview() {
         </div>
 
         {/* 4-Col Grid Skeleton */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-300 border border-slate-300 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-slate-900 bg-slate-900 mb-8 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="p-5 bg-white h-[140px] flex flex-col justify-between">
+            <div key={i} className="p-6 bg-white h-[140px] flex flex-col justify-between border-[1px] border-slate-900">
               <div className="h-2 w-24 bg-slate-200 animate-pulse"></div>
               <div className="space-y-3">
                 <div className="h-10 w-20 bg-slate-300 animate-pulse"></div>
@@ -130,14 +130,14 @@ export default function AdminOverview() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             {/* Table Skeleton */}
-            <div className="border border-slate-300 bg-white h-[400px]">
-              <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between">
+            <div className="border-2 border-slate-900 bg-white h-[400px] shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+              <div className="p-4 border-b-2 border-slate-900 bg-slate-100 flex justify-between">
                 <div className="h-3 w-48 bg-slate-300 animate-pulse"></div>
                 <div className="h-4 w-16 bg-slate-200 animate-pulse"></div>
               </div>
               <div className="p-4 space-y-4">
                 {[...Array(6)].map((_, i) => (
-                  <div key={i} className="flex justify-between items-center border-b border-slate-100 pb-4">
+                  <div key={i} className="flex justify-between items-center border-b-2 border-slate-900 pb-4">
                     <div className="h-4 w-32 bg-slate-200 animate-pulse"></div>
                     <div className="h-4 w-12 bg-slate-300 animate-pulse"></div>
                     <div className="h-4 w-16 bg-slate-200 animate-pulse"></div>
@@ -147,8 +147,8 @@ export default function AdminOverview() {
               </div>
             </div>
           </div>
-          <div className="border border-slate-300 bg-white h-[500px]">
-            <div className="p-4 border-b border-slate-300 bg-slate-900 flex justify-between">
+          <div className="border-2 border-slate-900 bg-white h-[500px] shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 border-b-2 border-slate-900 bg-slate-900 flex justify-between">
               <div className="h-3 w-32 bg-slate-700 animate-pulse"></div>
               <div className="h-3 w-12 bg-slate-700 animate-pulse"></div>
             </div>
@@ -173,92 +173,92 @@ export default function AdminOverview() {
     <div className="p-4 sm:p-6 md:p-8 max-w-[1400px] mx-auto font-sans text-slate-900 bg-white min-h-screen">
       
       {/* TOP: Command Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-8 gap-4 border-b-2 border-slate-900 pb-4">
         <div>
-          <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">State Agricultural Procurement Command</h1>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none">Apex Real-Time Console</h2>
+          <h1 className="text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white px-2 py-0.5 mb-2 inline-block">State Agricultural Procurement Command</h1>
+          <h2 className="text-2xl sm:text-4xl font-black tracking-tight leading-none uppercase">Apex Real-Time Console</h2>
         </div>
         <div className="flex flex-col items-start sm:items-end gap-2">
           <LiveClock />
-          <div className="flex items-center gap-2 bg-slate-900 px-3 py-1 text-white">
-            <div className="w-2 h-2 rounded-none bg-emerald-400"></div>
+          <div className="flex items-center gap-2 bg-emerald-100 border-2 border-emerald-900 px-3 py-1 text-emerald-900 font-black text-[10px] uppercase tracking-widest">
+            <div className="w-2 h-2 rounded-none bg-emerald-600 animate-pulse"></div>
             <SyncStatus />
           </div>
           <button 
             onClick={handleExportData}
-            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-900 px-3 py-1 text-xs font-bold uppercase tracking-widest transition-colors border border-slate-300"
+            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 text-[10px] font-black uppercase tracking-widest transition-colors border-2 border-slate-900 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px]"
           >
-            <Download className="w-4 h-4" /> Export CSV
+            <Download className="w-4 h-4" /> EXPORT CSV
           </button>
         </div>
       </div>
 
       {/* Global Alert Strip - Dynamically bound to data */}
       {overloadedCentres.length > 0 && (
-        <div className="w-full bg-amber-50 border border-amber-200 border-l-4 border-l-amber-500 p-3 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="bg-amber-900 text-amber-50 font-mono text-[10px] font-bold px-1.5 py-0.5 tracking-widest uppercase">CRITICAL</span>
-            <span className="text-sm font-bold text-amber-900">{overloadedCentres.length} Procurement Centres are approaching queue capacity overload.</span>
+        <div className="w-full bg-amber-50 border-2 border-amber-900 p-4 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-[4px_4px_0px_rgba(120,53,15,1)]">
+          <div className="flex items-center gap-4">
+            <span className="bg-amber-900 text-amber-50 font-black text-[10px] px-2 py-1 tracking-widest uppercase">CRITICAL</span>
+            <span className="text-sm font-black text-amber-900 uppercase tracking-widest">{overloadedCentres.length} Procurement Centres are approaching queue capacity overload.</span>
           </div>
-          <button className="text-xs font-bold text-amber-700 underline uppercase tracking-wider hover:text-amber-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-900 focus-visible:ring-offset-2 focus-visible:ring-offset-amber-50 rounded-sm">Take Action</button>
+          <button className="text-[10px] bg-amber-900 text-amber-50 px-4 py-2 font-black uppercase tracking-widest hover:bg-amber-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-900 focus-visible:ring-offset-2 transition-colors border-2 border-transparent">TAKE ACTION</button>
         </div>
       )}
 
       {/* PRIMARY OPERATIONS: 4-Col Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-300 border border-slate-300 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 bg-slate-900 border-2 border-slate-900 mb-12 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
         
         {/* Metric 1 */}
-        <div className="p-5 bg-white flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Total Farmers Today</span>
+        <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Total Farmers Today</span>
           <div>
-            <div className="flex items-baseline gap-1">
-              <h3 className="text-4xl font-mono tabular-nums font-black tracking-tighter">{stats.totalBookings}</h3>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-5xl font-mono tabular-nums font-black tracking-tighter text-slate-900">{stats.totalBookings}</h3>
             </div>
-            <p className="text-[10px] text-emerald-600 font-mono font-bold mt-2 uppercase tracking-wide">
+            <p className="text-[10px] text-white bg-emerald-900 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-emerald-950">
               {stats.completedBookings} Completed
             </p>
           </div>
         </div>
 
         {/* Metric 2 */}
-        <div className="p-5 bg-white flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Active Queues</span>
+        <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Active Queues</span>
           <div>
-            <div className="flex items-baseline gap-1">
-              <h3 className="text-4xl font-mono tabular-nums font-black tracking-tighter">{stats.inQueueCount}</h3>
-              <span className="text-xs font-bold text-slate-400 font-sans tracking-wide">VEHICLES</span>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-5xl font-mono tabular-nums font-black tracking-tighter text-slate-900">{stats.inQueueCount}</h3>
+              <span className="text-xs font-black text-slate-500 uppercase tracking-widest">VEHICLES</span>
             </div>
-            <p className="text-[10px] text-amber-600 font-mono font-bold mt-2 uppercase tracking-wide">
+            <p className="text-[10px] text-amber-900 bg-amber-100 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-amber-900">
               AVG WAIT: 42 MINS
             </p>
           </div>
         </div>
 
         {/* Metric 3 */}
-        <div className="p-5 bg-white flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Procurement Completed</span>
+        <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Procurement Completed</span>
           <div>
-            <div className="flex items-baseline gap-1">
-              <h3 className="text-4xl font-mono tabular-nums font-black tracking-tighter">{stats.totalProcuredQuintals.toLocaleString('en-IN')}</h3>
-              <span className="text-xs font-bold text-slate-400 font-sans tracking-wide">Q</span>
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-5xl font-mono tabular-nums font-black tracking-tighter text-slate-900">{stats.totalProcuredQuintals.toLocaleString('en-IN')}</h3>
+              <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Q</span>
             </div>
-            <div className="w-full h-1 bg-slate-100 mt-3 relative">
+            <div className="w-full h-2 bg-slate-100 mt-4 relative border-2 border-slate-900">
               <div className="absolute top-0 left-0 h-full bg-slate-900" style={{ width: '45%' }}></div>
             </div>
-            <p className="text-[9px] text-slate-500 font-bold mt-1 text-right tracking-widest uppercase">45% of Daily Target</p>
+            <p className="text-[10px] text-slate-900 font-black mt-2 text-right tracking-widest uppercase">45% of Daily Target</p>
           </div>
         </div>
 
         {/* Metric 4 */}
-        <div className="p-5 bg-white flex flex-col justify-between">
-          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Centres Requiring Attention</span>
+        <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+          <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest mb-6">Centres Requiring Attention</span>
           <div>
-            <div className="flex items-baseline gap-1">
-              <h3 className="text-4xl font-mono tabular-nums font-black tracking-tighter text-amber-600">
+            <div className="flex items-baseline gap-2">
+              <h3 className="text-5xl font-mono tabular-nums font-black tracking-tighter text-amber-600">
                 {centres.filter(c => c.current_queue_length > (c.daily_capacity_quintals * 0.05)).length}
               </h3>
             </div>
-            <p className="text-[10px] text-amber-600 font-mono font-bold mt-2 uppercase tracking-wide">
+            <p className="text-[10px] text-red-100 bg-red-900 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-red-950">
               OVERLOAD RISK
             </p>
           </div>
@@ -271,24 +271,25 @@ export default function AdminOverview() {
         <div className="lg:col-span-2 space-y-8 flex flex-col">
           
           {/* CENTRE OPERATIONS: High-Density Table */}
-          <div className="border border-slate-300 bg-white">
-            <div className="p-4 border-b border-slate-300 bg-slate-50 flex justify-between items-center">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Centre Performance & Queue Load</h3>
-              <button className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 border border-slate-200 px-2 py-1 bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-sm">Export CSV</button>
+          {/* CENTRE OPERATIONS: High-Density Table */}
+          <div className="border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 border-b-2 border-slate-900 bg-slate-100 flex justify-between items-center">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">Centre Performance & Queue Load</h3>
+              <button className="text-[10px] font-black uppercase tracking-widest text-slate-900 hover:text-white border-2 border-slate-900 px-3 py-1 bg-white hover:bg-slate-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-1 rounded-none">EXPORT CSV</button>
             </div>
             <div ref={parentRef} className="overflow-x-auto max-h-[400px] overflow-y-auto relative no-scrollbar">
               <table className="w-full text-left text-xs min-w-full table-fixed">
                 <thead className="sticky top-0 z-10">
-                  <tr className="border-b border-slate-200 bg-slate-50">
-                    <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest w-16">Status</th>
-                    <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Centre</th>
-                    <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest text-right">Queue</th>
-                    <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest">Wait Time</th>
-                    <th className="py-3 px-4 font-bold text-[9px] text-slate-400 uppercase tracking-widest w-48">Capacity Utilization</th>
+                  <tr className="border-b-2 border-slate-900 bg-white">
+                    <th className="py-4 px-4 font-black text-[9px] text-slate-900 uppercase tracking-widest w-16 border-r-2 border-slate-900">Status</th>
+                    <th className="py-4 px-4 font-black text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Centre</th>
+                    <th className="py-4 px-4 font-black text-[9px] text-slate-900 uppercase tracking-widest text-right border-r-2 border-slate-900">Queue</th>
+                    <th className="py-4 px-4 font-black text-[9px] text-slate-900 uppercase tracking-widest border-r-2 border-slate-900">Wait Time</th>
+                    <th className="py-4 px-4 font-black text-[9px] text-slate-900 uppercase tracking-widest w-48">Capacity Utilization</th>
                   </tr>
                 </thead>
                 <tbody 
-                    className="divide-y divide-slate-100 font-sans" 
+                    className="divide-y-2 divide-slate-900 font-sans" 
                     style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}
                 >
                   {rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -300,34 +301,34 @@ export default function AdminOverview() {
                     return (
                       <tr 
                         key={centre.id} 
-                        className="hover:bg-slate-50 transition-colors absolute top-0 left-0 w-full"
+                        className="hover:bg-slate-100 transition-colors absolute top-0 left-0 w-full"
                         style={{
                             height: `${virtualRow.size}px`,
                             transform: `translateY(${virtualRow.start}px)`,
                         }}
                       >
-                        <td className="py-3 px-4 w-16">
-                          <div className={`w-2 h-2 rounded-none ${centre.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
+                        <td className="py-4 px-4 w-16 border-r-2 border-slate-900">
+                          <div className={`w-3 h-3 rounded-none border-2 border-slate-900 ${centre.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
                         </td>
-                        <td className="py-3 px-4">
-                          <div className="font-bold text-slate-900 truncate">{centre.name}</div>
-                          <div className="font-mono text-[9px] text-slate-500">{centre.centre_code}</div>
+                        <td className="py-4 px-4 border-r-2 border-slate-900">
+                          <div className="font-black text-slate-900 uppercase tracking-widest truncate">{centre.name}</div>
+                          <div className="font-mono text-[9px] font-bold text-slate-600">{centre.centre_code}</div>
                         </td>
-                        <td className={`py-3 px-4 font-mono tabular-nums text-right font-bold ${isOverloaded ? 'text-amber-600' : 'text-slate-700'}`}>
+                        <td className={`py-4 px-4 font-mono tabular-nums text-right font-black border-r-2 border-slate-900 ${isOverloaded ? 'text-amber-600' : 'text-slate-900'}`}>
                           {centre.current_queue_length}
                         </td>
-                        <td className="py-3 px-4 font-mono tabular-nums text-slate-600">
+                        <td className="py-4 px-4 font-mono tabular-nums font-bold text-slate-900 border-r-2 border-slate-900">
                           {centre.est_wait_time_mins}m
                         </td>
-                        <td className="py-3 px-4 w-48">
+                        <td className="py-4 px-4 w-48">
                           <div className="flex items-center gap-3">
-                            <div className="w-full h-[1px] bg-slate-200 relative">
+                            <div className="w-full h-2 bg-slate-100 border-2 border-slate-900 relative">
                               <div 
                                 className={`absolute top-0 left-0 h-full ${isOverloaded ? 'bg-amber-500' : 'bg-slate-900'}`} 
                                 style={{ width: `${utilPercent}%` }}
                               ></div>
                             </div>
-                            <span className="font-mono tabular-nums text-[10px] w-8 text-right font-bold inline-block">{utilPercent}%</span>
+                            <span className="font-mono tabular-nums text-[10px] w-8 text-right font-black inline-block">{utilPercent}%</span>
                           </div>
                         </td>
                       </tr>
@@ -336,50 +337,50 @@ export default function AdminOverview() {
                 </tbody>
               </table>
             </div>
-            <div className="p-3 border-t border-slate-200 bg-slate-50 text-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 rounded-sm px-2 py-1">Virtualization Active ({centres.length} Centres)</span>
+            <div className="p-3 border-t-2 border-slate-900 bg-slate-100 text-center">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-none px-2 py-1">Virtualization Active ({centres.length} Centres)</span>
             </div>
           </div>
 
           {/* TRENDS: 3-Col Compact Charts */}
-          <div className="border border-slate-300 bg-white">
-            <div className="p-4 border-b border-slate-300 bg-slate-50">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">System Velocity (7-Day Trends)</h3>
+          <div className="border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+            <div className="p-4 border-b-2 border-slate-900 bg-slate-100">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-900">System Velocity (7-Day Trends)</h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-200">
-              <div className="p-5">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Procurement Velocity</p>
-                <div className="flex items-end gap-2 mb-3">
-                  <span className="text-2xl font-mono tabular-nums font-black text-slate-900">14.2K</span>
-                  <span className="text-[10px] font-bold font-mono text-emerald-600 mb-1">+12%</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y-2 md:divide-y-0 md:divide-x-2 divide-slate-900">
+              <div className="p-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2">Procurement Velocity</p>
+                <div className="flex items-end gap-2 mb-4">
+                  <span className="text-3xl font-mono tabular-nums font-black text-slate-900">14.2K</span>
+                  <span className="text-[10px] font-black font-mono text-emerald-600 mb-1">+12%</span>
                 </div>
-                <div className="w-full h-8 flex items-end gap-1">
+                <div className="w-full h-10 flex items-end gap-1 border-b-2 border-slate-900 pb-1">
                   {[40, 55, 45, 60, 75, 65, 80].map((h, i) => (
-                    <div key={i} className="flex-1 bg-slate-200" style={{ height: `${h}%` }}></div>
+                    <div key={i} className="flex-1 bg-slate-900" style={{ height: `${h}%` }}></div>
                   ))}
                 </div>
               </div>
-              <div className="p-5">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Avg Wait Time</p>
-                <div className="flex items-end gap-2 mb-3">
-                  <span className="text-2xl font-mono tabular-nums font-black text-slate-900">42m</span>
-                  <span className="text-[10px] font-bold font-mono text-amber-600 mb-1">+5m</span>
+              <div className="p-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2">Avg Wait Time</p>
+                <div className="flex items-end gap-2 mb-4">
+                  <span className="text-3xl font-mono tabular-nums font-black text-slate-900">42m</span>
+                  <span className="text-[10px] font-black font-mono text-amber-600 mb-1">+5m</span>
                 </div>
-                <div className="w-full h-8 flex items-end gap-1">
+                <div className="w-full h-10 flex items-end gap-1 border-b-2 border-slate-900 pb-1">
                   {[30, 32, 35, 45, 50, 42, 42].map((h, i) => (
-                    <div key={i} className="flex-1 bg-amber-200" style={{ height: `${h}%` }}></div>
+                    <div key={i} className="flex-1 bg-amber-500" style={{ height: `${h}%` }}></div>
                   ))}
                 </div>
               </div>
-              <div className="p-5">
-                <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Active Centres</p>
-                <div className="flex items-end gap-2 mb-3">
-                  <span className="text-2xl font-mono tabular-nums font-black text-slate-900">{stats.activeCentres}</span>
-                  <span className="text-[10px] font-bold font-mono text-slate-400 mb-1">STABLE</span>
+              <div className="p-6">
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 mb-2">Active Centres</p>
+                <div className="flex items-end gap-2 mb-4">
+                  <span className="text-3xl font-mono tabular-nums font-black text-slate-900">{stats.activeCentres}</span>
+                  <span className="text-[10px] font-black font-mono text-slate-500 mb-1">STABLE</span>
                 </div>
-                <div className="w-full h-8 flex items-end gap-1">
+                <div className="w-full h-10 flex items-end gap-1 border-b-2 border-slate-900 pb-1">
                   {[100, 100, 100, 95, 100, 100, 100].map((h, i) => (
-                    <div key={i} className="flex-1 bg-slate-800" style={{ height: `${h}%` }}></div>
+                    <div key={i} className="flex-1 bg-slate-900" style={{ height: `${h}%` }}></div>
                   ))}
                 </div>
               </div>
@@ -387,115 +388,134 @@ export default function AdminOverview() {
           </div>
           </div>
 
-          <div className="mt-8">
-            <LiveMandiHeatmap />
+          <div className="mt-8 border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+            <div className="flex items-center justify-center h-full bg-slate-100 text-slate-500 font-bold uppercase tracking-widest border-2 border-slate-900 border-dashed">
+              Map Visualization Offline
+            </div>
           </div>
 
         </div>
 
         {/* Right Column (ALERTS & Exceptions) */}
-        <div className="border border-slate-300 bg-white flex flex-col h-full min-h-[500px]">
-          <div className="p-4 border-b border-slate-300 bg-slate-900 text-white flex justify-between items-center">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-300">Action Required</h3>
-            <span className="bg-red-500 text-white text-[9px] font-bold font-mono px-1.5 py-0.5">4 ALERTS</span>
+        <div className="border-2 border-slate-900 bg-white flex flex-col h-full min-h-[500px] shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+          <div className="p-4 border-b-2 border-slate-900 bg-slate-900 text-white flex justify-between items-center">
+            <h3 className="text-xs font-black uppercase tracking-widest text-white">Action Required</h3>
+            <span className="bg-red-600 text-white border-2 border-red-950 text-[10px] font-black font-mono px-2 py-0.5">4 ALERTS</span>
           </div>
           
           <div className="flex-1 overflow-auto bg-slate-50">
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y-2 divide-slate-900">
               
               {pendingFarmers.length > 0 && pendingFarmers.map(farmer => (
-                <div key={farmer.id} className="p-4 bg-white hover:bg-slate-50 transition-colors">
+                <div key={farmer.id} className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
                   <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-none mt-1.5 flex-shrink-0"></div>
+                    <div className="w-3 h-3 border-2 border-slate-900 bg-blue-500 rounded-none mt-1 flex-shrink-0"></div>
                     <div className="flex-1">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="text-[9px] font-bold font-mono text-blue-600 bg-blue-50 px-1 border border-blue-200">[VERIFICATION REQUIRED]</span>
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[9px] font-black font-mono text-blue-900 bg-blue-100 px-2 py-0.5 border-2 border-blue-900">[VERIFICATION REQUIRED]</span>
                       </div>
-                      <p className="text-xs font-bold text-slate-900 leading-tight mb-1">{farmer.full_name} ({farmer.farmer_code})</p>
-                      <p className="text-[10px] text-slate-600">Pending verification for Bank Account {farmer.account_number_masked}.</p>
+                      <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">{farmer.full_name} ({farmer.farmer_code})</p>
+                      <p className="text-[10px] font-bold text-slate-700">Pending verification for Bank Account {farmer.account_number_masked}.</p>
                       <button 
                         onClick={() => handleApprove(farmer.id)}
                         disabled={isApproving === farmer.id}
-                        className="mt-2 text-[10px] font-bold uppercase tracking-widest text-emerald-600 hover:text-emerald-700 underline disabled:opacity-50 disabled:no-underline"
+                        className="mt-3 text-[10px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-emerald-600 px-3 py-2 border-2 border-slate-900 transition-colors disabled:opacity-50"
                       >
-                        {isApproving === farmer.id ? 'Approving...' : 'Approve Profile'}
+                        {isApproving === farmer.id ? 'APPROVING...' : 'APPROVE PROFILE'}
                       </button>
                     </div>
                   </div>
                 </div>
               ))}
 
-              {/* Alert 1 */}
-              <div className="p-4 bg-white hover:bg-slate-50 transition-colors">
+              {/* Grievance Ticket Alert */}
+              <div className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
                 <div className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 bg-red-500 rounded-none mt-1.5 flex-shrink-0"></div>
-                  <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-[9px] font-bold font-mono text-red-600 bg-red-50 px-1 border border-red-200">[PAYMENT FAILED]</span>
-                      <span className="text-[9px] font-mono text-slate-400">10m ago</span>
+                  <div className="w-3 h-3 border-2 border-slate-900 bg-red-500 rounded-none mt-1 flex-shrink-0 animate-pulse"></div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] font-black font-mono text-red-900 bg-red-100 px-2 py-0.5 border-2 border-red-900">[GRIEVANCE ESCALATION]</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 leading-tight mb-1">DBT Bounce: Invalid Account</p>
-                    <p className="text-[10px] text-slate-600">Farmer KSP-1032 payment of ₹85,000 bounced at RBI gateway.</p>
-                    <button className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 underline">Review Log</button>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">TKT-2026-0812: Payment Delayed</p>
+                    <p className="text-[10px] font-bold text-slate-700">Treasury processing delayed &gt; 48hrs for Basirhat PC.</p>
+                    <button className="mt-3 text-[10px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 px-3 py-2 border-2 border-slate-900 transition-colors">
+                      REVIEW TICKET
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Alert 1 */}
+              <div className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
+                <div className="flex items-start gap-3">
+                  <div className="w-3 h-3 border-2 border-slate-900 bg-red-500 rounded-none mt-1 flex-shrink-0"></div>
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] font-black font-mono text-red-900 bg-red-100 px-2 py-0.5 border-2 border-red-900">[PAYMENT FAILED]</span>
+                      <span className="text-[9px] font-black font-mono text-slate-500">10m ago</span>
+                    </div>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">DBT Bounce: Invalid Account</p>
+                    <p className="text-[10px] font-bold text-slate-700">Farmer KSP-1032 payment of ₹85,000 bounced at RBI gateway.</p>
+                    <button className="mt-3 text-[10px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 px-3 py-2 border-2 border-slate-900 transition-colors">REVIEW LOG</button>
                   </div>
                 </div>
               </div>
 
               {/* Alert 2 */}
-              <div className="p-4 bg-white hover:bg-slate-50 transition-colors">
+              <div className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
                 <div className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-none mt-1.5 flex-shrink-0"></div>
+                  <div className="w-3 h-3 border-2 border-slate-900 bg-amber-500 rounded-none mt-1 flex-shrink-0"></div>
                   <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-[9px] font-bold font-mono text-amber-600 bg-amber-50 px-1 border border-amber-200">[CAPACITY WARN]</span>
-                      <span className="text-[9px] font-mono text-slate-400">22m ago</span>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] font-black font-mono text-amber-900 bg-amber-100 px-2 py-0.5 border-2 border-amber-900">[CAPACITY WARN]</span>
+                      <span className="text-[9px] font-black font-mono text-slate-500">22m ago</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 leading-tight mb-1">Burdwan-02 Queue Overload</p>
-                    <p className="text-[10px] text-slate-600">Queue capacity reached 98%. Recommended to divert incoming vehicles.</p>
-                    <button className="mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500 underline">Manage Queue</button>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">Burdwan-02 Queue Overload</p>
+                    <p className="text-[10px] font-bold text-slate-700">Queue capacity reached 98%. Recommended to divert incoming vehicles.</p>
+                    <button className="mt-3 text-[10px] font-black uppercase tracking-widest text-white bg-slate-900 hover:bg-slate-800 px-3 py-2 border-2 border-slate-900 transition-colors">MANAGE QUEUE</button>
                   </div>
                 </div>
               </div>
 
               {/* Alert 3 */}
-              <div className="p-4 bg-white hover:bg-slate-50 transition-colors">
+              <div className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
                 <div className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-none mt-1.5 flex-shrink-0"></div>
+                  <div className="w-3 h-3 border-2 border-slate-900 bg-amber-500 rounded-none mt-1 flex-shrink-0"></div>
                   <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-[9px] font-bold font-mono text-amber-600 bg-amber-50 px-1 border border-amber-200">[CAPACITY WARN]</span>
-                      <span className="text-[9px] font-mono text-slate-400">45m ago</span>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] font-black font-mono text-amber-900 bg-amber-100 px-2 py-0.5 border-2 border-amber-900">[CAPACITY WARN]</span>
+                      <span className="text-[9px] font-black font-mono text-slate-500">45m ago</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 leading-tight mb-1">Ranaghat Queue Overload</p>
-                    <p className="text-[10px] text-slate-600">Queue capacity reached 95%. Wait time exceeding 90 mins.</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">Ranaghat Queue Overload</p>
+                    <p className="text-[10px] font-bold text-slate-700">Queue capacity reached 95%. Wait time exceeding 90 mins.</p>
                   </div>
                 </div>
               </div>
 
               {/* Alert 4 */}
-              <div className="p-4 bg-white hover:bg-slate-50 transition-colors">
+              <div className="p-5 bg-white hover:bg-slate-100 transition-colors border-[1px] border-slate-900">
                 <div className="flex items-start gap-3">
-                  <div className="w-1.5 h-1.5 bg-slate-500 rounded-none mt-1.5 flex-shrink-0"></div>
+                  <div className="w-3 h-3 border-2 border-slate-900 bg-slate-900 rounded-none mt-1 flex-shrink-0"></div>
                   <div>
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="text-[9px] font-bold font-mono text-slate-600 bg-slate-100 px-1 border border-slate-200">[SYSTEM]</span>
-                      <span className="text-[9px] font-mono text-slate-400">2h ago</span>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="text-[9px] font-black font-mono text-white bg-slate-900 px-2 py-0.5 border-2 border-slate-950">[SYSTEM]</span>
+                      <span className="text-[9px] font-black font-mono text-slate-500">2h ago</span>
                     </div>
-                    <p className="text-xs font-bold text-slate-900 leading-tight mb-1">API Latency Degraded</p>
-                    <p className="text-[10px] text-slate-600">NIC Gateway response time &gt; 2000ms. Transactions may be delayed.</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-slate-900 leading-tight mb-2">API Latency Degraded</p>
+                    <p className="text-[10px] font-bold text-slate-700">NIC Gateway response time &gt; 2000ms. Transactions may be delayed.</p>
                   </div>
                 </div>
               </div>
 
             </div>
           </div>
-          <div className="p-4 border-t border-slate-200 bg-white mt-auto">
-            <button className="w-full text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors py-2.5 border border-slate-300 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 rounded-sm">
-              View Action Center
+          <div className="p-4 border-t-2 border-slate-900 bg-white mt-auto">
+            <button className="w-full text-[10px] font-black uppercase tracking-widest text-slate-900 hover:text-white bg-white hover:bg-slate-900 transition-colors py-3 border-2 border-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 rounded-none">
+              VIEW ACTION CENTER
             </button>
           </div>
         </div>
       </div>
-    </div>
+    
   );
 }

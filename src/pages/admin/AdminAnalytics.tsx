@@ -75,80 +75,73 @@ export default function AdminAnalytics() {
   }, []);
 
   return (
-  <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+  <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-8 font-sans bg-white min-h-screen text-slate-900">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-2 border-slate-900 pb-4">
   <div>
-  <h1 className="text-2xl font-black text-slate-900">Analytics & Reports</h1>
-  <p className="text-slate-500 text-sm mt-1">Statewide procurement insights and financial disbursals.</p>
+  <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">State Agricultural Procurement Command</h1>
+  <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none">Analytics & Reports</h2>
+  <p className="text-slate-600 text-sm font-mono mt-2">Statewide procurement insights and financial disbursals.</p>
   </div>
-  <div className="flex items-center gap-2 bg-white px-3 py-1.5 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 shadow-sm">
-  <Calendar className="w-4 h-4 text-slate-500" />
+  <div className="flex items-center gap-2 bg-slate-900 px-4 py-2 text-sm font-bold text-white uppercase tracking-widest">
+  <Calendar className="w-4 h-4" />
   Last 7 Days
   </div>
   </div>
 
   {/* KPI Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
-  <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
-  <Sprout className="w-6 h-6" />
+  <div className="grid grid-cols-1 md:grid-cols-5 gap-0 border-2 border-slate-900 bg-slate-900">
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 last:border-none min-h-[120px]">
+  <div className="flex items-center justify-between mb-4">
+  <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-emerald-100 px-2 py-0.5">Total Procured</p>
+  <Sprout className="w-5 h-5 text-emerald-700" />
   </div>
-  <div>
-  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Procured</p>
-  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
+  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
   </div>
-  </Card>
 
-  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
-  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
-  <TrendingUp className="w-6 h-6" />
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="flex items-center justify-between mb-4">
+  <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-blue-100 px-2 py-0.5">DBT Disbursed</p>
+  <TrendingUp className="w-5 h-5 text-blue-700" />
   </div>
-  <div>
-  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">DBT Disbursed</p>
-  <h3 className="text-xl font-black text-slate-900 font-mono">₹{stats.totalDisbursedCrores} Cr</h3>
+  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">₹{stats.totalDisbursedCrores} Cr</h3>
   </div>
-  </Card>
 
-  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
-  <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 shrink-0">
-  <Users className="w-6 h-6" />
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="flex items-center justify-between mb-4">
+  <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-amber-100 px-2 py-0.5">Active Farmers</p>
+  <Users className="w-5 h-5 text-amber-700" />
   </div>
-  <div>
-  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Farmers</p>
-  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.totalFarmers.toLocaleString()}</h3>
+  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.totalFarmers.toLocaleString()}</h3>
   </div>
-  </Card>
 
-  <Card className="p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white">
-  <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 shrink-0">
-  <Building2 className="w-6 h-6" />
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="flex items-center justify-between mb-4">
+  <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-purple-100 px-2 py-0.5">Active Mandis</p>
+  <Building2 className="w-5 h-5 text-purple-700" />
   </div>
-  <div>
-  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Active Mandis</p>
-  <h3 className="text-xl font-black text-slate-900 font-mono">{stats.activeCentres} / {centres.length}</h3>
+  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.activeCentres} / {centres.length}</h3>
   </div>
-  </Card>
 
-  <Card className={`p-5 border-slate-200 shadow-sm rounded-2xl flex items-center gap-4 bg-white ${(avgRating && avgRating < 3.0) ? 'border-red-300 bg-red-50' : ''}`}>
-  <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${(avgRating && avgRating < 3.0) ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'}`}>
-  <Star className="w-6 h-6" />
+  <div className={`p-5 flex flex-col justify-between bg-white min-h-[120px] ${(avgRating && avgRating < 3.0) ? 'bg-red-50' : ''}`}>
+  <div className="flex items-center justify-between mb-4">
+  <p className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 ${(avgRating && avgRating < 3.0) ? 'bg-red-900 text-white' : 'bg-orange-100 text-slate-900'}`}>Service Quality</p>
+  <Star className={`w-5 h-5 ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-orange-700'}`} />
   </div>
-  <div>
-  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Service Quality</p>
-  <h3 className={`text-xl font-black font-mono flex items-center gap-1 ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-slate-900'}`}>
+  <h3 className={`text-3xl font-black font-mono tracking-tighter ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-slate-900'}`}>
     {avgRating ? `${avgRating}/5.0` : 'N/A'}
   </h3>
   </div>
-  </Card>
   </div>
 
  {/* Charts Section */}
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  
  {/* Main Area Chart */}
- <Card className="lg:col-span-2 p-6 border-slate-200 shadow-sm rounded-2xl bg-white">
- <h3 className="font-bold text-slate-900 mb-6">Procurement Volume Trend (Quintals)</h3>
- <div className="h-[300px] w-full">
+ <div className="lg:col-span-2 p-0 border-2 border-slate-900 bg-white">
+ <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Procurement Volume Trend (Quintals)</h3>
+ </div>
+ <div className="h-[300px] w-full p-6">
  <ResponsiveContainer width="100%" height="100%">
  <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
  <defs>
@@ -158,22 +151,24 @@ export default function AdminAnalytics() {
  </linearGradient>
  </defs>
  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
- <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
- <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+ <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} dy={10} />
+ <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} />
  <RechartsTooltip 
- contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+ contentStyle={{ borderRadius: '0px', border: '2px solid #0f172a', boxShadow: 'none' }}
  />
  <Area type="monotone" dataKey="procured" stroke="#047857" strokeWidth={3} fillOpacity={1} fill="url(#colorProcured)" />
- <Area type="monotone" dataKey="target" stroke="#cbd5e1" strokeDasharray="5 5" fillOpacity={0} />
+ <Area type="monotone" dataKey="target" stroke="#94a3b8" strokeDasharray="5 5" fillOpacity={0} />
  </AreaChart>
  </ResponsiveContainer>
  </div>
- </Card>
+ </div>
 
  {/* Pie Chart */}
- <Card className="p-6 border-slate-200 shadow-sm rounded-2xl bg-white flex flex-col">
- <h3 className="font-bold text-slate-900 mb-2">Crop Distribution</h3>
- <div className="flex-1 min-h-[200px]">
+ <div className="p-0 border-2 border-slate-900 bg-white flex flex-col">
+ <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Crop Distribution</h3>
+ </div>
+ <div className="flex-1 min-h-[200px] p-6 pb-0">
  <ResponsiveContainer width="100%" height="100%">
  <PieChart>
  <Pie
@@ -182,76 +177,77 @@ export default function AdminAnalytics() {
  outerRadius={80}
  paddingAngle={5}
  dataKey="value"
+ stroke="none"
  >
  {cropData.map((entry, index) => (
  <Cell key={`cell-${index}`} fill={entry.color} />
  ))}
  </Pie>
  <RechartsTooltip 
- contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+ contentStyle={{ borderRadius: '0px', border: '2px solid #0f172a', boxShadow: 'none' }}
  />
  </PieChart>
  </ResponsiveContainer>
  </div>
- <div className="space-y-2 mt-4">
- {cropData.map(c => (
- <div key={c.name} className="flex justify-between items-center text-sm">
- <div className="flex items-center gap-2">
- <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c.color }}></div>
- <span className="text-slate-600 font-medium">{c.name}</span>
+ <div className="space-y-0 p-6 pt-0 mt-4">
+ {cropData.map((c, i) => (
+ <div key={c.name} className={`flex justify-between items-center text-sm py-3 border-slate-200 ${i !== cropData.length - 1 ? 'border-b' : ''}`}>
+ <div className="flex items-center gap-3">
+ <div className="w-3 h-3 rounded-none border border-slate-900" style={{ backgroundColor: c.color }}></div>
+ <span className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">{c.name}</span>
  </div>
- <span className="font-bold text-slate-900">{c.value}%</span>
+ <span className="font-black font-mono text-slate-900">{c.value}%</span>
  </div>
  ))}
  </div>
- </Card>
+ </div>
 
  {/* Bar Chart */}
- <Card className="lg:col-span-3 p-6 border-slate-200 shadow-sm rounded-2xl bg-white">
- <h3 className="font-bold text-slate-900 mb-6">Top Mandis Queue vs Capacity</h3>
- <div className="h-[300px] w-full">
+ <div className="lg:col-span-3 p-0 border-2 border-slate-900 bg-white">
+ <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Top Mandis Queue vs Capacity</h3>
+ </div>
+ <div className="h-[300px] w-full p-6">
  <ResponsiveContainer width="100%" height="100%">
  <BarChart data={centreLoads} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={32}>
  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
- <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
- <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+ <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} dy={10} />
+ <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} />
  <RechartsTooltip 
  cursor={{ fill: '#f1f5f9' }}
- contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+ contentStyle={{ borderRadius: '0px', border: '2px solid #0f172a', boxShadow: 'none' }}
  />
- <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
- <Bar dataKey="queue" name="Active Queue" fill="#ca8a04" radius={[4, 4, 0, 0]} />
- <Bar dataKey="capacity" name="Scaled Capacity" fill="#e2e8f0" radius={[4, 4, 0, 0]} />
+ <Legend iconType="square" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+ <Bar dataKey="queue" name="Active Queue" fill="#ca8a04" radius={[0, 0, 0, 0]} />
+ <Bar dataKey="capacity" name="Scaled Capacity" fill="#94a3b8" radius={[0, 0, 0, 0]} />
  </BarChart>
  </ResponsiveContainer>
  </div>
- </Card>
+ </div>
  
  {/* Expected Arrivals (Next 7 Days) */}
- <Card className="lg:col-span-3 p-6 border-slate-200 shadow-sm rounded-2xl bg-white mt-2">
- <div className="flex justify-between items-start mb-6">
-  <div>
-    <h3 className="font-bold text-slate-900">Pre-Harvest Arrival Forecast (Quintals)</h3>
-    <p className="text-xs text-slate-500">Based on FPO bulk bookings and individual farmer slot bookings.</p>
-  </div>
+ <div className="lg:col-span-3 p-0 border-2 border-slate-900 bg-white mt-4">
+ <div className="p-4 border-b-2 border-slate-900 bg-slate-50 flex justify-between items-center">
+  <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Pre-Harvest Arrival Forecast (Quintals)</h3>
+  <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Based on FPO & Farmer Bookings</span>
  </div>
- <div className="h-[300px] w-full">
+ <div className="h-[300px] w-full p-6">
  <ResponsiveContainer width="100%" height="100%">
  <BarChart data={futureData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barSize={40}>
  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
- <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} dy={10} />
- <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
+ <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} dy={10} />
+ <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#0f172a', fontWeight: 'bold' }} />
  <RechartsTooltip 
  cursor={{ fill: '#f1f5f9' }}
- contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+ contentStyle={{ borderRadius: '0px', border: '2px solid #0f172a', boxShadow: 'none' }}
  />
- <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
- <Bar dataKey="individual" name="Individual Farmers" stackId="a" fill="#3b82f6" />
- <Bar dataKey="fpo" name="FPO / Group Bookings" stackId="a" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+ <Legend iconType="square" wrapperStyle={{ paddingTop: '20px', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} />
+ <Bar dataKey="individual" name="Individual Farmers" stackId="a" fill="#0f172a" />
+ <Bar dataKey="fpo" name="FPO / Group Bookings" stackId="a" fill="#047857" radius={[0, 0, 0, 0]} />
  </BarChart>
  </ResponsiveContainer>
  </div>
- </Card>
+ </div>
  </div>
  </div>
  );

@@ -15,7 +15,7 @@ export function useSpeechRecognition() {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<any>(null);
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { lang } = useLanguage();
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -36,7 +36,7 @@ export function useSpeechRecognition() {
             'gu': 'gu-IN',
             'pa': 'pa-IN'
         };
-        recog.lang = langMap[language] || 'hi-IN';
+        recog.lang = langMap[lang] || 'hi-IN';
 
         recog.onstart = () => {
           setIsListening(true);
@@ -65,7 +65,7 @@ export function useSpeechRecognition() {
         console.warn('Speech Recognition API not supported in this browser.');
       }
     }
-  }, [navigate, language]);
+  }, [navigate, lang]);
 
   const handleVoiceCommand = (command: string) => {
     // Simple keyword matching for navigation across different languages

@@ -3,17 +3,19 @@ import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Calendar, Clock, MapPin, Leaf, Sprout, 
-  FileText, CloudRain, ArrowRight, ShieldCheck, 
+import { Input } from '@/components/ui/input';
+import {
+  Calendar, Clock, MapPin, Leaf, Sprout,
+  FileText, CloudRain, ArrowRight, ShieldCheck,
   Banknote, Download, CheckCircle2, AlertCircle, X, Sparkles,
-  CalendarClock, Ticket, User, Users, PhoneCall,
-  TrendingUp, TrendingDown, Sun, Cloud, Bell, Building, BellRing
+  CalendarClock, Ticket, User, Users, PhoneCall, Truck,
+  TrendingUp, TrendingDown, Sun, Cloud, Bell, Building, BellRing, CreditCard, Edit2
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { Booking as BookingRecord } from '@/types';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { useSupabase } from '@/context/SupabaseContext';
+import { supabase } from '@/lib/supabase';
 import { evaluateCentreRecommendationsAsync } from '@/services/recommendationEngine';
 import { CentreRecommendation } from '@/types';
 import { getCoordinatesForVillage } from '@/services/locationNames';
@@ -30,6 +32,156 @@ import { usePushNotifications, getNotificationPermission } from '@/services/useP
 import { usePwaInstall } from '@/services/usePwaInstall';
 import { SellPredictorWidget } from '@/components/ui/SellPredictorWidget';
 
+const INDIAN_BANKS = [
+  'State Bank of India', 'Punjab National Bank', 'HDFC Bank', 'ICICI Bank', 
+  'Axis Bank', 'Bank of Baroda', 'Canara Bank', 'Union Bank of India', 
+  'Bank of India', 'Indian Bank', 'Central Bank of India', 'Indian Overseas Bank', 
+  'UCO Bank', 'Bank of Maharashtra', 'Kotak Mahindra Bank', 'IndusInd Bank', 
+  'Yes Bank', 'IDBI Bank'
+];
+
+function BankAccountCard() {
+  const { farmer, setFarmer } = useSupabase();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    bank_name: farmer?.bank_name || '',
+    account_number: farmer?.account_number_masked || '',
+    ifsc_code: farmer?.ifsc_code || '',
+  });
+
+  // Update formData when farmer changes
+  useEffect(() => {
+    setFormData({
+      bank_name: farmer?.bank_name || '',
+      account_number: farmer?.account_number_masked || '',
+      ifsc_code: farmer?.ifsc_code || '',
+    });
+  }, [farmer]);
+
+  const handleSave = async () => {
+    if (!farmer?.id) return;
+    setIsSaving(true);
+    try {
+      let newMaskedAccount = formData.account_number;
+      if (newMaskedAccount && !newMaskedAccount.includes('X') && newMaskedAccount.length >= 4) {
+        newMaskedAccount = 'XXXX-XXXX-' + newMaskedAccount.slice(-4);
+      }
+
+      const updatedData = {
+        bank_name: formData.bank_name || undefined,
+        account_number_masked: newMaskedAccount || undefined,
+        ifsc_code: formData.ifsc_code || undefined,
+      };
+
+      await supabase.from('farmer_profiles').update(updatedData).eq('id', farmer.id);
+      
+      setFarmer({ ...farmer, ...updatedData } as any);
+      toast.success('Bank details updated successfully!');
+      setIsEditing(false);
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to update bank details');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const hasBankDetails = !!farmer?.bank_name;
+
+  return (
+    <Card className="p-4 border border-slate-200 bg-white rounded-lg shadow-sm h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+            <Banknote className="w-4 h-4 text-emerald-600" /> Linked Bank Account
+          </h3>
+          <p className="text-[11px] text-slate-500">For DBT payments & subsidies</p>
+        </div>
+        {!isEditing && (
+          <Button onClick={() => setIsEditing(true)} size="sm" variant="ghost" className="h-7 px-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+            <Edit2 className="w-3.5 h-3.5" />
+          </Button>
+        )}
+      </div>
+
+      <div className="flex-1">
+        {isEditing ? (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Bank Name</label>
+              <select 
+                value={formData.bank_name} 
+                onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                className="w-full h-8 px-2 text-xs bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+              >
+                <option value="">Select Bank</option>
+                {INDIAN_BANKS.map(bank => (
+                  <option key={bank} value={bank}>{bank}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">Account Number</label>
+              <Input 
+                value={formData.account_number}
+                onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                placeholder="Enter A/C Number"
+                className="h-8 text-xs rounded-md border-slate-200 bg-slate-50"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-bold text-slate-500 uppercase mb-1 block">IFSC Code</label>
+              <Input 
+                value={formData.ifsc_code}
+                onChange={(e) => setFormData({ ...formData, ifsc_code: e.target.value.toUpperCase() })}
+                placeholder="IFSC Code"
+                className="h-8 text-xs rounded-md border-slate-200 bg-slate-50 uppercase"
+              />
+            </div>
+          </div>
+        ) : hasBankDetails ? (
+          <div className="space-y-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-50 to-emerald-100/50 rounded-lg border border-emerald-100">
+              <div className="flex justify-between items-start mb-2">
+                <span className="font-bold text-slate-900 text-sm">{farmer.bank_name}</span>
+                <Building className="w-4 h-4 text-emerald-600 opacity-50" />
+              </div>
+              <p className="font-mono text-slate-700 text-sm tracking-widest mb-1">{farmer.account_number_masked}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase">IFSC: {farmer.ifsc_code}</p>
+            </div>
+            <div className="flex items-center gap-2 text-[10px] font-medium text-emerald-700 bg-emerald-50 p-2 rounded-md">
+              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
+              <span>Aadhaar-seeded account ready for DBT</span>
+            </div>
+          </div>
+        ) : (
+          <div className="h-full flex flex-col items-center justify-center text-center py-4">
+            <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-2">
+              <CreditCard className="w-5 h-5 text-slate-400" />
+            </div>
+            <p className="text-xs font-bold text-slate-700 mb-1">No Bank Linked</p>
+            <p className="text-[10px] text-slate-500 mb-3 px-4">Add your bank details to receive payments directly.</p>
+            <Button onClick={() => setIsEditing(true)} size="sm" className="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
+              Add Bank Details
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {isEditing && (
+        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
+          <Button onClick={() => setIsEditing(false)} variant="outline" size="sm" className="flex-1 h-8 text-xs" disabled={isSaving}>Cancel</Button>
+          <Button onClick={handleSave} size="sm" className="flex-1 h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white" disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Details'}
+          </Button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 export default function FarmerDashboard() {
   const { t } = useLanguage();
   const store = useKishanData();
@@ -38,7 +190,7 @@ export default function FarmerDashboard() {
   const allBookings = store.getFarmerBookingsForFarmer(farmer?.id, user?.email);
   const completedBookings = allBookings.filter(b => b.status === 'COMPLETED');
   const centres = store.centres;
-  
+
   const [selectedReceipt, setSelectedReceipt] = useState<BookingRecord | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
@@ -91,27 +243,13 @@ export default function FarmerDashboard() {
   if (!farmer) {
     return <PageLoader />;
   }
-  
-  if (store.isLoading) {
-    return (
-      <div className="p-4 md:p-6 max-w-6xl mx-auto w-full space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[1,2,3,4].map(i => (
-            <Skeleton key={i} className="h-[120px] rounded-lg w-full" />
-          ))}
-        </div>
-        <Skeleton className="h-[300px] rounded-lg w-full" />
-        <Skeleton className="h-[160px] rounded-lg w-full" />
-      </div>
-    );
-  }
 
   const totalQuintalsSold = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || b.expected_quantity_q), 0);
   const totalAmountReceived = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_payable || 0), 0);
   const notifications = store.getNotificationsForFarmer(farmer.id, user?.email).slice(0);
 
   const today = new Date();
-  
+
   // Yield Estimator
   const cropMsp = OFFICIAL_MSP_RATES.find(m => m.crop === farmer?.crop_name) || OFFICIAL_MSP_RATES[0];
   const estYieldPerAcre = 18;
@@ -161,7 +299,7 @@ export default function FarmerDashboard() {
               onClick={async () => {
                 await Notification.requestPermission();
                 setPushBannerDismissed(true);
-                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch {}
+                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { }
               }}
               className="text-xs font-bold text-indigo-700 hover:underline shrink-0"
             >
@@ -170,7 +308,7 @@ export default function FarmerDashboard() {
             <button
               onClick={() => {
                 setPushBannerDismissed(true);
-                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch {}
+                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { }
               }}
               className="text-slate-400 hover:text-slate-600"
             >
@@ -180,99 +318,96 @@ export default function FarmerDashboard() {
         )}
 
         {/* TOP ROW: KPI Overview Cards & New Widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg relative overflow-hidden group transition">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-md bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100/50">
-                <Leaf className="w-6 h-6" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+          <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white/80 backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100/50 shadow-sm">
+                <Leaf className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('total_procured')}</span>
-                <p className="text-xl font-semibold text-slate-900 leading-tight truncate">{totalQuintalsSold.toFixed(1)} <span className="text-xs font-semibold text-slate-500">Quintals</span></p>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('total_procured')}</span>
+                <p className="text-2xl font-bold text-slate-900 leading-tight truncate mt-0.5">{totalQuintalsSold.toFixed(1)} <span className="text-xs font-semibold text-slate-400">Q</span></p>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 ml-[60px] font-medium">{t('historical_sales')}</p>
-            <div className="absolute top-4 right-4 w-7 h-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-500 group-hover:scale-110 transition">
-              <Sparkles className="w-3.5 h-3.5" />
-            </div>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-50 inline-block px-2 py-1 rounded-md">{t('historical_sales')}</p>
+            <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
           </Card>
 
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-white/90 backdrop-blur-sm rounded-lg relative overflow-hidden group transition">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100/50">
-                <Banknote className="w-6 h-6" />
+          <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white/80 backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100/50 shadow-sm">
+                <Banknote className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">{t('dbt_disbursed')}</span>
-                <p className="text-xl font-semibold text-slate-900 leading-tight truncate">₹{totalAmountReceived.toLocaleString('en-IN')}</p>
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('dbt_disbursed')}</span>
+                <p className="text-2xl font-bold text-slate-900 leading-tight truncate mt-0.5">₹{totalAmountReceived.toLocaleString('en-IN')}</p>
               </div>
             </div>
-            <p className="text-[10px] text-slate-500 ml-[60px] font-medium">Direct Bank Transfer</p>
-            <div className="absolute top-4 right-4 w-7 h-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition">
-              <Banknote className="w-3.5 h-3.5" />
-            </div>
+            <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-widest bg-emerald-50 border border-emerald-100/50 inline-block px-2 py-1 rounded-md">Direct Bank Transfer</p>
+            <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
           </Card>
 
           {/* Yield Estimator */}
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-gradient-to-br from-indigo-50/50 to-white backdrop-blur-sm rounded-lg relative overflow-hidden group transition">
-            <div className="flex justify-between items-start mb-2">
+          <Card className="p-6 border border-indigo-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gradient-to-br from-indigo-50/40 to-white backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
+            <div className="flex justify-between items-start mb-3">
               <div>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1"><Sprout className="w-3 h-3" /> {t('yield_estimator')}</span>
-                <p className="text-lg font-semibold text-slate-900 mt-1">{expectedTotalQuintals.toFixed(0)} Q <span className="text-xs font-semibold text-slate-500">{t('est_harvest')}</span></p>
+                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1.5"><Sprout className="w-3.5 h-3.5" /> AI Yield Estimator</span>
+                <p className="text-xl font-bold text-slate-900 mt-1.5">{expectedTotalQuintals.toFixed(0)} Q <span className="text-xs font-semibold text-slate-500">{t('est_harvest')}</span></p>
               </div>
-              <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 text-[9px] px-1.5 py-0">{farmer.land_area_acres} Acres</Badge>
+              <Badge className="bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-sm text-[10px] px-2 py-0.5 rounded-full">{farmer.land_area_acres} Acres</Badge>
             </div>
-            <div className="mt-3 pt-3 border-t border-indigo-100/60">
-              <p className="text-[10px] text-slate-500 flex justify-between">
+            <div className="mt-4 pt-4 border-t border-indigo-100/60">
+              <p className="text-[11px] text-slate-500 flex justify-between items-center font-medium">
                 <span>{t('est_msp_value')}</span>
-                <span className="font-bold text-indigo-700">₹{expectedTotalValue.toLocaleString('en-IN')}</span>
+                <span className="font-bold text-indigo-700 text-sm bg-indigo-50 px-2 py-0.5 rounded">₹{expectedTotalValue.toLocaleString('en-IN')}</span>
               </p>
             </div>
           </Card>
 
           {/* Live Market Prices */}
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-gradient-to-br from-emerald-50/50 to-white backdrop-blur-sm rounded-lg relative overflow-hidden group transition">
-            <div className="flex justify-between items-start mb-2">
+          <Card className="p-6 border border-emerald-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gradient-to-br from-emerald-50/40 to-white backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
+            <div className="flex justify-between items-start mb-3">
               <div>
-                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider flex items-center gap-1"><TrendingUp className="w-3 h-3" /> {t('rate_advantage')}</span>
-                <p className="text-lg font-semibold text-emerald-700 mt-1">₹{cropMsp.rate_per_quintal} <span className="text-xs font-semibold text-slate-500">/ Q (MSP)</span></p>
+                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Market Advantage</span>
+                <p className="text-xl font-bold text-emerald-700 mt-1.5">₹{cropMsp.rate_per_quintal} <span className="text-xs font-semibold text-slate-500">/ Q (MSP)</span></p>
               </div>
-              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 text-[9px] px-1.5 py-0">+{Math.round(((cropMsp.rate_per_quintal - openMarketRate) / openMarketRate) * 100)}%</Badge>
+              <Badge className="bg-emerald-500 text-white border border-emerald-600 shadow-sm text-[10px] px-2 py-0.5 rounded-full font-bold">+{Math.round(((cropMsp.rate_per_quintal - openMarketRate) / openMarketRate) * 100)}%</Badge>
             </div>
-            <div className="mt-3 pt-3 border-t border-emerald-100/60">
-              <p className="text-[10px] text-slate-500 flex justify-between">
+            <div className="mt-4 pt-4 border-t border-emerald-100/60">
+              <p className="text-[11px] text-slate-500 flex justify-between items-center font-medium">
                 <span>{t('local_market_rate')}</span>
-                <span className="font-bold text-red-600 flex items-center gap-0.5"><TrendingDown className="w-2.5 h-2.5" /> ₹{openMarketRate.toFixed(0)}</span>
+                <span className="font-bold text-rose-600 flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded border border-rose-100"><TrendingDown className="w-3 h-3" /> ₹{openMarketRate.toFixed(0)}</span>
               </p>
             </div>
           </Card>
         </div>
 
         {/* FULL WIDTH PRICE HISTORY CHART */}
-        <Card className="p-5 border border-slate-200/80 shadow-sm bg-white rounded-lg">
+        <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/90 backdrop-blur-xl rounded-2xl relative z-20">
           <PriceHistoryChart cropName={farmer.crop_name || 'Paddy (Grade A)'} mspRate={cropMsp.rate_per_quintal} />
         </Card>
 
         {/* DECISION CARDS: Active Booking OR Recommendation */}
         {activeBooking ? (
-          <Card className="p-4 sm:p-5 border border-emerald-200/60 bg-white/90 backdrop-blur-md shadow-sm rounded-lg relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-600"></div>
-            
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-md bg-emerald-700 flex items-center justify-center shadow-inner">
-                  <Sprout className="w-6 h-6 text-emerald-100" />
+          <Card className="p-5 sm:p-6 border border-emerald-200/80 bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(16,185,129,0.08)] rounded-2xl relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-emerald-600"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center shadow-lg shadow-emerald-900/20">
+                  <Sprout className="w-7 h-7 text-emerald-50" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full mb-1 inline-block border border-emerald-100">
-                    {t('active_pass')}
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full mb-1.5 inline-flex items-center gap-1.5 border border-emerald-200/50 shadow-sm">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {t('active_pass')}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold text-slate-900">
-                      {activeBooking.crop_name} • {activeBooking.expected_quantity_q} Quintals
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
+                      {activeBooking.crop_name} • {activeBooking.expected_quantity_q} Q
                     </h2>
-                    <Badge className="bg-amber-100/80 text-amber-900 border border-amber-200 font-bold text-[10px] px-2.5 py-0.5 rounded-full backdrop-blur-sm">
-                      <CheckCircle2 className="w-3 h-3 mr-1 inline" /> {activeBooking.status}
+                    <Badge className="bg-amber-100 text-amber-900 border border-amber-200 shadow-sm font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                      {activeBooking.status}
                     </Badge>
                   </div>
                 </div>
@@ -280,45 +415,45 @@ export default function FarmerDashboard() {
 
               <div className="flex items-center gap-3">
                 <Link to="/farmer/queue">
-                  <Button className="bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-lg text-xs font-bold px-5 h-10 shadow-md gap-2 transition-colors transition-transform active:scale-[0.97]">
+                  <Button className="bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-xl text-xs font-bold px-6 h-11 shadow-lg shadow-emerald-900/10 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]">
                     {t('track_queue')} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </Link>
-                <Button variant="outline" onClick={() => setIsQrModalOpen(true)} className="border-emerald-300 text-emerald-800 rounded-lg text-xs font-bold px-4 h-10 gap-2 bg-emerald-50 hover:bg-emerald-100 shadow-sm transition-colors transition-transform active:scale-[0.97]">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="5" height="5" x="3" y="3" rx="1"/><rect width="5" height="5" x="16" y="3" rx="1"/><rect width="5" height="5" x="3" y="16" rx="1"/><path d="M21 16h-3a2 2 0 0 0-2 2v3"/><path d="M21 21v.01"/><path d="M12 7v3a2 2 0 0 1-2 2H7"/><path d="M3 12h.01"/><path d="M12 3h.01"/><path d="M12 16v.01"/><path d="M16 12h1"/><path d="M21 12v.01"/><path d="M12 21v-1"/></svg> Show QR Pass
+                <Button variant="outline" onClick={() => setIsQrModalOpen(true)} className="border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold px-5 h-11 gap-2 bg-emerald-50 hover:bg-emerald-100 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  <Ticket className="w-4 h-4" /> Show QR
                 </Button>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs px-2">
-              <div className="flex gap-3 items-start">
-                <div className="mt-0.5 p-1.5 bg-slate-50 rounded-md border border-slate-100 text-slate-500"><FileText className="w-3.5 h-3.5" /></div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 pt-5 border-t border-slate-100/80 relative z-10">
+              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><FileText className="w-4 h-4" /></div>
                 <div>
-                  <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Token Number</p>
-                  <p className="text-sm font-semibold text-slate-800 mt-0.5">{activeBooking.token_number}</p>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Token No.</p>
+                  <p className="text-sm font-bold text-slate-800 mt-1 font-mono bg-white px-1.5 py-0.5 rounded border border-slate-100 shadow-sm inline-block">{activeBooking.token_number}</p>
                 </div>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="mt-0.5 p-1.5 bg-slate-50 rounded-md border border-slate-100 text-slate-500"><MapPin className="w-3.5 h-3.5" /></div>
+              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><MapPin className="w-4 h-4" /></div>
                 <div>
-                  <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Mandi Centre</p>
-                  <p className="font-bold text-slate-800 mt-0.5 text-[11px] leading-tight pr-4">{activeBooking.centre_name}</p>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Mandi Centre</p>
+                  <p className="font-bold text-slate-800 mt-1 text-xs leading-snug">{activeBooking.centre_name}</p>
                 </div>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="mt-0.5 p-1.5 bg-slate-50 rounded-md border border-slate-100 text-slate-500"><CalendarClock className="w-3.5 h-3.5" /></div>
+              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><CalendarClock className="w-4 h-4" /></div>
                 <div>
-                  <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Scheduled Slot</p>
-                  <p className="font-bold text-slate-800 mt-0.5 text-[11px]">{activeBooking.slot_time}</p>
-                  <p className="text-[10px] text-slate-500 font-medium">Today, {activeBooking.slot_date}</p>
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Schedule</p>
+                  <p className="font-bold text-slate-800 mt-1 text-xs">{activeBooking.slot_time}</p>
+                  <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Today, {activeBooking.slot_date}</p>
                 </div>
               </div>
-              <div className="flex gap-3 items-start">
-                <div className="mt-0.5 p-1.5 bg-slate-50 rounded-md border border-slate-100 text-slate-500"><Ticket className="w-3.5 h-3.5" /></div>
+              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
+                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><Truck className="w-4 h-4" /></div>
                 <div>
-                  <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Vehicle</p>
-                  <p className="font-bold text-slate-800 mt-0.5 text-[11px]">{activeBooking.vehicle_number || '—'}</p>
-                  {!activeBooking.vehicle_number && <p className="text-[10px] text-slate-500 font-medium">Not added</p>}
+                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vehicle</p>
+                  <p className="font-bold text-slate-800 mt-1 text-xs">{activeBooking.vehicle_number || '—'}</p>
+                  {!activeBooking.vehicle_number && <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Not added</p>}
                 </div>
               </div>
             </div>
@@ -334,7 +469,7 @@ export default function FarmerDashboard() {
                 </div>
               </div>
               <div className="grid grid-cols-4 gap-4 pt-4 border-t border-slate-100">
-                {[1,2,3,4].map(i => <Skeleton key={i} className="h-8 rounded" />)}
+                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-8 rounded" />)}
               </div>
             </div>
           ) : bestCentreRec && (
@@ -405,44 +540,44 @@ export default function FarmerDashboard() {
         )}
 
         {/* COMPACT ACTIONS & HELPLINE ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="md:col-span-2 p-4 border border-slate-200 shadow-sm bg-white rounded-lg flex items-center justify-between">
-            <h3 className="font-semibold text-slate-900 text-sm hidden sm:block shrink-0 mr-4">Quick Links</h3>
-            <div className="flex gap-2 w-full justify-between sm:justify-end">
-              <Link to="/farmer/book" className="flex flex-col items-center gap-1.5 group">
-                <div className="w-10 h-10 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-emerald-700 group-hover:bg-emerald-50 transition-colors">
-                  <Calendar className="w-4 h-4" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Card className="md:col-span-2 p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-2xl flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 text-sm hidden sm:block shrink-0 mr-6 tracking-wide">Quick Actions</h3>
+            <div className="flex gap-3 w-full justify-between sm:justify-end">
+              <Link to="/farmer/book" className="flex flex-col items-center gap-2 group">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-emerald-700 group-hover:bg-emerald-50 group-hover:border-emerald-100 group-hover:shadow-md transition-all">
+                  <Calendar className="w-5 h-5" />
                 </div>
-                <span className="text-[9px] text-slate-600 font-semibold text-center">Book Slot</span>
+                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Book Slot</span>
               </Link>
-              <Link to="/farmer/queue" className="flex flex-col items-center gap-1.5 group">
-                <div className="w-10 h-10 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-blue-600 group-hover:bg-blue-50 transition-colors">
-                  <Users className="w-4 h-4" />
+              <Link to="/farmer/queue" className="flex flex-col items-center gap-2 group">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-blue-600 group-hover:bg-blue-50 group-hover:border-blue-100 group-hover:shadow-md transition-all">
+                  <Users className="w-5 h-5" />
                 </div>
-                <span className="text-[9px] text-slate-600 font-semibold text-center">Live Queue</span>
+                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Live Queue</span>
               </Link>
-              <Link to="/farmer/centres" className="flex flex-col items-center gap-1.5 group">
-                <div className="w-10 h-10 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-50 transition-colors">
-                  <MapPin className="w-4 h-4" />
+              <Link to="/farmer/centres" className="flex flex-col items-center gap-2 group">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-amber-600 group-hover:bg-amber-50 group-hover:border-amber-100 group-hover:shadow-md transition-all">
+                  <MapPin className="w-5 h-5" />
                 </div>
-                <span className="text-[9px] text-slate-600 font-semibold text-center">Centres</span>
+                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Centres</span>
               </Link>
-              <Link to="/farmer/dashboard" className="flex flex-col items-center gap-1.5 group">
-                <div className="w-10 h-10 rounded-md bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-100 transition-colors">
-                  <User className="w-4 h-4" />
+              <Link to="/farmer/dashboard" className="flex flex-col items-center gap-2 group">
+                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-slate-600 group-hover:bg-slate-100 group-hover:shadow-md transition-all">
+                  <User className="w-5 h-5" />
                 </div>
-                <span className="text-[9px] text-slate-600 font-semibold text-center">Profile</span>
+                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Profile</span>
               </Link>
             </div>
           </Card>
 
-          <Card className="md:col-span-1 p-4 border border-emerald-100 shadow-sm bg-emerald-50/50 rounded-lg flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200/50 shadow-inner">
-              <PhoneCall className="w-5 h-5" />
+          <Card className="md:col-span-1 p-5 border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-gradient-to-br from-emerald-50/50 to-white rounded-2xl flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200/50 shadow-inner">
+              <PhoneCall className="w-6 h-6" />
             </div>
             <div>
-              <span className="text-[10px] font-bold text-emerald-800">Kisan Helpline</span>
-              <p className="text-lg font-semibold text-slate-900 mt-0.5 tracking-tight">1800-180-1551</p>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-100/50 px-2 py-0.5 rounded">Kisan Helpline</span>
+              <p className="text-xl font-bold text-slate-900 mt-1 tracking-tight">1800-180-1551</p>
             </div>
           </Card>
         </div>
@@ -513,116 +648,121 @@ export default function FarmerDashboard() {
         </div>
 
         {/* RECENT PROCUREMENT HISTORY & PAYMENT TRACKER */}
-        <Card className="p-4 border border-slate-200 bg-white rounded-lg shadow-sm mb-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold text-slate-900 text-sm">Recent Procurement History</h3>
-              <p className="text-[11px] text-slate-500">Track your past sales and DBT payment statuses</p>
-            </div>
-            <span className="text-[11px] font-semibold text-emerald-700">All Records</span>
-          </div>
-
-          <div className="space-y-4">
-            {allBookings.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-                  <Leaf className="w-7 h-7 text-emerald-300" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          <div className="lg:col-span-2">
+            <Card className="p-4 border border-slate-200 bg-white rounded-lg shadow-sm h-full flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="font-semibold text-slate-900 text-sm">Recent Procurement History</h3>
+                  <p className="text-[11px] text-slate-500">Track your past sales and DBT payment statuses</p>
                 </div>
-                <p className="text-slate-700 text-sm font-bold mb-1">No procurement history yet</p>
-                <p className="text-slate-500 text-xs mb-4">Book your first slot to sell your harvest at guaranteed MSP prices.</p>
-                <Link to="/farmer/book">
-                  <Button className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-bold px-6 h-9 shadow-xs gap-1.5 transition-transform active:scale-[0.97]">
-                    <Calendar className="w-3.5 h-3.5" /> Book Your First Slot
-                  </Button>
-                </Link>
+                <span className="text-[11px] font-semibold text-emerald-700">All Records</span>
               </div>
-            ) : (
-              allBookings.map((b) => {
-                const isCompleted = b.status === 'COMPLETED' && b.weighment_data;
-                const stage = isCompleted ? getPaymentStage(b.weighment_data!.dbt_status) : 0;
 
-                return (
-                  <div key={b.id} className="p-4 rounded-md border border-slate-200 bg-white hover:border-emerald-300 shadow-xs transition flex flex-col gap-4">
-                    {/* Header Row */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div className="flex items-center gap-3">
-                        <div className={`px-2.5 py-1.5 rounded-lg font-mono text-xs font-bold shrink-0 ${
-                          isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {b.token_number}
+              <div className="space-y-4 flex-1">
+                {allBookings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
+                      <Leaf className="w-7 h-7 text-emerald-300" />
+                    </div>
+                    <p className="text-slate-700 text-sm font-bold mb-1">No procurement history yet</p>
+                    <p className="text-slate-500 text-xs mb-4">Book your first slot to sell your harvest at guaranteed MSP prices.</p>
+                    <Link to="/farmer/book">
+                      <Button className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-full text-xs font-bold px-6 h-9 shadow-xs gap-1.5 transition-transform active:scale-[0.97]">
+                        <Calendar className="w-3.5 h-3.5" /> Book Your First Slot
+                      </Button>
+                    </Link>
+                  </div>
+                ) : (
+                  allBookings.map((b) => {
+                    const isCompleted = b.status === 'COMPLETED' && b.weighment_data;
+                    const stage = isCompleted ? getPaymentStage(b.weighment_data!.dbt_status) : 0;
+
+                    return (
+                      <div key={b.id} className="p-4 rounded-md border border-slate-200 bg-white hover:border-emerald-300 shadow-xs transition flex flex-col gap-4">
+                        {/* Header Row */}
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`px-2.5 py-1.5 rounded-lg font-mono text-xs font-bold shrink-0 ${isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                              {b.token_number}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-slate-900 text-sm">{b.crop_name} • {b.weighment_data?.net_weight_q || b.expected_quantity_q} Q</h4>
+                              <p className="text-[11px] text-slate-500">{b.centre_name} • {b.slot_date}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${isCompleted ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
+                              }`}>
+                              {b.status}
+                            </span>
+
+                            {isCompleted ? (
+                              <Button onClick={() => setSelectedReceipt(b)} size="sm" variant="outline" className="text-[11px] h-8 rounded-lg border-slate-300 text-slate-700 gap-1.5 px-3">
+                                <FileText className="w-3.5 h-3.5" /> e-Slip
+                              </Button>
+                            ) : (
+                              <Link to="/farmer/queue">
+                                <Button size="sm" className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] h-8 rounded-lg px-4 transition-transform active:scale-[0.97]">Track</Button>
+                              </Link>
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900 text-sm">{b.crop_name} • {b.weighment_data?.net_weight_q || b.expected_quantity_q} Q</h4>
-                          <p className="text-[11px] text-slate-500">{b.centre_name} • {b.slot_date}</p>
-                        </div>
-                      </div>
 
-                      <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${
-                          isCompleted ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : 'bg-amber-50 border-amber-200 text-amber-700'
-                        }`}>
-                          {b.status}
-                        </span>
+                        {/* Payment Tracking Timeline (Only for completed) */}
+                        {isCompleted && b.weighment_data && (
+                          <div className="mt-2 pt-3 border-t border-slate-100 bg-slate-50/50 -mx-2 -mb-2 px-2 pb-2 rounded-b-lg">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 flex items-center gap-2 relative">
+                                {/* Line connecting stages */}
+                                <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-slate-200 -z-10 -translate-y-1/2"></div>
+                                <div className={`absolute top-1/2 left-4 h-0.5 bg-emerald-500 -z-10 -translate-y-1/2 transition-colors duration-200 ease-out`} style={{ width: stage === 3 ? 'calc(100% - 32px)' : stage === 2 ? '50%' : '0%' }}></div>
 
-                        {isCompleted ? (
-                          <Button onClick={() => setSelectedReceipt(b)} size="sm" variant="outline" className="text-[11px] h-8 rounded-lg border-slate-300 text-slate-700 gap-1.5 px-3">
-                            <FileText className="w-3.5 h-3.5" /> e-Slip
-                          </Button>
-                        ) : (
-                          <Link to="/farmer/queue">
-                            <Button size="sm" className="bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] h-8 rounded-lg px-4 transition-transform active:scale-[0.97]">Track</Button>
-                          </Link>
+                                {/* Stage 1: Initiated */}
+                                <div className="flex flex-col items-center gap-1 flex-1">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage >= 1 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'}`}>
+                                    <CheckCircle2 className="w-3 h-3" />
+                                  </div>
+                                  <span className={`text-[9px] font-bold ${stage >= 1 ? 'text-emerald-700' : 'text-slate-500'}`}>Initiated</span>
+                                </div>
+
+                                {/* Stage 2: Treasury */}
+                                <div className="flex flex-col items-center gap-1 flex-1">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage >= 2 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'} ${stage === 2 && 'ring-2 ring-emerald-200 ring-offset-1 animate-pulse'}`}>
+                                    <Building className="w-3 h-3" />
+                                  </div>
+                                  <span className={`text-[9px] font-bold ${stage >= 2 ? 'text-emerald-700' : 'text-slate-500'}`}>Treasury Process</span>
+                                </div>
+
+                                {/* Stage 3: Credited */}
+                                <div className="flex flex-col items-center gap-1 flex-1">
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage === 3 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'}`}>
+                                    <Banknote className="w-3 h-3" />
+                                  </div>
+                                  <span className={`text-[9px] font-bold ${stage === 3 ? 'text-emerald-700' : 'text-slate-500'}`}>Credited</span>
+                                </div>
+                              </div>
+
+                              <div className="w-1/3 text-right">
+                                <span className="text-[10px] font-semibold text-slate-500 block mb-0.5">DBT Value</span>
+                                <span className="text-sm font-semibold text-slate-900">₹{b.weighment_data.net_payable.toLocaleString('en-IN')}</span>
+                              </div>
+                            </div>
+                          </div>
                         )}
                       </div>
-                    </div>
-
-                    {/* Payment Tracking Timeline (Only for completed) */}
-                    {isCompleted && b.weighment_data && (
-                      <div className="mt-2 pt-3 border-t border-slate-100 bg-slate-50/50 -mx-2 -mb-2 px-2 pb-2 rounded-b-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 flex items-center gap-2 relative">
-                            {/* Line connecting stages */}
-                            <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-slate-200 -z-10 -translate-y-1/2"></div>
-                            <div className={`absolute top-1/2 left-4 h-0.5 bg-emerald-500 -z-10 -translate-y-1/2 transition-colors duration-200 ease-out`} style={{ width: stage === 3 ? 'calc(100% - 32px)' : stage === 2 ? '50%' : '0%' }}></div>
-                            
-                            {/* Stage 1: Initiated */}
-                            <div className="flex flex-col items-center gap-1 flex-1">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage >= 1 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'}`}>
-                                <CheckCircle2 className="w-3 h-3" />
-                              </div>
-                              <span className={`text-[9px] font-bold ${stage >= 1 ? 'text-emerald-700' : 'text-slate-500'}`}>Initiated</span>
-                            </div>
-
-                            {/* Stage 2: Treasury */}
-                            <div className="flex flex-col items-center gap-1 flex-1">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage >= 2 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'} ${stage === 2 && 'ring-2 ring-emerald-200 ring-offset-1 animate-pulse'}`}>
-                                <Building className="w-3 h-3" />
-                              </div>
-                              <span className={`text-[9px] font-bold ${stage >= 2 ? 'text-emerald-700' : 'text-slate-500'}`}>Treasury Process</span>
-                            </div>
-
-                            {/* Stage 3: Credited */}
-                            <div className="flex flex-col items-center gap-1 flex-1">
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${stage === 3 ? 'bg-emerald-500 text-white shadow-md' : 'bg-white border-2 border-slate-300 text-slate-500'}`}>
-                                <Banknote className="w-3 h-3" />
-                              </div>
-                              <span className={`text-[9px] font-bold ${stage === 3 ? 'text-emerald-700' : 'text-slate-500'}`}>Credited</span>
-                            </div>
-                          </div>
-                          
-                          <div className="w-1/3 text-right">
-                            <span className="text-[10px] font-semibold text-slate-500 block mb-0.5">DBT Value</span>
-                            <span className="text-sm font-semibold text-slate-900">₹{b.weighment_data.net_payable.toLocaleString('en-IN')}</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
+                    );
+                  })
+                )}
+              </div>
+            </Card>
           </div>
-        </Card>
+          <div className="lg:col-span-1">
+            <BankAccountCard />
+          </div>
+        </div>
 
         {/* Advisory & Guidelines */}
         <div className="p-3 rounded-md bg-amber-50/80 border border-amber-200/80 flex items-start gap-2.5 text-[11px] text-amber-900 mb-6">
@@ -630,7 +770,7 @@ export default function FarmerDashboard() {
           <div>
             <p className="font-bold mb-0.5 text-xs">Government Procurement Advisory (2026 Kharif/Rabi Season)</p>
             <p className="text-amber-800/90 leading-relaxed">
-              Ensure produce moisture is dried below 14% for Grade A certification. 
+              Ensure produce moisture is dried below 14% for Grade A certification.
               All weighments are CCTV monitored. Payment via DBT to Aadhaar-seeded bank within 48 hours.
             </p>
           </div>
@@ -642,7 +782,7 @@ export default function FarmerDashboard() {
       {selectedReceipt && selectedReceipt.weighment_data && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
           <div className="bg-white rounded-md max-w-lg w-full p-5 sm:p-7 shadow-2xl relative animate-in fade-in zoom-in duration-200 max-h-[92vh] overflow-y-auto print-clean-card">
-            <button 
+            <button
               onClick={() => setSelectedReceipt(null)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500 hover:text-slate-700 print-hide"
             >
@@ -703,7 +843,7 @@ export default function FarmerDashboard() {
                 <span className="text-slate-500 font-medium">Tare Weight (खाली वाहन धर्मकांटा वजन):</span>
                 <span className="font-bold font-mono">{selectedReceipt.weighment_data.tare_weight_q} Q</span>
               </div>
-              
+
               <div className="flex justify-between py-2 border-y-2 border-emerald-600 bg-emerald-50 px-2.5 rounded-lg font-bold text-emerald-950">
                 <div>
                   <span className="block font-semibold text-xs sm:text-sm">Certified Net Weight / शुद्ध अनाज वजन</span>
@@ -739,7 +879,7 @@ export default function FarmerDashboard() {
             <div className="p-3 border-2 border-dashed border-emerald-600/40 rounded-lg bg-emerald-50/40 flex items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-2">
                 <div className="w-10 h-10 rounded-full border-2 border-emerald-700 flex items-center justify-center text-emerald-800 font-semibold text-[9px] text-center leading-tight">
-                  MSP<br/>PASS
+                  MSP<br />PASS
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold uppercase text-emerald-900">Department of Food & Public Distribution</p>
@@ -747,8 +887,8 @@ export default function FarmerDashboard() {
                 </div>
               </div>
               <div className="bg-white p-1 rounded-lg border border-emerald-200 shrink-0">
-                <QRCode 
-                  value={`MSP-RECEIPT-${selectedReceipt.weighment_data.slip_number}-${selectedReceipt.weighment_data.net_weight_q}Q`} 
+                <QRCode
+                  value={`MSP-RECEIPT-${selectedReceipt.weighment_data.slip_number}-${selectedReceipt.weighment_data.net_weight_q}Q`}
                   size={48}
                   level="L"
                 />
@@ -756,7 +896,7 @@ export default function FarmerDashboard() {
             </div>
 
             <div className="pt-2 border-t border-slate-200 flex gap-3 print-hide">
-              <Button 
+              <Button
                 onClick={async () => {
                   try {
                     const { generateReceiptPdf } = await import('@/services/receiptGenerator');
@@ -767,8 +907,8 @@ export default function FarmerDashboard() {
                     };
                     toast.promise(
                       generateReceiptPdf(
-                        selectedReceipt, 
-                        selectedReceipt.weighment_data, 
+                        selectedReceipt,
+                        selectedReceipt.weighment_data,
                         paymentData
                       ),
                       {
@@ -785,9 +925,9 @@ export default function FarmerDashboard() {
               >
                 <Download className="w-4 h-4" /> Download / Print Official Slip
               </Button>
-              <Button 
+              <Button
                 onClick={() => setSelectedReceipt(null)}
-                variant="outline" 
+                variant="outline"
                 className="rounded-md text-xs font-bold h-10 px-5 transition"
               >
                 Close
@@ -816,14 +956,14 @@ export default function FarmerDashboard() {
               <p className="text-xs text-slate-500 font-medium mt-1">Scan at weighbridge</p>
             </div>
             <div className="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-4 text-xs">
-               <div>
-                 <span className="text-slate-500 font-medium uppercase text-[9px] tracking-wider">Farmer</span>
-                 <p className="font-bold text-slate-800 truncate">{activeBooking.farmer_name}</p>
-               </div>
-               <div>
-                 <span className="text-slate-500 font-medium uppercase text-[9px] tracking-wider">Crop</span>
-                 <p className="font-bold text-slate-800 truncate">{activeBooking.crop_name}</p>
-               </div>
+              <div>
+                <span className="text-slate-500 font-medium uppercase text-[9px] tracking-wider">Farmer</span>
+                <p className="font-bold text-slate-800 truncate">{activeBooking.farmer_name}</p>
+              </div>
+              <div>
+                <span className="text-slate-500 font-medium uppercase text-[9px] tracking-wider">Crop</span>
+                <p className="font-bold text-slate-800 truncate">{activeBooking.crop_name}</p>
+              </div>
             </div>
           </div>
         </div>

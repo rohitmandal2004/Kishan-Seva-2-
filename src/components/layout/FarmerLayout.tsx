@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     Home, MapPin, CalendarClock, Ticket, Bell, LogOut, PhoneCall,
     User, CreditCard, BookOpen, HelpCircle, ShieldCheck, Sun, Moon, Mic, MicOff, CheckCircle2, Droplets, ArrowDownToLine, Menu, X,
-    WifiOff, Users
+    WifiOff, Users, LineChart, Headset
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
@@ -18,7 +18,7 @@ export default function FarmerLayout() {
     const currentPath = location.pathname;
     const store = useKishanData();
     const activeBooking = store.getActiveFarmerBookingForFarmer(farmer?.id, user?.email);
-    const { t, language } = useLanguage();
+    const { t, lang } = useLanguage();
     const [showNotifications, setShowNotifications] = useState(false);
     const [showProfileMenu, setShowProfileMenu] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function FarmerLayout() {
     useEffect(() => {
         try {
             localStorage.removeItem('kishan_offline_pass');
-        } catch {}
+        } catch { }
         const goOffline = () => setIsOffline(true);
         const goOnline = () => setIsOffline(false);
         window.addEventListener('offline', goOffline);
@@ -79,15 +79,17 @@ export default function FarmerLayout() {
         { icon: CalendarClock, label: 'Book Slot', path: '/farmer/book' },
         { icon: Users, label: 'FPO Bulk Booking', path: '/farmer/bulk-book' },
         { icon: Ticket, label: 'Live Queue', path: '/farmer/queue', badge: activeBooking ? 'Active' : undefined },
+        { icon: LineChart, label: 'Market Insights', path: '/farmer/market' },
         { icon: MapPin, label: 'Procurement Centres', path: '/farmer/centres' },
         { icon: BookOpen, label: 'My Bookings', path: '/farmer/bookings' },
         { icon: CreditCard, label: 'Payments', path: '/farmer/payments' },
         { icon: Bell, label: 'Notifications', path: '/farmer/notifications', count: unreadCount > 0 ? unreadCount : undefined },
+        { icon: Headset, label: 'Helpdesk', path: '/farmer/helpdesk' },
         { icon: HelpCircle, label: 'Help & Support', path: '/farmer/support' },
     ];
 
     return (
-        <div className={`bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col relative ${language === 'en' ? 'font-poppins' : 'font-sans'}`}>
+        <div className={`bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col relative ${lang === 'en' ? 'font-poppins' : 'font-sans'}`}>
             {/* Mobile Top Bar */}
             <div className="md:hidden bg-white/95 backdrop-blur-md px-3.5 py-2.5 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200 shadow-xs">
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -137,7 +139,7 @@ export default function FarmerLayout() {
                         type="button"
                         className="p-2 rounded-full hover:bg-red-50 text-slate-500 hover:text-red-600 transition-colors"
                         title="Sign Out"
-                     aria-label="Sign Out">
+                        aria-label="Sign Out">
                         <LogOut className="w-4 h-4" />
                     </button>
                 </div>
@@ -145,19 +147,17 @@ export default function FarmerLayout() {
 
             <div className="flex-1 flex flex-col md:flex-row w-full md:overflow-hidden min-h-0">
                 {/* Desktop & Tablet Sidebar */}
-                <aside className="hidden md:flex w-56 lg:w-64 shrink-0 flex-col bg-[#0A2E1A] text-white h-full overflow-y-auto shadow-2xl relative z-50 border-r border-emerald-950">
-                    <div className="px-5 py-6 flex items-center gap-3">
-                        <img src="/logo.svg" alt="Kishan Seva" className="h-10 w-10 object-contain drop-shadow-md" />
+                <aside className="hidden md:flex w-64 shrink-0 flex-col bg-[#0b291a] text-white h-full shadow-2xl relative z-50">
+                    <div className="px-6 py-8 flex items-center gap-3">
+                        <img src="/logo.svg" alt="Kishan Seva" className="h-11 w-11 object-contain drop-shadow-md" />
                         <div>
-                            <span className="font-black text-white text-lg tracking-tight leading-tight block">Kishan Seva</span>
-                            <p className="text-emerald-400 text-[10px] font-bold tracking-wide">Farmer Portal</p>
-                            <p className="text-slate-300 text-[8px] leading-tight mt-1">Empowering Farmers<br />A Better Tomorrow</p>
+                            <span className="font-serif font-bold text-white text-xl tracking-tight block leading-none">Kishan Seva</span>
+                            <p className="text-[#34d399] text-xs font-bold tracking-wide mt-1">Farmer Portal</p>
+                            <p className="text-slate-300 text-[9px] leading-tight mt-1 opacity-80">Empowering Farmers<br />A Better Tomorrow</p>
                         </div>
                     </div>
 
-
-
-                    <div className="flex-1 px-3 space-y-0.5 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    <div className="flex-1 px-4 space-y-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = currentPath === item.path;
@@ -165,18 +165,18 @@ export default function FarmerLayout() {
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`group relative flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-colors duration-200 overflow-hidden ${isActive
-                                            ? 'bg-emerald-800/80 text-white font-bold shadow-inner'
-                                            : 'text-emerald-100/70 hover:bg-white/10 hover:text-white'
+                                    className={`group relative flex items-center gap-3.5 px-4 py-3 rounded-[14px] text-sm font-semibold transition-all duration-200 overflow-hidden ${isActive
+                                        ? 'bg-[#0f462e] text-white shadow-sm'
+                                        : 'text-[#8ba797] hover:bg-white/5 hover:text-white'
                                         }`}
                                 >
                                     {isActive && (
-                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-emerald-400 rounded-r-full shadow-[0_0_8px_rgba(52,211,153,0.8)]"></div>
+                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-[60%] bg-[#34d399] rounded-r-full shadow-[0_0_10px_rgba(52,211,153,0.3)]"></div>
                                     )}
-                                    <Icon className={`w-4 h-4 ${isActive ? 'text-emerald-400' : ''}`} />
-                                    <span className="flex-1">{item.label}</span>
+                                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#34d399]' : ''}`} />
+                                    <span className="flex-1 tracking-wide">{item.label}</span>
                                     {item.badge && (
-                                        <span className="px-2 py-0.5 bg-amber-500 text-slate-950 text-[10px] font-extrabold rounded-full animate-pulse">
+                                        <span className="px-2.5 py-0.5 bg-[#f59e0b] text-[#451a03] text-[10px] font-black rounded-full uppercase tracking-wider shadow-sm">
                                             {item.badge}
                                         </span>
                                     )}
@@ -190,14 +190,14 @@ export default function FarmerLayout() {
                         })}
                     </div>
 
-                    <div className="p-4 border-t border-white/5 mt-2">
+                    <div className="p-4 mt-2">
                         {/* Promo Banner */}
-                        <div className="mt-2 rounded-xl overflow-hidden relative border border-emerald-900/50 shadow-inner h-24">
-                            <img src="/sidebar-promo.jpg" alt="Promo" className="absolute inset-0 w-full h-full object-cover" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-[#0A2E1A] via-[#0A2E1A]/60 to-transparent"></div>
-                            <div className="absolute bottom-2 left-2 flex items-center gap-2 z-10">
-                                <img src="/logo.svg" className="w-5 h-5 opacity-90" />
-                                <span className="text-[10px] font-bold text-emerald-100 leading-tight drop-shadow-md">भारत का किसान<br />देश की शान</span>
+                        <div className="rounded-xl overflow-hidden relative border border-[#143e2a] shadow-[0_4px_12px_rgba(0,0,0,0.1)] h-28 group">
+                            <img src="/sidebar-promo.jpg" alt="Promo" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-70 transition-opacity mix-blend-overlay" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0b291a] via-[#0b291a]/40 to-transparent"></div>
+                            <div className="absolute bottom-3 left-3 flex items-center gap-2.5 z-10">
+                                <img src="/logo.svg" className="w-6 h-6 opacity-90 drop-shadow-md" />
+                                <span className="text-[11px] font-black text-emerald-50 leading-tight drop-shadow-md">भारत का किसान<br />देश की शान</span>
                             </div>
                         </div>
                     </div>
@@ -205,75 +205,107 @@ export default function FarmerLayout() {
 
                 {/* Main Content Area */}
                 <main className="flex-1 min-w-0 overflow-y-auto flex flex-col relative bg-[#F5F8F6] h-full">
-                    {/* Desktop Top Bar */}
-                    <div className="hidden md:flex bg-white/95 backdrop-blur-md px-6 py-3 border-b border-slate-200 sticky top-0 z-40 items-center justify-between shadow-xs shrink-0">
-                        {/* Left side */}
-                        <div className="flex items-center gap-4">
-                            <div>
-                                <p className="text-[11px] text-slate-500 font-medium">{getGreeting()}</p>
-                                <div className="flex items-center gap-3">
-                                    <h1 className="text-xl font-black text-slate-900 leading-none flex items-center gap-1.5">
-                                        <span className="text-emerald-700">Namaste, {farmer?.full_name?.split(' ')[0]}</span>
-                                        <span className="text-emerald-600 text-2xl leading-none">{"\u{1F64F}\u{FE0E}"}</span>
-                                    </h1>
-                                    <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                                        <ShieldCheck className="w-3 h-3" /> Verified Farmer
-                                    </span>
+                    {/* Offline Banner */}
+                    {isOffline && (
+                        <div className="bg-orange-50 border-b border-orange-200 px-6 py-3 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="p-1.5 bg-orange-100 rounded-full">
+                                    <WifiOff className="w-4 h-4 text-orange-600" />
                                 </div>
-                                <p className="text-[11px] text-slate-600 font-medium mt-1">
-                                    Farmer Code: <span className="font-mono text-slate-900">{farmer?.farmer_code || 'N/A'}</span> <span className="text-slate-300 mx-1">|</span> Village: {farmer?.village || 'Not set'}, {farmer?.district || 'India'}
-                                </p>
+                                <div>
+                                    <p className="text-sm font-bold text-orange-800">{t('offline_mode') || 'You are currently offline'}</p>
+                                    <p className="text-xs text-orange-600">{t('offline_desc') || 'Showing cached data. You can still access your QR pass.'}</p>
+                                </div>
+                            </div>
+                            {activeBooking && (
+                                <Link to="/farmer/bookings" className="text-xs font-bold text-white bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-full shadow-sm transition-colors">
+                                    View Pass
+                                </Link>
+                            )}
+                        </div>
+                    )}
+                    
+                    {/* Desktop Top Bar */}
+                    <div className="hidden md:flex bg-white/95 backdrop-blur-xl px-8 py-5 border-b border-slate-100 sticky top-0 z-40 items-center justify-between shrink-0 transition-all">
+                        {/* Left side */}
+                        <div className="flex flex-col justify-center">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">{getGreeting()}</p>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl font-black text-slate-900 leading-none tracking-tight flex items-center gap-2">
+                                    Namaste, <span className="text-emerald-700">{farmer?.full_name?.split(' ')[0]}</span>
+                                    <span className="text-2xl leading-none inline-block">{"\u{1F64F}\u{FE0E}"}</span>
+                                </h1>
+                                <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1.5 uppercase tracking-wide">
+                                    <ShieldCheck className="w-3.5 h-3.5" /> Verified Farmer
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2 text-[11px] font-medium text-slate-500">
+                                <span className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded text-slate-700 font-mono">
+                                    {farmer?.farmer_code || 'N/A'}
+                                </span> 
+                                <span className="text-slate-300">•</span> 
+                                <span className="flex items-center gap-1.5">
+                                    <MapPin className="w-3.5 h-3.5 text-slate-400" /> 
+                                    {farmer?.village || 'Not set'}, {farmer?.district || 'India'}
+                                </span>
                             </div>
                         </div>
 
-                        {/* Weather Widget */}
-                        <div className="flex items-center gap-4 bg-slate-50/80 px-4 py-2 rounded-2xl border border-slate-100 shadow-xs">
-                            <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
-                                <Sun className="w-8 h-8 text-amber-500 animate-spin-slow" />
-                                <div>
-                                    <p className="text-lg font-black text-slate-900 leading-none">28°C</p>
-                                    <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Clear Sky</p>
+                        {/* Weather Widget (Static & Premium) */}
+                        <div className="flex items-center gap-5 bg-white border border-slate-100 px-5 py-3 rounded-2xl shadow-sm">
+                            <div className="flex items-center gap-4 pr-5 border-r border-slate-100">
+                                <div className="flex items-center justify-center w-10 h-10 bg-amber-50 rounded-full border border-amber-100/50">
+                                    <Sun className="w-6 h-6 text-amber-500" />
                                 </div>
-                                <div className="flex flex-col gap-0.5 ml-2">
-                                    <span className="text-[9px] text-slate-500 flex items-center gap-1"><MapPin className="w-3 h-3" /> {farmer?.district || 'India'}</span>
+                                <div>
+                                    <p className="text-xl font-black text-slate-900 leading-none tracking-tighter">28°C</p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Clear Sky</p>
                                 </div>
                             </div>
-                            <div className="flex flex-col gap-1 text-[10px] font-semibold text-slate-600">
-                                <span className="flex items-center gap-1.5"><Droplets className="w-3.5 h-3.5 text-blue-500" /> Humidity 42%</span>
-                                <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Good for Harvesting</span>
-                                <span className="flex items-center gap-1.5"><ArrowDownToLine className="w-3.5 h-3.5 text-emerald-700" /> Grade A (14% Moisture)</span>
+                            <div className="flex flex-col gap-1.5 text-[10px] font-semibold text-slate-600">
+                                <span className="flex items-center gap-2"><Droplets className="w-3.5 h-3.5 text-blue-400" /> Humidity 42%</span>
+                                <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Good for Harvesting</span>
+                                <span className="flex items-center gap-2"><ArrowDownToLine className="w-3.5 h-3.5 text-emerald-600" /> Grade A (14% Moisture)</span>
                             </div>
                         </div>
 
                         {/* Right side (Profile & Notifications) */}
-                        <div className="flex items-center gap-4 ml-4">
-                            <div className="flex items-center gap-2 border-r border-slate-200 pr-4">
+                        <div className="flex items-center gap-4 ml-2">
+                            <div className="flex items-center gap-1 bg-white border border-slate-100 p-1 rounded-full shadow-sm">
                                 <button
                                     onClick={() => setIsSunlightMode(!isSunlightMode)}
-                                    className={`p-2 rounded-full transition-colors ${isSunlightMode ? 'bg-amber-100 text-amber-600' : 'hover:bg-slate-100 text-slate-500'}`}
+                                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors ${isSunlightMode ? 'bg-amber-50 text-amber-600' : 'hover:bg-slate-50 text-slate-500'}`}
                                     title="Toggle Sunlight Mode"
                                 >
-                                    {isSunlightMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                                    {isSunlightMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                                 </button>
                                 {isSupported && (
                                     <button
                                         onClick={isListening ? stopListening : startListening}
-                                        className={`p-2 rounded-full transition-colors ${isListening ? 'bg-red-100 text-red-600 animate-pulse' : 'hover:bg-slate-100 text-slate-500'}`}
+                                        className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors ${isListening ? 'bg-red-50 text-red-600' : 'hover:bg-slate-50 text-slate-500'}`}
                                         title="Voice Commands"
                                     >
-                                        {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                                        {isListening ? <Mic className="w-4 h-4" /> : <MicOff className="w-4 h-4" />}
                                     </button>
                                 )}
                             </div>
+
+                            <div className="w-px h-8 bg-slate-200"></div>
+                            
+                            <LanguageSelector variant="pill" className="h-11 px-3 !bg-white hover:!bg-slate-50" />
+
+                            <div className="w-px h-8 bg-slate-200"></div>
+
+                            {/* Notifications */}
                             <div className="relative">
                                 <button
                                     onClick={() => setShowNotifications(!showNotifications)}
-                                    className="p-2 rounded-full hover:bg-slate-100 text-slate-700 transition-colors"
+                                    className="w-11 h-11 flex items-center justify-center rounded-full bg-white border border-slate-100 shadow-sm hover:shadow-md text-emerald-600 transition-all"
                                 >
-                                    <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><title>Bell Ring</title><g><animateTransform attributeName="transform" type="rotate" values="0 12 5;10 12 5;-10 12 5;7 12 5;-5 12 5;2 12 5;0 12 5;0 12 5" keyTimes="0;0.05;0.12;0.19;0.26;0.33;0.42;1" dur="2.6s" repeatCount="indefinite"></animateTransform><path d="M18 9.6a6 6 0 1 0-12 0c0 4.4-1.5 5.5-1.9 6.1a.6.6 0 0 0 .5.9h14.8a.6.6 0 0 0 .5-.9c-.4-.6-1.9-1.7-1.9-6.1Z"></path></g><path d="M10.1 19.6a2.2 2.2 0 0 0 3.8 0"><animateTransform attributeName="transform" type="rotate" values="0 12 17;14 12 17;-14 12 17;10 12 17;-7 12 17;3 12 17;0 12 17;0 12 17" keyTimes="0;0.07;0.15;0.22;0.29;0.36;0.45;1" dur="2.6s" repeatCount="indefinite"></animateTransform></path></svg>
+                                    <Bell className="w-5 h-5" />
                                 </button>
                                 {unreadCount > 0 && (
-                                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                    <span className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
                                 )}
 
                                 {/* Notification Dropdown */}
@@ -322,18 +354,18 @@ export default function FarmerLayout() {
                             <div className="relative">
                                 <div
                                     onClick={() => setShowProfileMenu(!showProfileMenu)}
-                                    className="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-slate-100 py-1.5 px-2 rounded-full border border-slate-200 transition-colors"
+                                    className="flex items-center gap-2 cursor-pointer bg-white hover:bg-slate-50 py-1.5 px-1.5 rounded-full border border-slate-100 shadow-sm transition-colors"
                                 >
                                     <div className="w-8 h-8 rounded-full bg-[#0A2E1A] text-white font-bold flex items-center justify-center text-xs">
                                         {farmer?.full_name ? farmer.full_name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'KS'}
                                     </div>
-                                    <svg className="w-4 h-4 text-slate-500 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                    <svg className="w-3.5 h-3.5 text-slate-400 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                                 </div>
 
                                 {/* Profile Dropdown */}
                                 {showProfileMenu && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
-                                        <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50">
+                                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 z-50">
+                                        <div className="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50 rounded-t-xl">
                                             <div className="w-10 h-10 rounded-full bg-[#0A2E1A] text-white font-bold flex items-center justify-center text-sm shadow-sm">
                                                 {farmer?.full_name ? farmer.full_name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'KS'}
                                             </div>
@@ -386,11 +418,11 @@ export default function FarmerLayout() {
             <div className="fixed bottom-20 md:bottom-6 right-3 sm:right-6 z-40">
                 <a
                     href="tel:18001801551"
-                    className="flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-full bg-[#143d23] hover:bg-[#0f2e1b] text-white shadow-xl border border-emerald-400/40 text-[11px] sm:text-xs font-bold transition hover:scale-105 active:scale-95 group backdrop-blur-md"
+                    className="flex items-center gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-full bg-[#143d23] hover:bg-[#0f2e1b] text-white shadow-xl border border-emerald-400/40 text-[11px] sm:text-xs font-bold transition group backdrop-blur-md"
                     title="Toll-Free Kisan Call Centre Helpline (1800-180-1551)"
                 >
                     <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/30 flex items-center justify-center text-emerald-300">
-                        <PhoneCall className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-bounce" />
+                        <PhoneCall className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                     </div>
                     <span className="hidden sm:inline">Kisan Helpline:</span>
                     <span className="font-mono text-amber-300 font-black">1800-180-1551</span>
@@ -431,8 +463,8 @@ export default function FarmerLayout() {
                                         to={item.path}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-3 px-5 py-3 text-sm font-semibold transition-colors ${isActive
-                                                ? 'text-emerald-700 bg-emerald-50/80 border-r-4 border-emerald-600'
-                                                : 'text-slate-600 hover:bg-slate-50'
+                                            ? 'text-emerald-700 bg-emerald-50/80 border-r-4 border-emerald-600'
+                                            : 'text-slate-600 hover:bg-slate-50'
                                             }`}
                                     >
                                         <Icon className={`w-5 h-5 ${isActive ? 'text-emerald-600' : 'text-slate-500'}`} />
@@ -475,8 +507,8 @@ export default function FarmerLayout() {
                             key={item.path}
                             to={item.path}
                             className={`flex flex-col items-center justify-center py-1.5 px-1 rounded-2xl transition relative select-none ${isActive
-                                    ? 'text-emerald-800 bg-emerald-50/80 font-bold'
-                                    : 'text-slate-500 hover:text-slate-800 font-medium'
+                                ? 'text-emerald-800 bg-emerald-50/80 font-bold'
+                                : 'text-slate-500 hover:text-slate-800 font-medium'
                                 }`}
                         >
                             <div className="relative">

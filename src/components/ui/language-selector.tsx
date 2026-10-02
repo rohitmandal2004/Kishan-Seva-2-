@@ -6,9 +6,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 interface LanguageSelectorProps {
  variant?: 'compact' | 'pill' | 'buttons' | 'dropdown';
  className?: string;
+ isDark?: boolean;
 }
 
-export function LanguageSelector({ variant = 'pill', className = '' }: LanguageSelectorProps) {
+export function LanguageSelector({ variant = 'pill', className = '', isDark = false }: LanguageSelectorProps) {
   const { lang, setLanguage } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,11 +26,11 @@ export function LanguageSelector({ variant = 'pill', className = '' }: LanguageS
 
   const currentLang = LANGUAGES.find(l => l.code === lang) || LANGUAGES[0];
 
-  const isDark = variant === 'dropdown';
-
   const buttonClasses = isDark 
     ? `relative flex items-center bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl px-3 py-2 cursor-pointer w-full justify-between transition-colors ${className}`
-    : `relative flex items-center bg-slate-100/90 hover:bg-slate-100 border border-slate-200/80 rounded-full px-4 py-2 shadow-xs cursor-pointer justify-between transition-colors ${className}`;
+    : variant === 'dropdown'
+      ? `relative flex items-center bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 cursor-pointer w-full justify-between transition-colors ${className}`
+      : `relative flex items-center bg-slate-100/90 hover:bg-slate-100 border border-slate-200/80 rounded-full px-4 py-2 shadow-xs cursor-pointer justify-between transition-colors ${className}`;
 
   // Made the text size bigger (text-sm instead of text-xs) as requested
   const textClasses = isDark ? "text-sm font-semibold text-emerald-50" : "text-sm font-bold text-slate-700";

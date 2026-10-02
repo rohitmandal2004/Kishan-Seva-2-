@@ -30,6 +30,13 @@ export default function FarmerLogin() {
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Set intended role so multi-role users resolve to the correct profile
+  useEffect(() => {
+    try {
+      localStorage.setItem('kishan_intended_role', 'FARMER');
+    } catch {}
+  }, []);
+
   // Cooldown timer for OTP resend
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -109,11 +116,12 @@ export default function FarmerLogin() {
       } else if (clerkError?.code === 'session_exists') {
         // Active session detected
         toast.info('Active session detected. Checking profile...');
-        await refreshProfile();
-        if (farmer) {
+        const updatedProfile = await refreshProfile(clerk.user?.id || '', cleanEmail);
+        if (updatedProfile) {
           navigate('/farmer/dashboard', { replace: true });
         } else {
-          navigate('/farmer/register', { replace: true });
+          toast.error('Farmer account not found. Redirecting to registration...');
+          navigate('/farmer/register', { replace: true, state: { email: cleanEmail } });
         }
       } else if (clerkError?.message?.toLowerCase().includes('failed security validations') || clerkError?.code?.includes('security')) {
         toast.error('Clerk Bot Protection blocked this request. In Clerk Dashboard: Configure → Attack protection → Disable Bot protection for local development.');
@@ -219,13 +227,9 @@ export default function FarmerLogin() {
         }
 
         if (!effectiveProfile) {
-          setLoading(false); // Enable the UI again so the user sees the error
-          toast.error('Farmer account not found. Please register first.', {
-            action: {
-              label: 'Register now',
-              onClick: () => navigate('/farmer/register'),
-            },
-          });
+          setLoading(false);
+          toast.error('Farmer account not found. Redirecting to registration...');
+          navigate('/farmer/register', { replace: true, state: { email: cleanEmail } });
           return;
         }
 
@@ -309,7 +313,7 @@ export default function FarmerLogin() {
           </p>
         </div>
 
-        {user && farmer && (
+        {user && farmer ? (
           <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
             <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-900 font-semibold mb-1">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -341,9 +345,7 @@ export default function FarmerLogin() {
               </Button>
             </div>
           </div>
-        )}
-
-        {step === 'EMAIL' ? (
+        ) : step === 'EMAIL' ? (
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">

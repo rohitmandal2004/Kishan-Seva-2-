@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -56,6 +56,8 @@ export default function FarmerRegistration() {
   const { user: clerkUser, isLoaded: clerkUserLoaded, isSignedIn } = useUser();
   const { farmer, isConfigured, isProfileLoading, refreshProfile, signOut, setFarmer, setUser } = useSupabase();
 
+  const location = useLocation();
+  const [emailValueFromState] = useState(() => location.state?.email || '');
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
@@ -66,13 +68,14 @@ export default function FarmerRegistration() {
   const [authMode, setAuthMode] = useState<'signup' | 'signin'>('signup');
   const [resendCooldown, setResendCooldown] = useState(0);
   const [creationError, setCreationError] = useState<string | null>(null);
+  const [isOtherBank, setIsOtherBank] = useState(false);
 
   const { register, handleSubmit, control, trigger, setValue, getValues, watch, formState: { errors } } = useForm<RegistrationFormData>({
     resolver: zodResolver(registrationSchema),
     defaultValues: {
       full_name: '',
       phone: '',
-      email: '',
+      email: emailValueFromState || '',
       aadhaar: '',
       state: 'West Bengal',
       district: '',
@@ -300,12 +303,30 @@ export default function FarmerRegistration() {
           throw new Error(`Unable to verify email. Status: ${completeSignIn.status}`);
         }
 
+        const clerkUserId = clerkUser?.id || (window as any).Clerk?.user?.id || '';
+        const cleanEmail = (emailValue || '').trim().toLowerCase();
+        
         if (setActive && completeSignIn.createdSessionId) {
           try {
             await setActive({ session: completeSignIn.createdSessionId });
           } catch (actErr) {
             console.warn('[Kishan Seva] Session activation note:', actErr);
           }
+        }
+
+        if (clerkUserId && cleanEmail) {
+           const { data: existingFarmer } = await supabase
+             .from('farmer_profiles')
+             .select('*')
+             .or(`clerk_user_id.eq.${clerkUserId},email.ilike.${cleanEmail}`)
+             .maybeSingle();
+
+           if (existingFarmer) {
+             setFarmer(existingFarmer as FarmerProfile);
+             toast.success('Welcome back! Redirecting to your dashboard.');
+             navigate('/farmer/dashboard', { replace: true });
+             return;
+           }
         }
 
         setEmailVerified(true);
@@ -1001,7 +1022,45 @@ export default function FarmerRegistration() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="bank_name">Bank Name</Label>
-                    <Input id="bank_name" {...register('bank_name')} placeholder="e.g. State Bank of India" className="h-12"/>
+                    <Controller
+                      control={control}
+                      name="bank_name"
+                      render={({ field }) => (
+                        <div className="space-y-3">
+                          <Select 
+                            onValueChange={(val) => {
+                              if (val === 'Other') {
+                                setIsOtherBank(true);
+                                field.onChange('');
+                              } else {
+                                setIsOtherBank(false);
+                                field.onChange(val);
+                              }
+                            }}
+                            defaultValue={field.value && !isOtherBank ? field.value : undefined}
+                          >
+                            <SelectTrigger className="h-12">
+                              <SelectValue placeholder="Select Bank" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['State Bank of India', 'Punjab National Bank', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Bank of Baroda', 'Canara Bank', 'Union Bank of India', 'Bank of India', 'Indian Bank', 'Central Bank of India', 'Indian Overseas Bank', 'UCO Bank', 'Bank of Maharashtra', 'Kotak Mahindra Bank', 'IndusInd Bank', 'Yes Bank', 'IDBI Bank', 'Other'].map(bank => (
+                                <SelectItem key={bank} value={bank}>{bank}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          
+                          {isOtherBank && (
+                            <Input 
+                              placeholder="Enter your bank name" 
+                              className="h-12"
+                              onChange={e => field.onChange(e.target.value)}
+                              value={field.value}
+                              autoFocus
+                            />
+                          )}
+                        </div>
+                      )}
+                    />
                     {errors.bank_name && <p className="text-red-500 text-xs mt-1">{errors.bank_name.message}</p>}
                   </div>
 
@@ -1044,7 +1103,19 @@ export default function FarmerRegistration() {
                 <div className="hidden sm:block"></div>
               )}
               
-              <Button type="button" onClick={handleSubmit(onSubmitFinal)} disabled={loading} className="bg-emerald-700 hover:bg-emerald-800 text-white h-11 sm:h-12 px-8 font-bold justify-center w-full sm:w-auto shadow-md">
+              <Button 
+                type="button" 
+                onClick={(e) => {
+                  if (step < 4) {
+                    e.preventDefault();
+                    onNextStep();
+                  } else {
+                    handleSubmit(onSubmitFinal)(e);
+                  }
+                }} 
+                disabled={loading} 
+                className="bg-emerald-700 hover:bg-emerald-800 text-white h-11 sm:h-12 px-8 font-bold justify-center w-full sm:w-auto shadow-md"
+              >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : null}
                 {step === 4 ? 'Complete Registration' : (step === 1 && !otpSent) ? 'Send OTP' : 'Continue'}
               </Button>

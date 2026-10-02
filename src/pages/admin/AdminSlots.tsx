@@ -96,109 +96,110 @@ export default function AdminSlots() {
  };
 
  return (
- <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+ <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-8 font-sans">
  {/* Header Banner */}
- <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3">
+ <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b-2 border-slate-900 pb-6">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+ <span className="text-[10px] uppercase font-black bg-slate-900 text-white px-2 py-0.5 tracking-widest inline-block mb-2">
  Gate Intake & Scheduling Algorithms
  </span>
- <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+ <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight uppercase">
  Slot Quota & Capacity Control Console
  </h2>
- <p className="text-xs text-slate-500 mt-0.5">
+ <p className="text-xs font-bold text-slate-700 mt-2 uppercase tracking-widest">
  Calibrate hourly arrival windows, apply weather risk mitigation buffers, and execute emergency intake throttling.
  </p>
  </div>
 
- <div className="flex items-center gap-2">
- <Button
+ <div className="flex items-center gap-3">
+ <button
  onClick={handleEmergencyToggle}
- variant={isEmergencyThrottled ? 'destructive' : 'outline'}
- className={`text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs transition ${
- isEmergencyThrottled ? 'animate-pulse' : 'border-slate-300 text-slate-700'
+ className={`text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all flex items-center gap-2 ${
+ isEmergencyThrottled ? 'bg-red-500 text-white animate-pulse' : 'bg-white text-slate-900 hover:bg-slate-100'
  }`}
  >
  <ShieldAlert className="w-4 h-4" />
- {isEmergencyThrottled ? 'Emergency Throttle Active' : 'Engage Emergency Throttle'}
- </Button>
+ {isEmergencyThrottled ? 'EMERGENCY THROTTLE ACTIVE' : 'ENGAGE EMERGENCY THROTTLE'}
+ </button>
 
- <Button
+ <button
  onClick={handleSaveConfig}
- className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"
+ className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all flex items-center gap-2"
  >
- <Save className="w-4 h-4" /> Save Quotas
- </Button>
+ <Save className="w-4 h-4" /> SAVE QUOTAS
+ </button>
  </div>
  </div>
 
  {/* Select Mandi Bar */}
- <Card className="p-4 border border-slate-200 shadow-xs bg-white rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4">
- <div className="flex items-center gap-3 w-full md:w-auto">
- <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-xl">
+ <div className="p-4 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white flex flex-col md:flex-row items-center justify-between gap-6">
+ <div className="flex items-center gap-4 w-full md:w-auto">
+ <div className="p-3 border-2 border-slate-900 bg-emerald-400 text-slate-900">
  <Building2 className="w-5 h-5" />
  </div>
  <div>
- <label className="text-[10px] uppercase font-bold text-slate-500 block">Target Mandi</label>
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-1">TARGET MANDI</label>
  <select
  value={selectedCentreId}
  onChange={(e) => setSelectedCentreId(e.target.value)}
- className="text-sm font-extrabold text-slate-900 bg-transparent border-0 outline-hidden cursor-pointer"
+ className="text-sm font-black uppercase tracking-widest text-slate-900 bg-slate-50 border-2 border-slate-900 px-3 py-2 cursor-pointer focus:outline-none"
  >
  {centres.map((c) => (
  <option key={c.id} value={c.id}>
- {c.name} ({c.centre_code} - {c.district})
+ {c.name.toUpperCase()} ({c.centre_code} - {c.district.toUpperCase()})
  </option>
  ))}
  </select>
  </div>
  </div>
 
- <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-600">
- <span className="flex items-center gap-1">
- <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
- Daily Intake Cap: <strong className="text-slate-900">{selectedCentre?.daily_capacity_quintals} Q</strong>
+ <div className="flex flex-wrap items-center gap-4 text-xs font-black uppercase tracking-widest text-slate-900">
+ <span className="flex items-center gap-2 bg-slate-100 px-3 py-2 border-2 border-slate-900">
+ <span className="w-2 h-2 bg-emerald-500 border border-slate-900"></span>
+ DAILY INTAKE CAP: <strong className="text-slate-900">{selectedCentre?.daily_capacity_quintals} Q</strong>
  </span>
- <span className="border-l border-slate-200 pl-3 flex items-center gap-1">
- <Clock className="w-3.5 h-3.5 text-slate-500" />
- Computerized Scale: <strong className="text-slate-900">Certified Active</strong>
+ <span className="flex items-center gap-2 bg-slate-100 px-3 py-2 border-2 border-slate-900">
+ <Clock className="w-3.5 h-3.5 text-slate-900" />
+ COMPUTERIZED SCALE: <strong className="text-slate-900">CERTIFIED ACTIVE</strong>
  </span>
  </div>
- </Card>
+ </div>
 
  {/* Main Control Grid */}
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+ <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  {/* Left Column: Quota Adjusters */}
- <div className="space-y-6 lg:col-span-2">
- <Card className="p-6 border border-slate-200 shadow-xs bg-white rounded-3xl space-y-6">
- <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+ <div className="space-y-8 lg:col-span-2">
+ <div className="p-6 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white space-y-6">
+ <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
  <div>
- <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
- <Sliders className="w-4 h-4 text-emerald-600" />
+ <h3 className="font-black text-slate-900 text-lg flex items-center gap-2 uppercase tracking-widest">
+ <Sliders className="w-5 h-5 text-emerald-500" />
  Time-Slot Arrival Quotas
  </h3>
- <p className="text-xs text-slate-500">Adjust max vehicles admitted per time bracket</p>
+ <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">Adjust max vehicles admitted per time bracket</p>
  </div>
- <Badge className="bg-slate-100 text-slate-700 border-0 text-xs font-bold">
- Total Allowed Today: {totalDailyTokens} Vehicles
- </Badge>
+ <span className="bg-slate-900 text-white px-3 py-1 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900">
+ TOTAL TODAY: {totalDailyTokens} VEHS
+ </span>
  </div>
 
  {/* Morning Slot */}
- <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+ <div className="p-5 bg-white border-2 border-slate-900 space-y-4 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all">
  <div className="flex justify-between items-center">
- <div className="flex items-center gap-2">
- <Sun className="w-4 h-4 text-amber-500" />
+ <div className="flex items-center gap-3">
+ <div className="p-2 bg-amber-100 border-2 border-slate-900">
+ <Sun className="w-5 h-5 text-amber-500" />
+ </div>
  <div>
- <span className="text-xs font-extrabold text-slate-900 block">Morning Slot</span>
- <span className="text-[11px] text-slate-500">08:00 AM – 11:00 AM</span>
+ <span className="text-sm font-black text-slate-900 block uppercase tracking-widest">Morning Slot</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 block">08:00 AM – 11:00 AM</span>
  </div>
  </div>
  <div className="text-right">
- <span className="text-sm font-black text-slate-900">{effectiveMorning} Vehicles</span>
+ <span className="text-2xl font-black text-slate-900 tabular-nums">{effectiveMorning} <span className="text-[10px] text-slate-500 tracking-widest ml-1">VEHS</span></span>
  {weatherBufferPercent > 0 && (
- <span className="text-[10px] text-amber-600 block font-semibold">
- (Base: {morningQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
+ <span className="text-[10px] text-slate-900 bg-amber-400 font-black uppercase tracking-widest px-1 border-2 border-slate-900 block mt-1">
+ (BASE: {morningQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
  </span>
  )}
  </div>
@@ -210,25 +211,27 @@ export default function AdminSlots() {
  step={5}
  value={morningQuota}
  onChange={(e) => setMorningQuota(Number(e.target.value))}
- className="w-full accent-emerald-600 cursor-pointer"
+ className="w-full accent-slate-900 h-2 bg-slate-200 cursor-pointer outline-none appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-emerald-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900"
  />
  </div>
 
  {/* Afternoon Slot */}
- <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+ <div className="p-5 bg-white border-2 border-slate-900 space-y-4 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all">
  <div className="flex justify-between items-center">
- <div className="flex items-center gap-2">
- <Sun className="w-4 h-4 text-orange-500" />
+ <div className="flex items-center gap-3">
+ <div className="p-2 bg-orange-100 border-2 border-slate-900">
+ <Sun className="w-5 h-5 text-orange-500" />
+ </div>
  <div>
- <span className="text-xs font-extrabold text-slate-900 block">Afternoon Peak Slot</span>
- <span className="text-[11px] text-slate-500">11:00 AM – 02:00 PM</span>
+ <span className="text-sm font-black text-slate-900 block uppercase tracking-widest">Afternoon Peak Slot</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 block">11:00 AM – 02:00 PM</span>
  </div>
  </div>
  <div className="text-right">
- <span className="text-sm font-black text-slate-900">{effectiveAfternoon} Vehicles</span>
+ <span className="text-2xl font-black text-slate-900 tabular-nums">{effectiveAfternoon} <span className="text-[10px] text-slate-500 tracking-widest ml-1">VEHS</span></span>
  {weatherBufferPercent > 0 && (
- <span className="text-[10px] text-amber-600 block font-semibold">
- (Base: {afternoonQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
+ <span className="text-[10px] text-slate-900 bg-amber-400 font-black uppercase tracking-widest px-1 border-2 border-slate-900 block mt-1">
+ (BASE: {afternoonQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
  </span>
  )}
  </div>
@@ -240,25 +243,27 @@ export default function AdminSlots() {
  step={5}
  value={afternoonQuota}
  onChange={(e) => setAfternoonQuota(Number(e.target.value))}
- className="w-full accent-emerald-600 cursor-pointer"
+ className="w-full accent-slate-900 h-2 bg-slate-200 cursor-pointer outline-none appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-emerald-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900"
  />
  </div>
 
  {/* Evening Slot */}
- <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-3">
+ <div className="p-5 bg-white border-2 border-slate-900 space-y-4 hover:shadow-[4px_4px_0px_rgba(0,0,0,1)] transition-all">
  <div className="flex justify-between items-center">
- <div className="flex items-center gap-2">
- <Clock className="w-4 h-4 text-indigo-500" />
+ <div className="flex items-center gap-3">
+ <div className="p-2 bg-indigo-100 border-2 border-slate-900">
+ <Clock className="w-5 h-5 text-indigo-500" />
+ </div>
  <div>
- <span className="text-xs font-extrabold text-slate-900 block">Evening Twilight Slot</span>
- <span className="text-[11px] text-slate-500">02:00 PM – 05:00 PM</span>
+ <span className="text-sm font-black text-slate-900 block uppercase tracking-widest">Evening Twilight Slot</span>
+ <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5 block">02:00 PM – 05:00 PM</span>
  </div>
  </div>
  <div className="text-right">
- <span className="text-sm font-black text-slate-900">{effectiveEvening} Vehicles</span>
+ <span className="text-2xl font-black text-slate-900 tabular-nums">{effectiveEvening} <span className="text-[10px] text-slate-500 tracking-widest ml-1">VEHS</span></span>
  {weatherBufferPercent > 0 && (
- <span className="text-[10px] text-amber-600 block font-semibold">
- (Base: {eveningQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
+ <span className="text-[10px] text-slate-900 bg-amber-400 font-black uppercase tracking-widest px-1 border-2 border-slate-900 block mt-1">
+ (BASE: {eveningQuota} -{Math.round(100 - effectiveReductionFactor * 100)}%)
  </span>
  )}
  </div>
@@ -270,67 +275,73 @@ export default function AdminSlots() {
  step={5}
  value={eveningQuota}
  onChange={(e) => setEveningQuota(Number(e.target.value))}
- className="w-full accent-emerald-600 cursor-pointer"
+ className="w-full accent-slate-900 h-2 bg-slate-200 cursor-pointer outline-none appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-emerald-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900"
  />
  </div>
- </Card>
+ </div>
 
  {/* Slot Utilization Graph */}
- <Card className="p-6 border border-slate-200 shadow-xs bg-white rounded-3xl">
- <h3 className="font-extrabold text-slate-900 text-sm mb-1">Live Slot Booking Utilization</h3>
- <p className="text-xs text-slate-500 mb-4">Booked tokens vs Effective Quota vs Base Capacity</p>
+ <div className="p-6 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white">
+ <h3 className="font-black text-slate-900 text-lg uppercase tracking-widest mb-1">Live Slot Booking Utilization</h3>
+ <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-6 border-b-2 border-slate-900 pb-4">Booked tokens vs Effective Quota vs Base Capacity</p>
  <div className="h-64 w-full">
  <ResponsiveContainer width="100%" height="100%">
  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
- <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
- <XAxis dataKey="slot" tick={{ fontSize: 11, fill: '#64748b' }} />
- <YAxis tick={{ fontSize: 11, fill: '#64748b' }} />
+ <CartesianGrid strokeDasharray="0" vertical={false} stroke="#e2e8f0" strokeWidth={2} />
+ <XAxis dataKey="slot" tick={{ fontSize: 10, fill: '#0f172a', fontWeight: '900' }} tickLine={false} axisLine={{ strokeWidth: 2, stroke: '#0f172a' }} />
+ <YAxis tick={{ fontSize: 10, fill: '#0f172a', fontWeight: '900' }} tickLine={false} axisLine={{ strokeWidth: 2, stroke: '#0f172a' }} />
  <Tooltip
  contentStyle={{
- backgroundColor: '#1e293b',
- borderRadius: '12px',
+ backgroundColor: '#0f172a',
+ borderRadius: '0',
  color: '#fff',
- fontSize: '12px',
- border: 'none',
+ fontSize: '10px',
+ fontWeight: '900',
+ textTransform: 'uppercase',
+ letterSpacing: '0.1em',
+ border: '2px solid #000',
+ boxShadow: '4px 4px 0px rgba(0,0,0,1)',
  }}
  />
- <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
- <Bar dataKey="baseQuota" fill="#cbd5e1" name="Base Quota" radius={[4, 4, 0, 0]} />
- <Bar dataKey="effectiveQuota" fill="#10b981" name="Effective Quota" radius={[4, 4, 0, 0]} />
- <Bar dataKey="booked" fill="#3b82f6" name="Already Booked" radius={[4, 4, 0, 0]} />
+ <Legend wrapperStyle={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', paddingTop: '10px' }} />
+ <Bar dataKey="baseQuota" fill="#cbd5e1" name="Base Quota" radius={[0, 0, 0, 0]} stroke="#0f172a" strokeWidth={2} />
+ <Bar dataKey="effectiveQuota" fill="#34d399" name="Effective Quota" radius={[0, 0, 0, 0]} stroke="#0f172a" strokeWidth={2} />
+ <Bar dataKey="booked" fill="#3b82f6" name="Already Booked" radius={[0, 0, 0, 0]} stroke="#0f172a" strokeWidth={2} />
  </BarChart>
  </ResponsiveContainer>
  </div>
- </Card>
+ </div>
  </div>
 
  {/* Right Column: Weather Mitigation & Emergency */}
- <div className="space-y-6">
- <Card className="p-6 border border-slate-200 shadow-xs bg-white rounded-3xl space-y-4">
- <div className="flex items-center gap-2">
+ <div className="space-y-8">
+ <div className="p-6 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white space-y-6">
+ <div className="flex items-center gap-3 border-b-2 border-slate-900 pb-4">
+ <div className="p-2 bg-blue-100 border-2 border-slate-900">
  <CloudRain className="w-5 h-5 text-blue-600" />
+ </div>
  <div>
- <h3 className="font-extrabold text-slate-900 text-sm">Weather Risk Mitigation</h3>
- <p className="text-[11px] text-slate-500">Auto-throttle arrivals during rain alerts</p>
+ <h3 className="font-black text-slate-900 text-sm uppercase tracking-widest leading-none mb-1">Weather Mitigation</h3>
+ <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Auto-throttle during rain</p>
  </div>
  </div>
 
- <div className="p-3 bg-blue-50/70 border border-blue-100 rounded-2xl space-y-2">
- <div className="flex justify-between items-center text-xs">
- <span className="font-bold text-blue-900">Live IMD Forecast:</span>
- <Badge className="bg-blue-200 text-blue-900 border-0 text-[10px] font-bold">
- {weatherCondition === 'CLEAR' ? 'Sunny / Clear' : weatherCondition === 'MODERATE_RAIN' ? 'Passing Showers (12mm)' : 'Heavy Monsoon'}
- </Badge>
+ <div className="p-4 bg-blue-50 border-2 border-slate-900 space-y-3">
+ <div className="flex justify-between items-center text-[10px]">
+ <span className="font-black text-slate-900 uppercase tracking-widest">Live IMD Forecast</span>
+ <span className="bg-slate-900 text-white px-2 py-0.5 border-2 border-slate-900 text-[9px] font-black uppercase tracking-widest">
+ {weatherCondition === 'CLEAR' ? 'SUNNY / CLEAR' : weatherCondition === 'MODERATE_RAIN' ? 'SHOWERS (12MM)' : 'HEAVY MONSOON'}
+ </span>
  </div>
- <p className="text-[11px] text-blue-700 leading-tight">
- Moisture spikes occur during rain; damp paddy takes 2.5x longer to grade and weigh.
+ <p className="text-[10px] font-bold text-slate-700 leading-tight border-t-2 border-slate-900 pt-3 uppercase tracking-widest">
+ Damp paddy takes 2.5x longer to grade and weigh.
  </p>
  </div>
 
  <div>
- <div className="flex justify-between text-xs font-bold text-slate-700 mb-1.5">
- <span>Buffer Safety Margin</span>
- <span className="text-blue-600">-{weatherBufferPercent}% Quota</span>
+ <div className="flex justify-between text-[10px] font-black text-slate-900 mb-2 uppercase tracking-widest">
+ <span>Buffer Margin</span>
+ <span className="bg-blue-400 px-1 border-2 border-slate-900">-{weatherBufferPercent}% QUOTA</span>
  </div>
  <input
  type="range"
@@ -339,98 +350,91 @@ export default function AdminSlots() {
  step={5}
  value={weatherBufferPercent}
  onChange={(e) => setWeatherBufferPercent(Number(e.target.value))}
- className="w-full accent-blue-600 cursor-pointer"
+ className="w-full accent-slate-900 h-2 bg-slate-200 cursor-pointer outline-none appearance-none [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-6 [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-slate-900"
  />
- <div className="flex justify-between text-[10px] text-slate-500 font-semibold mt-1">
- <span>0% (No buffer)</span>
- <span>25% (Recommended)</span>
- <span>50% (Heavy downpour)</span>
+ <div className="flex justify-between text-[9px] text-slate-600 font-bold mt-2 uppercase tracking-widest">
+ <span>0% (NONE)</span>
+ <span>25% (REC.)</span>
+ <span>50% (MAX)</span>
  </div>
  </div>
 
- <div className="pt-3 border-t border-slate-100 text-xs space-y-2">
- <span className="font-bold text-slate-700 block">Forecast Override:</span>
- <div className="grid grid-cols-3 gap-1.5">
- <Button
+ <div className="pt-4 border-t-2 border-slate-900 text-xs space-y-3">
+ <span className="font-black text-slate-900 text-[10px] uppercase tracking-widest block">Forecast Override:</span>
+ <div className="grid grid-cols-3 gap-2">
+ <button
  type="button"
- size="sm"
- variant={weatherCondition === 'CLEAR' ? 'default' : 'outline'}
  onClick={() => {
  setWeatherCondition('CLEAR');
  setWeatherBufferPercent(0);
  }}
- className="text-[10px] font-bold h-8 rounded-lg"
+ className={`text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 py-2 transition-all ${weatherCondition === 'CLEAR' ? 'bg-slate-900 text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]' : 'bg-white text-slate-900 hover:bg-slate-100 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
  >
- Clear
- </Button>
- <Button
+ CLEAR
+ </button>
+ <button
  type="button"
- size="sm"
- variant={weatherCondition === 'MODERATE_RAIN' ? 'default' : 'outline'}
  onClick={() => {
  setWeatherCondition('MODERATE_RAIN');
  setWeatherBufferPercent(15);
  }}
- className="text-[10px] font-bold h-8 rounded-lg"
+ className={`text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 py-2 transition-all ${weatherCondition === 'MODERATE_RAIN' ? 'bg-slate-900 text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]' : 'bg-white text-slate-900 hover:bg-slate-100 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
  >
- Showers
- </Button>
- <Button
+ SHOWERS
+ </button>
+ <button
  type="button"
- size="sm"
- variant={weatherCondition === 'HEAVY_MONSOON' ? 'default' : 'outline'}
  onClick={() => {
  setWeatherCondition('HEAVY_MONSOON');
  setWeatherBufferPercent(40);
  }}
- className="text-[10px] font-bold h-8 rounded-lg"
+ className={`text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 py-2 transition-all ${weatherCondition === 'HEAVY_MONSOON' ? 'bg-slate-900 text-white shadow-[2px_2px_0px_rgba(0,0,0,1)]' : 'bg-white text-slate-900 hover:bg-slate-100 hover:shadow-[2px_2px_0px_rgba(0,0,0,1)]'}`}
  >
- Monsoon
- </Button>
+ MONSOON
+ </button>
  </div>
  </div>
- </Card>
+ </div>
 
  {/* Emergency Safety Protocols */}
- <Card
- className={`p-6 border rounded-3xl shadow-xs transition ${
+ <div
+ className={`p-6 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] transition-colors ${
  isEmergencyThrottled
- ? 'bg-red-50/70 border-red-200'
- : 'bg-white border-slate-200'
+ ? 'bg-red-400'
+ : 'bg-white'
  }`}
  >
- <div className="flex items-center gap-2 mb-3">
+ <div className="flex items-center gap-3 mb-4 border-b-2 border-slate-900 pb-4">
+ <div className={`p-2 border-2 border-slate-900 ${isEmergencyThrottled ? 'bg-white' : 'bg-slate-100'}`}>
  <AlertCircle
- className={`w-5 h-5 ${
- isEmergencyThrottled ? 'text-red-600' : 'text-slate-500'
- }`}
+ className="w-5 h-5 text-slate-900"
  />
+ </div>
  <div>
  <h3
- className={`font-extrabold text-sm ${
- isEmergencyThrottled ? 'text-red-900' : 'text-slate-900'
+ className="font-black text-slate-900 text-sm uppercase tracking-widest leading-none mb-1"
+ >
+ Congestion Brake
+ </h3>
+ <p className={`text-[9px] font-bold uppercase tracking-widest ${isEmergencyThrottled ? 'text-slate-900' : 'text-slate-600'}`}>
+ Restrict gate passes
+ </p>
+ </div>
+ </div>
+
+ <p className={`text-[10px] font-bold uppercase tracking-widest leading-relaxed mb-6 ${isEmergencyThrottled ? 'text-slate-900' : 'text-slate-600'}`}>
+ When triggered, unconfirmed farmer tokens receive SMS deferrals, and slots are throttled by 50%.
+ </p>
+
+ <button
+ onClick={handleEmergencyToggle}
+ className={`w-full text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-4 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all ${
+ isEmergencyThrottled ? 'bg-slate-900 text-white' : 'bg-red-500 text-white'
  }`}
  >
- Congestion Emergency Brake
- </h3>
- <p className="text-[11px] text-slate-500">
- Instantly restrict gate passes if traffic gridlocks the highway
- </p>
+ {isEmergencyThrottled ? 'DEACTIVATE EMERGENCY PROTOCOL' : 'ENGAGE EMERGENCY BRAKE'}
+ </button>
  </div>
- </div>
-
- <p className="text-xs text-slate-600 leading-relaxed mb-4">
- When triggered, all incoming unconfirmed farmer tokens receive an automated SMS deferral notice, and booking slots are throttled by 50% immediately.
- </p>
-
- <Button
- onClick={handleEmergencyToggle}
- variant={isEmergencyThrottled ? 'destructive' : 'outline'}
- className="w-full text-xs font-bold rounded-xl"
- >
- {isEmergencyThrottled ? 'Deactivate Emergency Protocol' : 'Engage Emergency Brake'}
- </Button>
- </Card>
  </div>
  </div>
  </div>

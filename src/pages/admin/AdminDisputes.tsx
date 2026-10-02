@@ -51,30 +51,37 @@ export default function AdminDisputes() {
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 font-sans">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8 font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-2 border-slate-900 pb-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900">QC Disputes & Appeals</h1>
-          <p className="text-slate-500 text-sm mt-1">Manage farmer quality check appeals and re-test requests.</p>
+          <span className="text-[10px] uppercase font-black bg-slate-900 text-white px-2 py-0.5 tracking-widest inline-block mb-2">
+            Dispute Management
+          </span>
+          <h1 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight uppercase">
+            QC Disputes & Appeals
+          </h1>
+          <p className="text-xs font-bold text-slate-700 mt-2 uppercase tracking-widest">
+            Manage farmer quality check appeals and re-test requests.
+          </p>
         </div>
       </div>
 
-      <Card className="p-0 border-slate-200 shadow-sm rounded-2xl bg-white overflow-hidden">
+      <div className="border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center text-slate-500">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>Loading appeals...</p>
+          <div className="p-12 text-center text-slate-900">
+            <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" />
+            <p className="font-black uppercase tracking-widest">Loading appeals...</p>
           </div>
         ) : appeals.length === 0 ? (
-          <div className="p-12 text-center text-slate-500">
-            <Scale className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <p className="font-semibold text-slate-700">No disputes found</p>
-            <p className="text-sm">There are currently no active QC appeals.</p>
+          <div className="p-12 text-center text-slate-900">
+            <Scale className="w-12 h-12 text-slate-900 mx-auto mb-4" />
+            <p className="font-black text-lg uppercase tracking-widest">NO DISPUTES FOUND</p>
+            <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest">There are currently no active QC appeals.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="bg-slate-50 text-xs uppercase text-slate-500 font-bold border-b border-slate-200">
+              <thead className="bg-slate-900 text-[10px] uppercase tracking-widest text-white font-black border-b-2 border-slate-900">
                 <tr>
                   <th className="px-6 py-4">Farmer / Token</th>
                   <th className="px-6 py-4">Original Grade</th>
@@ -83,57 +90,56 @@ export default function AdminDisputes() {
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y-2 divide-slate-900">
                 {appeals.map((appeal) => (
-                  <tr key={appeal.id} className="hover:bg-slate-50/50">
+                  <tr key={appeal.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900">{appeal.farmer_profiles?.full_name || 'Unknown'}</div>
-                      <div className="text-xs text-slate-500 font-mono mt-0.5">
-                        Token: {appeal.bookings?.token_number || appeal.booking_id.substring(0,8)}
+                      <div className="font-black text-slate-900 uppercase tracking-widest">{appeal.farmer_profiles?.full_name || 'Unknown'}</div>
+                      <div className="text-[10px] text-slate-700 font-mono font-bold mt-1 border-2 border-slate-900 inline-block px-1">
+                        TKN: {appeal.bookings?.token_number || appeal.booking_id.substring(0,8)}
                       </div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">{appeal.bookings?.centre_name}</div>
+                      <div className="text-[9px] font-bold text-slate-500 mt-1 uppercase tracking-widest">{appeal.bookings?.centre_name}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge variant="outline" className="font-mono bg-white">
+                      <span className="font-mono font-black text-slate-900 border-2 border-slate-900 px-2 py-1 text-xs">
                         {appeal.original_grade}
-                      </Badge>
+                      </span>
                     </td>
                     <td className="px-6 py-4 max-w-xs">
-                      <p className="text-xs text-slate-700 line-clamp-2" title={appeal.appeal_reason}>
+                      <p className="text-[10px] font-bold text-slate-900 line-clamp-2 uppercase tracking-wider" title={appeal.appeal_reason}>
                         {appeal.appeal_reason}
                       </p>
-                      <span className="text-[10px] text-slate-400">{new Date(appeal.created_at).toLocaleDateString()}</span>
+                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mt-2 border-t-2 border-slate-900 pt-1 w-fit">
+                        {new Date(appeal.created_at).toLocaleDateString()}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
-                      <Badge 
-                        className={
-                          appeal.status === 'PENDING' ? 'bg-amber-100 text-amber-800' :
-                          appeal.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' :
-                          appeal.status === 'RE_TESTED' ? 'bg-blue-100 text-blue-800' :
-                          'bg-slate-100 text-slate-800'
-                        }
+                      <span 
+                        className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 border-2 border-slate-900 ${
+                          appeal.status === 'PENDING' ? 'bg-amber-400 text-slate-900' :
+                          appeal.status === 'APPROVED' ? 'bg-emerald-400 text-slate-900' :
+                          appeal.status === 'RE_TESTED' ? 'bg-blue-400 text-slate-900' :
+                          'bg-slate-200 text-slate-900'
+                        }`}
                       >
                         {appeal.status}
-                      </Badge>
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       {appeal.status === 'PENDING' && (
                         <div className="flex justify-end gap-2">
-                          <Button 
-                            size="sm" 
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+                          <button 
+                            className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[9px] font-black uppercase tracking-widest border-2 border-slate-900 px-3 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all"
                             onClick={() => handleUpdateStatus(appeal.id, 'APPROVED')}
                           >
-                            Approve Re-test
-                          </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            className="text-red-600 hover:bg-red-50 text-xs"
+                            APPROVE
+                          </button>
+                          <button 
+                            className="bg-red-500 hover:bg-red-400 text-white text-[9px] font-black uppercase tracking-widest border-2 border-slate-900 px-3 py-2 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all"
                             onClick={() => handleUpdateStatus(appeal.id, 'REJECTED')}
                           >
-                            Reject
-                          </Button>
+                            REJECT
+                          </button>
                         </div>
                       )}
                     </td>
@@ -143,7 +149,7 @@ export default function AdminDisputes() {
             </table>
           </div>
         )}
-      </Card>
+      </div>
     </div>
   );
 }

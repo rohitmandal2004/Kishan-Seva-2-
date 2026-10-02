@@ -249,213 +249,214 @@ export default function AdminTransactions() {
  };
 
  return (
- <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+ <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-8 font-sans">
  {/* Header Banner */}
- <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3">
+ <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b-2 border-slate-900 pb-6">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+ <span className="text-[10px] uppercase font-black bg-slate-900 text-white px-2 py-0.5 tracking-widest inline-block mb-2">
  Public Financial Management System (PFMS) & DBT
  </span>
- <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+ <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight uppercase">
  MSP Settlement & DBT Auditing Ledger
  </h2>
- <p className="text-xs text-slate-500 mt-0.5">
+ <p className="text-xs font-bold text-slate-700 mt-2 uppercase tracking-widest">
  Real-time tracking of direct bank transfers, RBI payment gateways, and failed disbursement reconciliation.
  </p>
  </div>
 
- <Button
+ <button
  onClick={handleExportCSV}
- className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"
+ className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all flex items-center gap-2"
  >
- <Download className="w-4 h-4" /> Export Audit CSV
- </Button>
+ <Download className="w-4 h-4" /> EXPORT AUDIT CSV
+ </button>
  </div>
 
  {/* KPI Cards */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
- Settled DBT Today
- </span>
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 bg-slate-900 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Settled DBT Today</span>
  <IndianRupee className="w-4 h-4 text-emerald-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
- ₹{(totalDisbursed / 100000).toFixed(2)}
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">
+ {(totalDisbursed / 100000).toFixed(2)}
  </h3>
- <span className="text-[11px] font-bold text-slate-500">Lakh</span>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">LAKH</span>
  </div>
- <p className="text-[10px] text-emerald-600 font-semibold mt-1">100% Aadhaar-seeded accounts</p>
- </Card>
+ <p className="text-[10px] font-bold text-emerald-700 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">100% Aadhaar-seeded accounts</p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
- In PFMS Transit
- </span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">In PFMS Transit</span>
  <Clock className="w-4 h-4 text-blue-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{pendingCount}</h3>
- <span className="text-[11px] font-bold text-slate-500">Beneficiaries</span>
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">{pendingCount}</h3>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">BENS</span>
  </div>
- <p className="text-[10px] text-blue-600 font-semibold mt-1">Expected clearing &lt; 2 hrs</p>
- </Card>
+ <p className="text-[10px] font-bold text-blue-700 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">Expected clearing &lt; 2 hrs</p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
- Failed Transfers
- </span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Failed Transfers</span>
  <AlertTriangle className="w-4 h-4 text-red-500" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{failedCount}</h3>
- <span className="text-[11px] font-bold text-red-600">Requires Action</span>
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-red-600 tabular-nums tracking-tighter">{failedCount}</h3>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">ACTN</span>
  </div>
- <p className="text-[10px] text-red-500 font-semibold mt-1">One-click re-trigger available</p>
- </Card>
+ <p className="text-[10px] text-red-900 bg-red-100 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-red-900">
+ ONE-CLICK RE-TRIGGER
+ </p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
- Gateway SLA
- </span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Gateway SLA</span>
  <Shield className="w-4 h-4 text-emerald-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">99.4%</h3>
- <span className="text-[11px] font-bold text-emerald-600">Success Rate</span>
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">99.4%</h3>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">SUCC</span>
  </div>
- <p className="text-[10px] text-slate-500 mt-1">RBI RTGS / NEFT connected</p>
- </Card>
+ <p className="text-[10px] font-bold text-slate-600 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">RBI RTGS / NEFT connected</p>
+ </div>
+ </div>
  </div>
 
  {/* Filter and Search Bar */}
- <Card className="p-4 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+ <div className="p-4 border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+ <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
  <div className="relative w-full md:w-96">
- <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
- <Input
+ <Search className="w-4 h-4 text-slate-900 absolute left-4 top-1/2 -translate-y-1/2 font-black" />
+ <input
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="Search by farmer name, token, DBT ref, ID..."
- className="pl-10 text-xs rounded-xl border-slate-200 focus-visible:ring-emerald-500"
+ placeholder="SEARCH BY NAME, TOKEN, REF..."
+ className="pl-12 w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 placeholder:text-slate-400"
  />
  </div>
 
- <div className="flex items-center gap-2 w-full md:w-auto">
- <Filter className="w-3.5 h-3.5 text-slate-500" />
- <span className="text-xs font-semibold text-slate-600">Status:</span>
+ <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-3 py-2 w-full md:w-auto">
+ <Filter className="w-4 h-4 text-slate-900" />
+ <span className="text-[10px] font-black uppercase tracking-widest text-slate-900">STATUS:</span>
  <select
  value={statusFilter}
  onChange={(e) => setStatusFilter(e.target.value)}
- className="text-xs font-semibold border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 outline-hidden focus:border-emerald-500"
+ className="text-[10px] font-black uppercase tracking-widest bg-transparent text-slate-900 focus:outline-none cursor-pointer"
  >
- <option value="ALL">All Transactions</option>
- <option value="COMPLETED">Completed (Settled)</option>
- <option value="PROCESSING">Processing in RBI</option>
- <option value="FAILED">Failed / Rejected</option>
- <option value="PENDING">Pending Batch</option>
+ <option value="ALL">ALL TRANSACTIONS</option>
+ <option value="COMPLETED">COMPLETED</option>
+ <option value="PROCESSING">PROCESSING (RBI)</option>
+ <option value="FAILED">FAILED / REJECTED</option>
+ <option value="PENDING">PENDING BATCH</option>
  </select>
  </div>
  </div>
- </Card>
+ </div>
 
  {/* Transaction Table */}
- <Card className="border border-slate-200 shadow-xs bg-white rounded-3xl overflow-hidden">
+ <div className="border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white overflow-hidden">
  <div className="overflow-x-auto">
  <table className="w-full text-left text-xs">
- <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+ <thead className="bg-slate-900 text-white font-black uppercase tracking-widest text-[10px] border-b-2 border-slate-900">
  <tr>
- <th className="py-3.5 px-4">DBT Ref / Token</th>
- <th className="py-3.5 px-4">Farmer Beneficiary</th>
- <th className="py-3.5 px-4">Bank & Account</th>
- <th className="py-3.5 px-4">Procurement Details</th>
- <th className="py-3.5 px-4 text-right">Net Payable</th>
- <th className="py-3.5 px-4 text-center">Status</th>
- <th className="py-3.5 px-4 text-right">Action</th>
+ <th className="py-4 px-4">DBT Ref / Token</th>
+ <th className="py-4 px-4">Farmer Beneficiary</th>
+ <th className="py-4 px-4">Bank & Account</th>
+ <th className="py-4 px-4">Procurement Details</th>
+ <th className="py-4 px-4 text-right">Net Payable</th>
+ <th className="py-4 px-4 text-center">Status</th>
+ <th className="py-4 px-4 text-right">Action</th>
  </tr>
  </thead>
- <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+ <tbody className="divide-y-2 divide-slate-900 font-bold text-slate-900 uppercase tracking-widest">
  {filteredTransactions.map((t) => (
- <tr key={t.id} className="hover:bg-slate-50/80 transition">
- <td className="py-3.5 px-4">
- <span className="font-mono font-bold text-slate-900 block">{t.dbt_ref}</span>
- <span className="text-[10px] font-mono text-slate-500">Token: {t.token_id}</span>
+ <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+ <td className="py-4 px-4">
+ <span className="font-mono font-black text-slate-900 block bg-slate-100 border-2 border-slate-900 px-1 py-0.5 w-fit">{t.dbt_ref}</span>
+ <span className="text-[9px] font-mono font-bold text-slate-600 mt-1 block">TOKEN: {t.token_id}</span>
  </td>
 
- <td className="py-3.5 px-4">
- <span className="font-extrabold text-slate-900 block">{t.farmer_name}</span>
- <span className="text-[10px] text-slate-500 font-mono">{t.farmer_id}</span>
+ <td className="py-4 px-4">
+ <span className="font-black text-slate-900 block text-sm">{t.farmer_name}</span>
+ <span className="text-[9px] font-mono font-bold text-slate-600 mt-1 block">{t.farmer_id}</span>
  </td>
 
- <td className="py-3.5 px-4">
- <span className="text-slate-800 font-bold block flex items-center gap-1">
- <Building className="w-3 h-3 text-slate-500" />
+ <td className="py-4 px-4">
+ <span className="text-slate-900 font-black block flex items-center gap-1">
+ <Building className="w-3 h-3 text-slate-900" />
  {t.bank_name}
  </span>
- <span className="text-[10px] text-slate-500 font-mono">
+ <span className="text-[9px] font-mono font-bold text-slate-600 mt-1 block">
  A/C: •••• {t.account_last4} • {t.ifsc}
  </span>
  </td>
 
- <td className="py-3.5 px-4">
- <span className="font-bold text-slate-800 block">{t.crop_type}</span>
- <span className="text-[10px] text-slate-500">
+ <td className="py-4 px-4">
+ <span className="font-black text-slate-900 block">{t.crop_type}</span>
+ <span className="text-[9px] font-bold text-slate-600 mt-1 block">
  {t.net_weight_quintals} Q @ ₹{t.msp_rate_per_quintal}/Q
  </span>
  </td>
 
- <td className="py-3.5 px-4 text-right">
+ <td className="py-4 px-4 text-right">
  <span className="font-black text-slate-900 text-sm block">
  ₹{t.net_payable.toLocaleString('en-IN')}
  </span>
  {t.deductions > 0 && (
- <span className="text-[10px] text-red-500">
- -₹{t.deductions.toLocaleString('en-IN')} ded.
+ <span className="text-[9px] font-black text-red-600 mt-1 block">
+ -₹{t.deductions.toLocaleString('en-IN')} DED.
  </span>
  )}
  </td>
 
- <td className="py-3.5 px-4 text-center">
- <Badge
- className={`text-[10px] font-bold border-0 px-2.5 py-0.5 ${
+ <td className="py-4 px-4 text-center">
+ <span
+ className={`text-[9px] font-black uppercase tracking-widest px-2 py-1 border-2 border-slate-900 inline-flex items-center gap-1 ${
  t.status === 'COMPLETED'
- ? 'bg-emerald-100 text-emerald-800'
+ ? 'bg-emerald-400 text-slate-900'
  : t.status === 'PROCESSING'
- ? 'bg-blue-100 text-blue-800 animate-pulse'
+ ? 'bg-blue-400 text-slate-900 animate-pulse'
  : t.status === 'FAILED'
- ? 'bg-red-100 text-red-800'
- : 'bg-amber-100 text-amber-800'
+ ? 'bg-red-500 text-white'
+ : 'bg-amber-400 text-slate-900'
  }`}
  >
- {t.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 mr-1" />}
- {t.status === 'FAILED' && <AlertTriangle className="w-3 h-3 mr-1" />}
- {t.status === 'PROCESSING' && <Clock className="w-3 h-3 mr-1" />}
+ {t.status === 'COMPLETED' && <CheckCircle2 className="w-3 h-3" />}
+ {t.status === 'FAILED' && <AlertTriangle className="w-3 h-3" />}
+ {t.status === 'PROCESSING' && <Clock className="w-3 h-3" />}
  {t.status}
- </Badge>
+ </span>
 
  {t.failure_reason && (
- <span className="text-[10px] text-red-600 block mt-1 max-w-[200px] mx-auto text-left leading-tight">
+ <span className="text-[9px] font-bold text-red-600 block mt-2 max-w-[200px] mx-auto text-left leading-tight">
  {t.failure_reason}
  </span>
  )}
  </td>
 
- <td className="py-3.5 px-4 text-right">
+ <td className="py-4 px-4 text-right">
  {t.status === 'FAILED' ? (
- <Button
- size="sm"
+ <button
  onClick={() => handleRetryTransaction(t)}
- className="bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold h-7 rounded-lg shadow-xs flex items-center gap-1 ml-auto"
+ className="bg-red-500 hover:bg-red-400 text-white text-[9px] font-black uppercase tracking-widest px-3 py-2 border-2 border-slate-900 shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] transition-all flex items-center gap-1 ml-auto"
  >
- <RotateCcw className="w-3 h-3" /> Retry DBT
- </Button>
+ <RotateCcw className="w-3 h-3" /> RETRY DBT
+ </button>
  ) : (
- <span className="text-[10px] text-slate-500 font-semibold block">
+ <span className="text-[9px] font-bold text-slate-600 block">
  {t.settled_at ? t.settled_at : t.created_at}
  </span>
  )}
@@ -465,7 +466,7 @@ export default function AdminTransactions() {
  </tbody>
  </table>
  </div>
- </Card>
+ </div>
  </div>
  );
 }

@@ -132,129 +132,141 @@ export default function AdminCentres() {
  };
 
  return (
- <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+ <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-8 font-sans">
  {/* Header Banner */}
- <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-3">
+ <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b-2 border-slate-900 pb-6">
  <div>
- <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
+ <span className="text-[10px] uppercase font-black bg-slate-900 text-white px-2 py-0.5 tracking-widest inline-block mb-2">
  Infrastructure &amp; Mandi Control
  </span>
- <h2 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+ <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight uppercase">
  Procurement Centre &amp; Mandi Management
  </h2>
- <p className="text-xs text-slate-500 mt-0.5">
+ <p className="text-xs font-bold text-slate-700 mt-2 uppercase tracking-widest">
  Configure weighbridge scales, capacity thresholds, and live operational status across {centres.length} Mandis.
  </p>
  </div>
- <Button
+ <button
  onClick={() => setIsAddModalOpen(true)}
- className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5"
+ className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all flex items-center gap-2"
  >
- <Plus className="w-4 h-4" /> Add New Mandi
- </Button>
+ <Plus className="w-4 h-4" /> ADD NEW MANDI
+ </button>
  </div>
 
  {/* KPI Overview */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Total Mandis</span>
- <Building2 className="w-4 h-4 text-slate-500" />
+ <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 bg-slate-900 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Total Mandis</span>
+ <Building2 className="w-4 h-4 text-slate-900" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{centres.length}</h3>
- <span className="text-[11px] font-bold text-emerald-600">({activeCount} Active)</span>
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">{centres.length}</h3>
  </div>
- <p className="text-[10px] text-slate-500 mt-1">Spread across {districts.length - 1} districts</p>
- </Card>
+ <p className="text-[10px] text-white bg-emerald-900 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-emerald-950">
+ {activeCount} Active
+ </p>
+ <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest block">Spread across {districts.length - 1} districts</p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">State Capacity</span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">State Capacity</span>
  <Scale className="w-4 h-4 text-emerald-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">
  {totalCapacity.toLocaleString('en-IN')}
  </h3>
- <span className="text-[11px] font-bold text-slate-500">Q / day</span>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Q/DAY</span>
  </div>
- <p className="text-[10px] text-emerald-600 font-semibold mt-1">Computerized scale certified</p>
- </Card>
+ <p className="text-[10px] font-bold text-slate-600 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">Computerized scale certified</p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Vehicles In Yard</span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Vehicles In Yard</span>
  <Users className="w-4 h-4 text-blue-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">{totalQueue}</h3>
- <span className="text-[11px] font-bold text-slate-500">Live tokens</span>
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">{totalQueue}</h3>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">TOKENS</span>
  </div>
- <p className="text-[10px] text-blue-600 font-semibold mt-1">Avg turnaround ~20 min</p>
- </Card>
+ <p className="text-[10px] text-blue-900 bg-blue-100 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-blue-900">
+ TURNAROUND: ~20M
+ </p>
+ </div>
+ </div>
 
- <Card className="p-4 sm:p-5 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex items-center justify-between">
- <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Mandi Health</span>
+ <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="flex items-center justify-between mb-6">
+ <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Mandi Health</span>
  <TrendingUp className="w-4 h-4 text-purple-600" />
  </div>
- <div className="flex items-baseline gap-1.5 mt-2">
- <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+ <div>
+ <div className="flex items-baseline gap-2">
+ <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">
  {Math.round((activeCount / (centres.length || 1)) * 100)}%
  </h3>
- <span className="text-[11px] font-bold text-emerald-600">Operational</span>
+ <span className="text-xs font-black text-slate-500 uppercase tracking-widest">OPR</span>
  </div>
- <p className="text-[10px] text-slate-500 mt-1">Zero downtime recorded this week</p>
- </Card>
+ <p className="text-[10px] font-bold text-slate-600 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">Zero downtime this week</p>
+ </div>
+ </div>
  </div>
 
  {/* Filter and Search Bar */}
- <Card className="p-4 border border-slate-200 shadow-xs bg-white rounded-2xl">
- <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
+ <div className="p-4 border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+ <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
  <div className="relative w-full md:w-96">
- <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
- <Input
+ <Search className="w-4 h-4 text-slate-900 absolute left-4 top-1/2 -translate-y-1/2 font-black" />
+ <input
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="Search by Mandi name, code, district..."
- className="pl-10 text-xs rounded-xl border-slate-200 focus-visible:ring-emerald-500"
+ placeholder="SEARCH BY MANDI NAME, CODE..."
+ className="pl-12 w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 placeholder:text-slate-400"
  />
  </div>
 
- <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
- <div className="flex items-center gap-1.5">
- <Filter className="w-3.5 h-3.5 text-slate-500" />
- <span className="text-xs font-semibold text-slate-600">District:</span>
+ <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
+ <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-3 py-2">
+ <Filter className="w-4 h-4 text-slate-900" />
+ <span className="text-xs font-black uppercase tracking-widest text-slate-900">DISTRICT:</span>
  <select
  value={districtFilter}
  onChange={(e) => setDistrictFilter(e.target.value)}
- className="text-xs font-semibold border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 outline-hidden focus:border-emerald-500"
+ className="text-xs font-black uppercase tracking-widest bg-transparent text-slate-900 focus:outline-none cursor-pointer"
  >
  {districts.map((d) => (
  <option key={d} value={d}>
- {d === 'ALL' ? 'All Districts' : d}
+ {d === 'ALL' ? 'ALL DISTRICTS' : d.toUpperCase()}
  </option>
  ))}
  </select>
  </div>
 
- <div className="flex items-center gap-1.5">
- <span className="text-xs font-semibold text-slate-600">Status:</span>
+ <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-3 py-2">
+ <span className="text-xs font-black uppercase tracking-widest text-slate-900">STATUS:</span>
  <select
  value={statusFilter}
  onChange={(e) => setStatusFilter(e.target.value)}
- className="text-xs font-semibold border border-slate-200 rounded-lg px-2.5 py-1.5 bg-slate-50 text-slate-700 outline-hidden focus:border-emerald-500"
+ className="text-xs font-black uppercase tracking-widest bg-transparent text-slate-900 focus:outline-none cursor-pointer"
  >
- <option value="ALL">All Statuses</option>
- <option value="ACTIVE">Active Only</option>
- <option value="MAINTENANCE">Maintenance</option>
- <option value="INACTIVE">Inactive</option>
+ <option value="ALL">ALL STATUSES</option>
+ <option value="ACTIVE">ACTIVE ONLY</option>
+ <option value="MAINTENANCE">MAINTENANCE</option>
+ <option value="INACTIVE">INACTIVE</option>
  </select>
  </div>
  </div>
  </div>
- </Card>
+ </div>
 
  {/* Mandis Grid */}
  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -265,27 +277,27 @@ export default function AdminCentres() {
  );
 
  return (
- <Card
+ <div
  key={centre.id}
- className="p-5 border border-slate-200 shadow-xs bg-white rounded-3xl hover:border-emerald-200 transition flex flex-col justify-between"
+ className="p-5 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white flex flex-col justify-between"
  >
  <div>
- <div className="flex items-start justify-between gap-2 mb-2">
+ <div className="flex items-start justify-between gap-2 mb-4">
  <div>
- <span className="text-[10px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded">
+ <span className="text-[10px] font-mono font-black border-2 border-slate-900 bg-slate-100 text-slate-900 px-2 py-0.5 tracking-widest uppercase">
  {centre.centre_code}
  </span>
- <h3 className="font-extrabold text-base text-slate-900 mt-1 leading-snug">
+ <h3 className="font-black text-xl text-slate-900 mt-3 leading-snug uppercase tracking-widest">
  {centre.name}
  </h3>
  </div>
- <Badge
- className={`text-[10px] font-bold border-0 px-2.5 py-0.5 cursor-pointer select-none transition ${
+ <button
+ className={`text-[10px] font-black border-2 border-slate-900 px-2 py-1 select-none transition uppercase tracking-widest flex items-center shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none ${
  centre.status === 'ACTIVE'
- ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+ ? 'bg-emerald-400 text-slate-900'
  : centre.status === 'MAINTENANCE'
- ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
- : 'bg-red-100 text-red-800 hover:bg-red-200'
+ ? 'bg-amber-400 text-slate-900'
+ : 'bg-red-500 text-white'
  }`}
  onClick={() => handleToggleStatus(centre)}
  title="Click to toggle status"
@@ -294,199 +306,197 @@ export default function AdminCentres() {
  {centre.status === 'MAINTENANCE' && <Wrench className="w-3 h-3 mr-1" />}
  {centre.status === 'INACTIVE' && <AlertTriangle className="w-3 h-3 mr-1" />}
  {centre.status}
- </Badge>
+ </button>
  </div>
 
- <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
- <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+ <p className="text-[10px] text-slate-700 font-bold flex items-center gap-1 mt-1 uppercase tracking-widest border-b-2 border-slate-900 pb-4">
+ <MapPin className="w-3 h-3 text-slate-900 shrink-0" />
  <span className="truncate">{centre.address}, {centre.district}</span>
  </p>
 
  {/* Live Capacity Meter */}
- <div className="mt-4 p-3 bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
- <div className="flex justify-between items-center text-xs">
- <span className="text-slate-600 font-semibold">Live Yard Utilization</span>
- <span className="font-bold text-slate-900">{loadPercent}%</span>
+ <div className="mt-4 p-4 bg-slate-50 border-2 border-slate-900 space-y-3">
+ <div className="flex justify-between items-center text-[10px]">
+ <span className="text-slate-900 font-black uppercase tracking-widest">Live Yard Utilization</span>
+ <span className="font-black text-slate-900 bg-white border-2 border-slate-900 px-1 py-0.5">{loadPercent}%</span>
  </div>
- <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+ <div className="w-full h-4 bg-white border-2 border-slate-900 overflow-hidden relative">
  <div
- className={`h-full rounded-full transition ${
- loadPercent > 85 ? 'bg-red-500' : loadPercent > 60 ? 'bg-amber-500' : 'bg-emerald-500'
+ className={`absolute h-full border-r-2 border-slate-900 ${
+ loadPercent > 85 ? 'bg-red-500' : loadPercent > 60 ? 'bg-amber-400' : 'bg-emerald-400'
  }`}
  style={{ width: `${loadPercent}%` }}
  />
  </div>
 
- <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200/60 text-center text-xs">
+ <div className="grid grid-cols-2 gap-2 pt-3 border-t-2 border-slate-900 text-center text-xs">
  <div>
- <span className="text-[10px] text-slate-500 block font-semibold">Active Queue</span>
- <span className="font-extrabold text-slate-900">{centre.current_queue_length} Vehicles</span>
+ <span className="text-[9px] text-slate-700 block font-black uppercase tracking-widest mb-1">Active Queue</span>
+ <span className="font-black text-slate-900 tabular-nums">{centre.current_queue_length} VEHS</span>
  </div>
- <div className="border-l border-slate-200/60">
- <span className="text-[10px] text-slate-500 block font-semibold">Daily Quota</span>
- <span className="font-extrabold text-slate-900">{centre.daily_capacity_quintals} Q</span>
+ <div className="border-l-2 border-slate-900">
+ <span className="text-[9px] text-slate-700 block font-black uppercase tracking-widest mb-1">Daily Quota</span>
+ <span className="font-black text-slate-900 tabular-nums">{centre.daily_capacity_quintals} Q</span>
  </div>
  </div>
  </div>
 
  {/* Hardware Spec */}
- <div className="flex items-center justify-between text-xs text-slate-500 mt-3 px-1">
+ <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-slate-900 mt-4 px-1">
  <span className="flex items-center gap-1">
- <Scale className="w-3.5 h-3.5 text-slate-500" />
- Computerized Scale
+ <Scale className="w-3 h-3 text-slate-900" />
+ COMPUTERIZED
  </span>
  <span className="flex items-center gap-1">
- <Clock className="w-3.5 h-3.5 text-slate-500" />
- ~{centre.est_wait_time_mins}m wait
+ <Clock className="w-3 h-3 text-slate-900" />
+ ~{centre.est_wait_time_mins}M WAIT
  </span>
  </div>
  </div>
 
  {/* Action Buttons */}
- <div className="flex items-center gap-2 mt-4 pt-3 border-t border-slate-100">
- <Button
- variant="outline"
- size="sm"
+ <div className="flex items-center gap-2 mt-6 pt-4 border-t-2 border-slate-900">
+ <button
  onClick={() => {
  setEditingCentre(centre);
  setNewCapacity(centre.daily_capacity_quintals);
  }}
- className="w-full text-xs font-bold rounded-xl border-slate-200 hover:bg-slate-50"
+ className="flex-1 bg-white hover:bg-slate-900 text-slate-900 hover:text-white text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 py-3 transition-colors flex justify-center items-center gap-2"
  >
- <SlidersHorizontal className="w-3.5 h-3.5 mr-1" /> Adjust Capacity
- </Button>
- <Button
- variant="outline"
- size="sm"
+ <SlidersHorizontal className="w-3 h-3" /> Adjust Capacity
+ </button>
+ <button
  onClick={() => handleToggleStatus(centre)}
- className="text-xs font-bold rounded-xl border-slate-200 hover:bg-slate-50 text-slate-700"
+ className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold border-2 border-slate-900 px-4 py-3 transition-colors"
  >
- <ArrowUpDown className="w-3.5 h-3.5" />
- </Button>
+ <ArrowUpDown className="w-4 h-4" />
+ </button>
  </div>
- </Card>
+ </div>
  );
  })}
  </div>
 
  {filteredCentres.length === 0 && (
- <Card className="p-12 text-center border border-slate-200 rounded-3xl bg-white">
- <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-3" />
- <h3 className="font-bold text-slate-800">No Mandis match your filters</h3>
- <p className="text-xs text-slate-500 mt-1">Try resetting the search query or district filter.</p>
- <Button
- variant="outline"
- size="sm"
+ <div className="p-12 text-center border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white">
+ <Building2 className="w-12 h-12 text-slate-900 mx-auto mb-4" />
+ <h3 className="font-black text-slate-900 uppercase tracking-widest text-lg">NO MANDIS MATCH YOUR FILTERS</h3>
+ <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest">Try resetting the search query or district filter.</p>
+ <button
  onClick={() => {
  setSearchTerm('');
  setDistrictFilter('ALL');
  setStatusFilter('ALL');
  }}
- className="mt-4 text-xs font-bold rounded-xl"
+ className="mt-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 border-2 border-slate-900 transition-colors"
  >
- Reset Filters
- </Button>
- </Card>
+ RESET FILTERS
+ </button>
+ </div>
  )}
 
  {/* Adjust Capacity Modal */}
  <Dialog open={!!editingCentre} onOpenChange={(open) => !open && setEditingCentre(null)}>
- <DialogContent className="sm:max-w-md bg-white rounded-3xl p-6">
+ <DialogContent className="sm:max-w-md bg-white border-2 border-slate-900 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,1)] p-0">
+ <div className="p-6">
  <DialogHeader>
- <DialogTitle className="text-lg font-black text-slate-900">
+ <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-widest">
  Adjust Mandi Daily Capacity
  </DialogTitle>
- <DialogDescription className="text-xs text-slate-500">
+ <DialogDescription className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">
  Update the maximum daily intake threshold for {editingCentre?.name} ({editingCentre?.centre_code}).
  </DialogDescription>
  </DialogHeader>
 
- <div className="space-y-4 py-3">
+ <div className="space-y-4 py-6">
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1.5">
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">
  Daily Capacity Threshold (Quintals)
  </label>
- <Input
+ <input
  type="number"
  value={newCapacity}
  onChange={(e) => setNewCapacity(Number(e.target.value))}
  min={100}
  max={10000}
  step={50}
- className="text-sm font-bold rounded-xl border-slate-200 focus-visible:ring-emerald-500"
+ className="w-full text-sm font-black rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
- <p className="text-[11px] text-slate-500 mt-1">
+ <p className="text-[9px] font-bold text-slate-600 mt-2 uppercase tracking-widest">
  Recommended range: 500 Q to 5,000 Q based on active weighbridges.
  </p>
  </div>
  </div>
 
- <DialogFooter className="gap-2 sm:gap-0">
- <Button
- variant="outline"
+ <DialogFooter className="gap-4 sm:gap-0 mt-4 border-t-2 border-slate-900 pt-6">
+ <button
+ type="button"
  onClick={() => setEditingCentre(null)}
- className="text-xs font-bold rounded-xl"
+ className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 px-6 py-3 transition-colors mr-0 sm:mr-4"
  >
  Cancel
- </Button>
- <Button
+ </button>
+ <button
+ type="button"
  onClick={handleSaveCapacity}
- className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl"
+ className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-6 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
  >
  Save Capacity
- </Button>
+ </button>
  </DialogFooter>
+ </div>
  </DialogContent>
  </Dialog>
 
  {/* Add New Mandi Modal */}
  <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
- <DialogContent className="sm:max-w-lg bg-white rounded-3xl p-6">
+ <DialogContent className="sm:max-w-lg bg-white border-2 border-slate-900 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,1)] p-0">
+ <div className="p-6">
  <form onSubmit={handleAddMandi}>
  <DialogHeader>
- <DialogTitle className="text-lg font-black text-slate-900">
+ <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-widest">
  Register New Procurement Mandi
  </DialogTitle>
- <DialogDescription className="text-xs text-slate-500">
+ <DialogDescription className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">
  Add an official West Bengal agricultural depot to the state procurement grid.
  </DialogDescription>
  </DialogHeader>
 
- <div className="space-y-3 py-4 text-left">
+ <div className="space-y-4 py-6 text-left">
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1">Mandi Name *</label>
- <Input
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Mandi Name *</label>
+ <input
  required
  value={newMandiName}
  onChange={(e) => setNewMandiName(e.target.value)}
- placeholder="e.g. Barasat Krishak Bazaar"
- className="text-xs rounded-xl"
+ placeholder="E.G. BARASAT KRISHAK BAZAAR"
+ className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
 
- <div className="grid grid-cols-2 gap-3">
+ <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1">Mandi Code *</label>
- <Input
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Mandi Code *</label>
+ <input
  required
  value={newMandiCode}
  onChange={(e) => setNewMandiCode(e.target.value)}
- placeholder="e.g. MANDI-WB-09"
- className="text-xs uppercase font-mono rounded-xl"
+ placeholder="E.G. MANDI-WB-09"
+ className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1">District *</label>
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">District *</label>
  <select
  value={newMandiDistrict}
  onChange={(e) => setNewMandiDistrict(e.target.value)}
- className="w-full text-xs font-semibold border border-slate-200 rounded-xl px-3 py-2 bg-slate-50 text-slate-700 outline-hidden"
+ className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none cursor-pointer"
  >
  {districts
  .filter((d) => d !== 'ALL')
  .map((d) => (
  <option key={d} value={d}>
- {d}
+ {d.toUpperCase()}
  </option>
  ))}
  </select>
@@ -494,46 +504,46 @@ export default function AdminCentres() {
  </div>
 
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1">Depot Address *</label>
- <Input
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Depot Address *</label>
+ <input
  required
  value={newMandiAddress}
  onChange={(e) => setNewMandiAddress(e.target.value)}
- placeholder="e.g. NH-34 Highway Crossing, Barasat"
- className="text-xs rounded-xl"
+ placeholder="E.G. NH-34 HIGHWAY CROSSING, BARASAT"
+ className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
 
  <div>
- <label className="text-xs font-bold text-slate-700 block mb-1">Daily Capacity (Quintals)</label>
- <Input
+ <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Daily Capacity (Quintals)</label>
+ <input
  type="number"
  min={100}
  step={50}
  value={newMandiCapacity}
  onChange={(e) => setNewMandiCapacity(Number(e.target.value))}
- className="text-xs font-bold rounded-xl"
+ className="w-full text-sm font-black rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
  </div>
 
- <DialogFooter className="gap-2 sm:gap-0">
- <Button
+ <DialogFooter className="gap-4 sm:gap-0 mt-2 border-t-2 border-slate-900 pt-6">
+ <button
  type="button"
- variant="outline"
  onClick={() => setIsAddModalOpen(false)}
- className="text-xs font-bold rounded-xl"
+ className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 px-6 py-3 transition-colors mr-0 sm:mr-4"
  >
  Cancel
- </Button>
- <Button
+ </button>
+ <button
  type="submit"
- className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl"
+ className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-6 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
  >
  Register Mandi
- </Button>
+ </button>
  </DialogFooter>
  </form>
+ </div>
  </DialogContent>
  </Dialog>
  </div>

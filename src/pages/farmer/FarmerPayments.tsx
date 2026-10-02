@@ -7,8 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import {
   CheckCircle2, IndianRupee, History, Download, Edit,
-  Building2, TrendingUp, ShieldCheck, Volume2, Calendar
+  Building2, TrendingUp, ShieldCheck, Volume2, Calendar, Banknote
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
@@ -113,30 +114,42 @@ export default function FarmerPayments() {
         <div className="print:hidden grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* Primary DBT Account Card */}
-          <Card className="col-span-1 md:col-span-3 p-0 border-0 bg-transparent rounded-md overflow-hidden shadow-sm relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 opacity-95" />
-            <div className="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl" />
+          <Card className="col-span-1 md:col-span-3 p-0 border border-emerald-900/10 rounded-2xl overflow-hidden shadow-xl shadow-emerald-900/5 relative">
+            {/* Rich Background */}
+            <div className="absolute inset-0 bg-[#0b291a] opacity-100" />
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay" />
+            <div className="absolute -right-32 -top-32 w-[500px] h-[500px] bg-emerald-500/20 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
+            <div className="absolute -left-32 -bottom-32 w-[400px] h-[400px] bg-emerald-700/30 rounded-full blur-[80px] pointer-events-none" />
 
-            <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-white/10 rounded-lg border border-white/10 backdrop-blur-md shrink-0">
-                  <Building2 className="w-8 h-8 text-emerald-400" />
+            <div className="relative z-10 p-6 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-start gap-5">
+                <div className="p-4 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-xl shrink-0 shadow-inner">
+                  <Building2 className="w-10 h-10 text-emerald-300" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('primary_dbt_account')}</p>
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[9px] px-2 py-0">{t('verified')} ✓</Badge>
+                  <div className="flex items-center gap-3 mb-2">
+                    <p className="text-[11px] font-bold text-emerald-100/60 uppercase tracking-[0.2em]">{t('primary_dbt_account')}</p>
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[10px] px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> {t('verified')}
+                    </Badge>
                   </div>
-                  <h3 className="font-semibold text-xl text-white tracking-tight">{paymentDetails.bankName}</h3>
-                  <p className="text-emerald-100/70 font-mono mt-1 text-sm tracking-widest">
-                    A/C <span className="text-white text-base">•••• {String(paymentDetails.accountNumber).slice(-4)}</span>
+                  <h3 className="font-serif font-bold text-2xl md:text-3xl text-white tracking-tight">{paymentDetails.bankName}</h3>
+                  <p className="text-emerald-100/80 font-mono mt-1 text-sm md:text-base tracking-widest">
+                    A/C <span className="text-white font-bold tracking-widest ml-1">•••• {String(paymentDetails.accountNumber).slice(-4)}</span>
                   </p>
-                  {paymentDetails.ifsc && (
-                    <p className="text-xs text-slate-500 mt-1 font-mono">IFSC: <span className="text-slate-300">{paymentDetails.ifsc}</span></p>
-                  )}
-                  {paymentDetails.upiId && (
-                    <p className="text-xs text-slate-500 mt-0.5 font-mono">UPI: <span className="text-slate-300">{paymentDetails.upiId}</span></p>
-                  )}
+                  
+                  <div className="flex items-center gap-4 mt-3">
+                    {paymentDetails.ifsc && (
+                      <p className="text-xs text-emerald-100/50 font-mono flex items-center gap-1">
+                        IFSC: <span className="text-emerald-50">{paymentDetails.ifsc}</span>
+                      </p>
+                    )}
+                    {paymentDetails.upiId && (
+                      <p className="text-xs text-emerald-100/50 font-mono flex items-center gap-1">
+                        UPI: <span className="text-emerald-50">{paymentDetails.upiId}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -156,7 +169,26 @@ export default function FarmerPayments() {
                   <div className="grid gap-5">
                     <div className="space-y-2">
                       <Label htmlFor="bankName" className="font-bold text-slate-700 text-xs uppercase tracking-wider">{t('bank_name')}</Label>
-                      <Input id="bankName" value={formData.bankName} onChange={(e) => setFormData({ ...formData, bankName: e.target.value })} className="rounded-md border-slate-200 h-12 bg-slate-50 focus:bg-white" />
+                      <Select 
+                        value={formData.bankName} 
+                        onValueChange={(val) => setFormData({ ...formData, bankName: val })}
+                      >
+                        <SelectTrigger className="rounded-md border-slate-200 h-12 bg-slate-50 focus:bg-white text-sm">
+                          <SelectValue placeholder="Select your bank" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-60">
+                          <SelectItem value="State Bank of India">State Bank of India (SBI)</SelectItem>
+                          <SelectItem value="Punjab National Bank">Punjab National Bank (PNB)</SelectItem>
+                          <SelectItem value="Bank of Baroda">Bank of Baroda (BOB)</SelectItem>
+                          <SelectItem value="HDFC Bank">HDFC Bank</SelectItem>
+                          <SelectItem value="ICICI Bank">ICICI Bank</SelectItem>
+                          <SelectItem value="Axis Bank">Axis Bank</SelectItem>
+                          <SelectItem value="Union Bank of India">Union Bank of India</SelectItem>
+                          <SelectItem value="Canara Bank">Canara Bank</SelectItem>
+                          <SelectItem value="Bank of India">Bank of India (BOI)</SelectItem>
+                          <SelectItem value="Indian Bank">Indian Bank</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -183,50 +215,56 @@ export default function FarmerPayments() {
           </Card>
 
           {/* Stat 1: Total Remitted */}
-          <Card className="p-6 border border-white/60 bg-white/80 backdrop-blur-xl shadow-sm rounded-md flex flex-col justify-between">
+          <Card className="p-6 border border-emerald-900/5 bg-white shadow-sm hover:shadow-md transition-shadow rounded-2xl flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-emerald-100/80 text-emerald-700 rounded-md">
-                <IndianRupee className="w-5 h-5" />
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100">
+                <IndianRupee className="w-6 h-6" />
               </div>
-              <span className="font-bold text-sm text-emerald-900 uppercase tracking-wider">{t('total_remitted')}</span>
+              <span className="font-bold text-[11px] text-slate-500 uppercase tracking-widest">{t('total_remitted')}</span>
             </div>
             <div>
-              <h2 className="text-4xl font-semibold text-emerald-700 font-mono tracking-tighter">
+              <h2 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter">
                 ₹{totalReceived.toLocaleString('en-IN')}
               </h2>
-              <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1"><TrendingUp className="w-3 h-3 text-emerald-500" />{t('direct_to_bank')}</p>
+              <p className="text-xs text-emerald-600 font-bold mt-2 flex items-center gap-1.5 bg-emerald-50 px-2 py-1 rounded w-fit uppercase tracking-wider">
+                <CheckCircle2 className="w-3.5 h-3.5" />{t('direct_to_bank')}
+              </p>
             </div>
           </Card>
 
           {/* Stat 2: Transactions */}
-          <Card className="p-6 border border-white/60 bg-white/80 backdrop-blur-xl shadow-sm rounded-md flex flex-col justify-between">
+          <Card className="p-6 border border-indigo-900/5 bg-white shadow-sm hover:shadow-md transition-shadow rounded-2xl flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-md">
-                <History className="w-5 h-5" />
+              <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-100">
+                <History className="w-6 h-6" />
               </div>
-              <span className="font-bold text-sm text-slate-700 uppercase tracking-wider">{t('transactions')}</span>
+              <span className="font-bold text-[11px] text-slate-500 uppercase tracking-widest">{t('transactions')}</span>
             </div>
             <div>
-              <h2 className="text-4xl font-semibold text-slate-900 font-mono tracking-tighter">
+              <h2 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter">
                 {bookings.length}
               </h2>
-              <p className="text-xs text-slate-500 font-medium mt-1">{t('completed_disbursals')}</p>
+              <p className="text-xs text-slate-500 font-semibold mt-2 px-1">
+                {t('completed_disbursals')}
+              </p>
             </div>
           </Card>
 
           {/* Stat 3: Avg. MSP Rate (NEW) */}
-          <Card className="p-6 border border-white/60 bg-white/80 backdrop-blur-xl shadow-sm rounded-md flex flex-col justify-between">
+          <Card className="p-6 border border-amber-900/5 bg-white shadow-sm hover:shadow-md transition-shadow rounded-2xl flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-4">
-              <div className="p-2.5 bg-amber-50 text-amber-600 rounded-md">
-                <TrendingUp className="w-5 h-5" />
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-xl border border-amber-100">
+                <TrendingUp className="w-6 h-6" />
               </div>
-              <span className="font-bold text-sm text-slate-700 uppercase tracking-wider">{t('avg_msp_rate')}</span>
+              <span className="font-bold text-[11px] text-slate-500 uppercase tracking-widest">{t('avg_msp_rate')}</span>
             </div>
             <div>
-              <h2 className="text-4xl font-semibold text-slate-900 font-mono tracking-tighter">
+              <h2 className="text-4xl md:text-5xl font-semibold text-slate-900 tracking-tighter">
                 {avgMspRate ? `₹${avgMspRate.toLocaleString('en-IN')}` : '—'}
               </h2>
-              <p className="text-xs text-slate-500 font-medium mt-1">{t('per_quintal_avg')}</p>
+              <p className="text-xs text-slate-500 font-semibold mt-2 px-1">
+                {t('per_quintal_avg')}
+              </p>
             </div>
           </Card>
         </div>

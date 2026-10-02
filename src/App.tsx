@@ -34,6 +34,8 @@ const FarmerPayments = lazy(() => import('./pages/farmer/FarmerPayments'));
 const FarmerProfile = lazy(() => import('./pages/farmer/FarmerProfile'));
 const FarmerNotifications = lazy(() => import('./pages/farmer/FarmerNotifications'));
 const FarmerSupport = lazy(() => import('./pages/farmer/FarmerSupport'));
+const Helpdesk = lazy(() => import('./pages/farmer/Helpdesk'));
+const MarketInsights = lazy(() => import('./pages/farmer/MarketInsights'));
 const QRCheckIn = lazy(() => import('./pages/farmer/QRCheckIn'));
 const FpoBulkBooking = lazy(() => import('./pages/farmer/FpoBulkBooking'));
 
@@ -52,72 +54,74 @@ const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
 const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 
 function AnimatedRoutes() {
- const location = useLocation();
- return (
- <AnimatePresence mode="wait">
- <Routes location={location} key={location.pathname}>
- 
- {/* Public Landing, Auth & Roles (Uses GSAP ScrollSmoother) */}
- <Route element={<RootLayout />}>
- <Route path="/" element={<LandingPage />} />
- <Route path="/roles" element={<RoleSelection />} />
- <Route path="/farmer/login" element={<FarmerLogin />} />
- <Route path="/operator/login" element={<OperatorLogin />} />
- <Route path="/admin/login" element={<AdminLogin />} />
- <Route path="/farmer/register" element={<FarmerRegistration />} />
- <Route path="*" element={<NotFound />} />
- </Route>
- 
- {/* Farmer Portal with Layout (Native Scroll) */}
- <Route path="/farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
- <Route index element={<Navigate to="/farmer/dashboard" replace />} />
- <Route path="dashboard" element={<FarmerDashboard />} />
- <Route path="bulk-book" element={<FpoBulkBooking />} />
- <Route path="bookings" element={<FarmerBookings />} />
- <Route path="centres" element={<CentreDiscovery />} />
- <Route path="book" element={<SlotBooking />} />
- <Route path="queue" element={<LiveQueue />} />
- <Route path="payments" element={<FarmerPayments />} />
- <Route path="profile" element={<FarmerProfile />} />
- <Route path="notifications" element={<FarmerNotifications />} />
- <Route path="support" element={<FarmerSupport />} />
- <Route path="check-in" element={<QRCheckIn />} />
- </Route>
- 
- {/* Mandi Operator Console with Layout (Native Scroll) */}
- <Route path="/operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
- <Route index element={<Navigate to="/operator/dashboard" replace />} />
- <Route path="dashboard" element={<OperatorDashboard />} />
- <Route path="queue" element={<OperatorQueue />} />
- <Route path="quality" element={<QualityCheck />} />
- <Route path="weighment" element={<Weighment />} />
- </Route>
- 
- {/* State Admin Routes (Native Scroll) */}
- <Route path="/admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
- <Route index element={<Navigate to="/admin/dashboard" replace />} />
- <Route path="dashboard" element={<AdminOverview />} />
- <Route path="centres" element={<AdminCentres />} />
- <Route path="slots" element={<AdminSlots />} />
- <Route path="analytics" element={<AdminAnalytics />} />
- <Route path="transactions" element={<AdminTransactions />} />
- <Route path="disputes" element={<AdminDisputes />} />
- </Route>
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
 
- {/* User-friendly Route Aliases */}
- <Route path="/login" element={<Navigate to="/roles" replace />} />
- <Route path="/register" element={<Navigate to="/farmer/register" replace />} />
- <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
- <Route path="/centres" element={<Navigate to="/farmer/centres" replace />} />
- <Route path="/mandis" element={<Navigate to="/farmer/centres" replace />} />
- <Route path="/book" element={<Navigate to="/farmer/book" replace />} />
- <Route path="/queue" element={<Navigate to="/farmer/queue" replace />} />
- <Route path="/quality" element={<Navigate to="/operator/quality" replace />} />
- <Route path="/weighment" element={<Navigate to="/operator/weighment" replace />} />
- 
- </Routes>
- </AnimatePresence>
- );
+        {/* Public Landing, Auth & Roles (Uses GSAP ScrollSmoother) */}
+        <Route element={<RootLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/roles" element={<RoleSelection />} />
+          <Route path="/farmer/login" element={<FarmerLogin />} />
+          <Route path="/operator/login" element={<OperatorLogin />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/farmer/register" element={<FarmerRegistration />} />
+          <Route path="*" element={<NotFound />} />
+        </Route>
+
+        {/* Farmer Portal with Layout (Native Scroll) */}
+        <Route path="/farmer" element={<RequireRole allowedRoles={['FARMER']}><FarmerLayout /></RequireRole>}>
+          <Route index element={<Navigate to="/farmer/dashboard" replace />} />
+          <Route path="dashboard" element={<FarmerDashboard />} />
+          <Route path="bulk-book" element={<FpoBulkBooking />} />
+          <Route path="bookings" element={<FarmerBookings />} />
+          <Route path="centres" element={<CentreDiscovery />} />
+          <Route path="book" element={<SlotBooking />} />
+          <Route path="queue" element={<LiveQueue />} />
+          <Route path="payments" element={<FarmerPayments />} />
+          <Route path="profile" element={<FarmerProfile />} />
+          <Route path="notifications" element={<FarmerNotifications />} />
+          <Route path="support" element={<FarmerSupport />} />
+          <Route path="helpdesk" element={<Helpdesk />} />
+          <Route path="market" element={<MarketInsights />} />
+          <Route path="check-in" element={<QRCheckIn />} />
+        </Route>
+
+        {/* Mandi Operator Console with Layout (Native Scroll) */}
+        <Route path="/operator" element={<RequireRole allowedRoles={['OPERATOR']}><OperatorLayout /></RequireRole>}>
+          <Route index element={<Navigate to="/operator/dashboard" replace />} />
+          <Route path="dashboard" element={<OperatorDashboard />} />
+          <Route path="queue" element={<OperatorQueue />} />
+          <Route path="quality" element={<QualityCheck />} />
+          <Route path="weighment" element={<Weighment />} />
+        </Route>
+
+        {/* State Admin Routes (Native Scroll) */}
+        <Route path="/admin" element={<RequireRole allowedRoles={['ADMIN']}><AdminLayout /></RequireRole>}>
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="dashboard" element={<AdminOverview />} />
+          <Route path="centres" element={<AdminCentres />} />
+          <Route path="slots" element={<AdminSlots />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="transactions" element={<AdminTransactions />} />
+          <Route path="disputes" element={<AdminDisputes />} />
+        </Route>
+
+        {/* User-friendly Route Aliases */}
+        <Route path="/login" element={<Navigate to="/roles" replace />} />
+        <Route path="/register" element={<Navigate to="/farmer/register" replace />} />
+        <Route path="/dashboard" element={<Navigate to="/farmer/dashboard" replace />} />
+        <Route path="/centres" element={<Navigate to="/farmer/centres" replace />} />
+        <Route path="/mandis" element={<Navigate to="/farmer/centres" replace />} />
+        <Route path="/book" element={<Navigate to="/farmer/book" replace />} />
+        <Route path="/queue" element={<Navigate to="/farmer/queue" replace />} />
+        <Route path="/quality" element={<Navigate to="/operator/quality" replace />} />
+        <Route path="/weighment" element={<Navigate to="/operator/weighment" replace />} />
+
+      </Routes>
+    </AnimatePresence>
+  );
 }
 
 function App() {
@@ -140,7 +144,7 @@ function App() {
       {/* PageLoader stays mounted until routes are fully ready — no remount blink */}
       <AnimatePresence>
         {(!isReady || isSplashVisible) && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}

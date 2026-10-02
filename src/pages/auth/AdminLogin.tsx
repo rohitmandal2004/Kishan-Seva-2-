@@ -29,6 +29,13 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
 
+  // Set intended role so multi-role users resolve to the correct profile
+  useEffect(() => {
+    try {
+      localStorage.setItem('kishan_intended_role', 'ADMIN');
+    } catch {}
+  }, []);
+
   // Cooldown timer for OTP resend
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -120,8 +127,9 @@ export default function AdminLogin() {
         toast.error('Admin profile not found. Contact administrator.');
       } else if (clerkError?.code === 'session_exists') {
         toast.info('Active session detected. Checking profile...');
-        await refreshProfile();
-        if (user && user.role === 'ADMIN') {
+        await refreshProfile(clerk.user?.id || '', cleanEmail);
+        const { role } = await resolveRole(clerk.user?.id || '', cleanEmail);
+        if (role === 'ADMIN') {
           navigate('/admin/dashboard', { replace: true });
         } else {
           toast.error('You do not have admin privileges.');
@@ -271,7 +279,7 @@ export default function AdminLogin() {
           </p>
         </div>
 
-        {user && user.role === 'ADMIN' && (
+        {user && user.role === 'ADMIN' ? (
           <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
             <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-900 font-semibold mb-1">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
@@ -300,9 +308,7 @@ export default function AdminLogin() {
               </Button>
             </div>
           </div>
-        )}
-
-        {step === 'EMAIL' ? (
+        ) : step === 'EMAIL' ? (
           <form onSubmit={handleSendOtp} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
