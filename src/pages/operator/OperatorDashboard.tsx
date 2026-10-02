@@ -6,13 +6,17 @@ import { QRScannerModal } from '@/components/ui/QRScannerModal';
 import { QueueAnalyticsChart } from '@/components/ui/QueueAnalyticsChart';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '@/services/i18n';
+import { useOperator } from '@/hooks/useOperator';
 
 export default function OperatorDashboard() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const store = useKishanData();
-  const allBookings = store.getBookings();
+  const { operatorCentreId } = useOperator();
+  
+  // Filter bookings for this operator's centre
+  const allBookings = store.getBookings().filter(b => b.centre_id === operatorCentreId);
   
   // Status bucketing
   const activeBookings = allBookings.filter(b => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
@@ -22,8 +26,10 @@ export default function OperatorDashboard() {
   const servingBookings = activeBookings.filter(b => b.status === 'QUALITY_TESTING' || b.status === 'WEIGHMENT');
   
   const totalProcuredQ = completedBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || b.expected_quantity_q), 0);
-  const centreCapacity = 500; // Mocked capacity
-  const remainingCapacity = centreCapacity - totalProcuredQ;
+  
+  const centre = store.getCentreById(operatorCentreId || '');
+  const centreCapacity = centre?.daily_capacity_quintals || 500;
+  const remainingCapacity = Math.max(0, centreCapacity - totalProcuredQ);
 
   const currentlyServing = servingBookings[0] || waitingBookings[0]; // The active one
   
@@ -260,8 +266,9 @@ export default function OperatorDashboard() {
                     <td colSpan={6} className="py-12 text-center text-slate-900 font-sans font-bold uppercase tracking-widest text-xs">No other farmers in the live queue.</td>
                   </tr>
                 ) : queueList.map((booking, index) => {
-                  // Mocking wait duration based on index for visual realism
-                  const waitTime = (index + 1) * 15;
+                  // Queue waiting time prediction: AI prediction fallback based on queue length and active service time.
+                  const avgServiceTimeMin = 15; 
+                  const waitTime = (index + 1) * avgServiceTimeMin;
                   const isDelayed = waitTime > 45;
                   
                   return (

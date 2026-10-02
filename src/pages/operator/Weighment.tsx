@@ -27,6 +27,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Booking } from '@/types';
+import { useSupabase } from '@/context/SupabaseContext';
+import { useOperator } from '@/hooks/useOperator';
 import { useRef } from 'react';
 import { useGSAP, gsap } from '@/lib/gsap';
 import { generateReceiptPdf } from '@/services/receiptGenerator';
@@ -47,9 +49,12 @@ type WeighmentFormData = z.infer<typeof weighmentSchema>;
 export default function Weighment() {
   const navigate = useNavigate();
   const store = useKishanData();
+  const { clerkUser } = useSupabase();
+  const { operatorCentreId } = useOperator();
+
   const bookings = store
     .getBookings()
-    .filter((b) => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
+    .filter((b) => b.centre_id === operatorCentreId && b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
 
   const [selectedTokenId, setSelectedTokenId] = useState<string>(bookings[0]?.id || '');
   const [loading, setLoading] = useState(false);
@@ -130,7 +135,7 @@ export default function Weighment() {
           foreign_matter_percent: 1.1,
           broken_grain_percent: 2.0,
           grade: 'Grade A',
-          inspector_name: 'Subhasish Das',
+          inspector_name: clerkUser?.fullName || 'Operator',
           timestamp: new Date().toISOString(),
           certificate_id: 'QC-KSP-2026-AUTO',
         },
@@ -145,7 +150,7 @@ export default function Weighment() {
           handling_charge: handlingCharge,
           net_payable: actualNetPayable,
           slip_number: slipNum,
-          weighbridge_operator: 'Pradip Ghosh (ID: WB-992)',
+          weighbridge_operator: clerkUser?.fullName || 'Operator',
           timestamp: new Date().toISOString(),
           dbt_status: 'DISBURSED',
           transaction_ref: dbtRef,
@@ -159,7 +164,7 @@ export default function Weighment() {
         // Multi-channel notifications
         NotificationService.notifyWeighmentCertified({
           farmer_name: updated.farmer_name,
-          phone: '+91 98301 23456',
+          phone: updated.farmer_phone || '',
           token_number: updated.token_number,
           net_weight: actualNet,
           net_payable: actualNetPayable,
@@ -168,13 +173,13 @@ export default function Weighment() {
 
         NotificationService.notifyDBTDisbursed({
           farmer_name: updated.farmer_name,
-          phone: '+91 98301 23456',
+          phone: updated.farmer_phone || '',
           amount: actualNetPayable,
           dbt_ref: dbtRef,
         });
 
         SmsGateway.sendSmsNotification(
-          updated.farmer_phone || '+91 98301 23456',
+          updated.farmer_phone || '',
           `[Simulated SMS] Kishan Seva: Weighment complete. Net weight: ${actualNet} Q. Rs ${actualNetPayable.toLocaleString('en-IN')} will be credited via PFMS.`
         );
       }

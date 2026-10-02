@@ -47,102 +47,34 @@ export default function AdminTransactions() {
  const [searchTerm, setSearchTerm] = useState('');
  const [statusFilter, setStatusFilter] = useState('ALL');
 
- // Simulated ledger derived from weighments & bookings
- const [transactions, setTransactions] = useState<TransactionRecord[]>([
- {
- id: 'TXN-WB-9901',
- dbt_ref: 'DBT/RBI/2026/89401',
- token_id: 'KSP-1040',
- farmer_name: 'Ananda Ghosh',
- farmer_id: 'WB-AGRI-2024-8841',
- bank_name: 'State Bank of India',
- account_last4: '4892',
- ifsc: 'SBIN0001234',
- crop_type: 'Paddy (Grade A)',
- net_weight_quintals: 50.0,
- msp_rate_per_quintal: 2320,
- gross_amount: 116000,
- deductions: 7300,
- net_payable: 108700,
- status: 'COMPLETED',
- created_at: '2026-09-06 09:30 AM',
- settled_at: '2026-09-06 10:15 AM',
- },
- {
- id: 'TXN-WB-9902',
- dbt_ref: 'DBT/RBI/2026/89402',
- token_id: 'KSP-1041',
- farmer_name: 'Subhash Mondal',
- farmer_id: 'WB-AGRI-2024-5512',
- bank_name: 'Punjab National Bank',
- account_last4: '1109',
- ifsc: 'PUNB0182700',
- crop_type: 'Paddy (Common)',
- net_weight_quintals: 32.5,
- msp_rate_per_quintal: 2300,
- gross_amount: 74750,
- deductions: 2150,
- net_payable: 72600,
- status: 'COMPLETED',
- created_at: '2026-09-06 10:05 AM',
- settled_at: '2026-09-06 10:48 AM',
- },
- {
- id: 'TXN-WB-9903',
- dbt_ref: 'DBT/RBI/2026/89403',
- token_id: 'KSP-1042',
- farmer_name: 'Tarun Bhowmik',
- farmer_id: 'WB-AGRI-2024-9102',
- bank_name: 'Bangiya Gramin Vikash Bank',
- account_last4: '7731',
- ifsc: 'BGVB0000412',
- crop_type: 'Mustard Seeds',
- net_weight_quintals: 18.0,
- msp_rate_per_quintal: 5650,
- gross_amount: 101700,
- deductions: 0,
- net_payable: 101700,
- status: 'PROCESSING',
- created_at: '2026-09-06 11:20 AM',
- },
- {
- id: 'TXN-WB-9904',
- dbt_ref: 'DBT/RBI/2026/89404',
- token_id: 'KSP-1043',
- farmer_name: 'Ramen Roy',
- farmer_id: 'WB-AGRI-2024-3329',
- bank_name: 'Bank of Baroda',
- account_last4: '6201',
- ifsc: 'BARB0HABRAX',
- crop_type: 'Paddy (Grade A)',
- net_weight_quintals: 42.0,
- msp_rate_per_quintal: 2320,
- gross_amount: 97440,
- deductions: 3100,
- net_payable: 94340,
- status: 'FAILED',
- created_at: '2026-09-06 11:45 AM',
- failure_reason: 'NPCI Aadhaar-Bank link mapping pending at beneficiary branch',
- },
- {
- id: 'TXN-WB-9905',
- dbt_ref: 'DBT/RBI/2026/89405',
- token_id: 'KSP-1044',
- farmer_name: 'Biren Santra',
- farmer_id: 'WB-AGRI-2024-6721',
- bank_name: 'UCO Bank',
- account_last4: '9045',
- ifsc: 'UCBA0000889',
- crop_type: 'Paddy (Common)',
- net_weight_quintals: 25.0,
- msp_rate_per_quintal: 2300,
- gross_amount: 57500,
- deductions: 1200,
- net_payable: 56300,
- status: 'PENDING',
- created_at: '2026-09-06 12:10 PM',
- },
- ]);
+ const transactions = useMemo(() => {
+   const allBookings = store.getBookings();
+   return allBookings
+     .filter((b) => b.weighment_data && b.weighment_data.net_payable > 0)
+     .map((b) => {
+       const w = b.weighment_data!;
+       return {
+         id: `TXN-${b.id.substring(0, 8)}`,
+         dbt_ref: w.transaction_ref || `DBT/RBI/${Date.now().toString().slice(-8)}`,
+         token_id: b.token_number || b.id.substring(0, 8).toUpperCase(),
+         farmer_name: b.farmer_name,
+         farmer_id: b.farmer_id || 'N/A',
+         bank_name: 'State Bank of India', // Placeholder for now, or fetch from farmer profile
+         account_last4: 'XXXX',
+         ifsc: 'SBIN0000000',
+         crop_type: b.crop_name,
+         net_weight_quintals: w.net_weight_q,
+         msp_rate_per_quintal: w.msp_rate_per_q,
+         gross_amount: w.gross_amount,
+         deductions: w.handling_charge + (w.moisture_deduction || 0),
+         net_payable: w.net_payable,
+         status: w.dbt_status === 'DISBURSED' ? 'COMPLETED' : 'PENDING',
+         created_at: w.timestamp ? new Date(w.timestamp).toLocaleString() : 'N/A',
+         settled_at: w.dbt_status === 'DISBURSED' && w.timestamp ? new Date(w.timestamp).toLocaleString() : undefined,
+       } as TransactionRecord;
+     })
+     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+ }, [store]);
 
  // Aggregate stats
  const totalDisbursed = transactions
@@ -168,38 +100,7 @@ export default function AdminTransactions() {
  }, [transactions, searchTerm, statusFilter]);
 
  const handleRetryTransaction = (txn: TransactionRecord) => {
- const updatedRef = `DBT/RBI/2026/${Math.floor(10000 + Math.random() * 90000)}`;
- setTransactions((prev) =>
- prev.map((item) =>
- item.id === txn.id
- ? {
- ...item,
- status: 'PROCESSING',
- dbt_ref: updatedRef,
- failure_reason: undefined,
- created_at: 'Just now (Retried)',
- }
- : item
- )
- );
-
- toast.success(`DBT payout re-dispatched for ${txn.farmer_name}! Ref: ${updatedRef}`);
-
- // Simulate async settlement after 2 seconds
- setTimeout(() => {
- setTransactions((prev) =>
- prev.map((item) =>
- item.id === txn.id
- ? {
- ...item,
- status: 'COMPLETED',
- settled_at: 'Just now (Settled)',
- }
- : item
- )
- );
- toast.success(`Payment settled successfully via PFMS gateway for ${txn.farmer_name}!`);
- }, 2500);
+   toast.error(`Direct DBT retry not supported in read-only view for ${txn.farmer_name}.`);
  };
 
  const handleExportCSV = () => {

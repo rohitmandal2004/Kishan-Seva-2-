@@ -14,44 +14,56 @@ export default function AdminAnalytics() {
  const store = useKishanData();
  const stats = store.getStats();
  const centres = store.centres;
+ const bookings = store.getBookings();
 
- // Generate stable timeline data for the last 7 days
+ // Generate real timeline data for the last 7 days from completed bookings
  const timelineData = useMemo(() => {
- return Array.from({ length: 7 }).map((_, i) => {
- const d = subDays(new Date(), 6 - i);
- return {
- date: format(d, 'dd MMM'),
- procured: 280 + ((i * 47) % 250),
- target: 600,
- };
- });
- }, []);
+  return Array.from({ length: 7 }).map((_, i) => {
+    const d = subDays(new Date(), 6 - i);
+    const dateStr = format(d, 'yyyy-MM-dd');
+    const dayBookings = bookings.filter(b => b.status === 'COMPLETED' && b.created_at?.startsWith(dateStr));
+    const procured = dayBookings.reduce((sum, b) => sum + (b.weighment_data?.net_weight_q || 0), 0);
+    return {
+      date: format(d, 'dd MMM'),
+      procured: procured,
+      target: 600,
+    };
+  });
+ }, [bookings]);
 
-  // Generate future timeline data for Expected Arrivals (Next 7 Days)
+  // Generate real future timeline data for Expected Arrivals (Next 7 Days)
   const futureData = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
       const d = new Date();
       d.setDate(d.getDate() + i + 1);
+      const dateStr = format(d, 'yyyy-MM-dd');
+      const dayBookings = bookings.filter(b => b.slot_date === dateStr && b.status !== 'CANCELLED');
       
-      // Simulate aggregated FPO and Farmer bookings
-      const individualBookings = 150 + ((i * 37) % 100);
-      const fpoBulkBookings = i === 2 || i === 5 ? 300 : 50; 
+      const totalExpected = dayBookings.reduce((sum, b) => sum + (b.expected_quantity_q || 0), 0);
       
       return {
         date: format(d, 'dd MMM'),
-        individual: individualBookings,
-        fpo: fpoBulkBookings,
-        totalExpected: individualBookings + fpoBulkBookings
+        individual: dayBookings.length,
+        fpo: 0,
+        totalExpected: totalExpected
       };
     });
-  }, []);
+  }, [bookings]);
 
- // Prepare Pie Chart data (Crop Distribution)
- const cropData = [
- { name: 'Paddy (Grade A)', value: 65, color: '#047857' },
- { name: 'Wheat', value: 25, color: '#ca8a04' },
- { name: 'Mustard', value: 10, color: '#b91c1c' },
- ];
+ // Prepare Pie Chart data (Crop Distribution) from real bookings
+ const cropData = useMemo(() => {
+  const cropCounts: Record<string, number> = {};
+  bookings.forEach(b => {
+    const crop = b.crop_name || 'Unknown';
+    cropCounts[crop] = (cropCounts[crop] || 0) + (b.expected_quantity_q || 1);
+  });
+  const colors = ['#047857', '#ca8a04', '#b91c1c', '#1d4ed8', '#4338ca'];
+  return Object.entries(cropCounts).map(([name, value], idx) => ({
+    name,
+    value,
+    color: colors[idx % colors.length]
+  }));
+ }, [bookings]);
 
  // Prepare Bar Chart data (Centre Loads)
  const centreLoads = centres.slice(0, 5).map(c => ({

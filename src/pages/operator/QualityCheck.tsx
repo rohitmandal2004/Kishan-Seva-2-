@@ -20,6 +20,8 @@ import { useKishanData } from '@/context/DataContext';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { QRScannerModal } from '@/components/operator/QRScannerModal';
 import { AnomalyDetectionEngine } from '@/services/anomalyDetection';
+import { useSupabase } from '@/context/SupabaseContext';
+import { useOperator } from '@/hooks/useOperator';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -60,9 +62,12 @@ type QualityCheckFormData = z.infer<typeof qualityCheckSchema>;
 export default function QualityCheck() {
    const navigate = useNavigate();
    const store = useKishanData();
+   const { clerkUser } = useSupabase();
+   const { operatorCentreId } = useOperator();
+
    const bookings = store
       .getBookings()
-      .filter((b) => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
+      .filter((b) => b.centre_id === operatorCentreId && b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
 
    const [selectedTokenId, setSelectedTokenId] = useState<string>(bookings[0]?.id || '');
    const [loading, setLoading] = useState(false);
@@ -84,7 +89,7 @@ export default function QualityCheck() {
          foreignMatter: 1.1,
          brokenGrain: 2.0,
          rejectionReason: '',
-         inspectorName: 'Subhasish Das (Chief Quality Inspector)',
+         inspectorName: clerkUser?.fullName || clerkUser?.firstName || 'Operator',
       },
    });
 

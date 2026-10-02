@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,19 +11,21 @@ import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
 import { useSupabase } from '@/context/SupabaseContext';
+import { useOperator } from '@/hooks/useOperator';
 
 import { playMandiChime, speakAnnouncement } from '@/services/soundAndSpeech';
 import { useLanguage } from '@/services/i18n';
 import { SmsGateway } from '@/services/smsGateway';
 import { toast } from 'sonner';
 import { Html5QrcodeScanner, Html5QrcodeScanType } from 'html5-qrcode';
-import { useEffect } from 'react';
 
 export default function OperatorQueue() {
     const navigate = useNavigate();
     const { t } = useLanguage();
     const store = useKishanData();
-    const bookings = store.getBookings();
+    const { operatorCentreId } = useOperator();
+    const bookings = store.getBookings().filter(b => b.centre_id === operatorCentreId);
+    
     const [search, setSearch] = useState('');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
     const [showQrScanner, setShowQrScanner] = useState(false);
