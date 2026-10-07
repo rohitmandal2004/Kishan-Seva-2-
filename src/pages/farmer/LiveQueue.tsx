@@ -464,7 +464,6 @@ export default function LiveQueue() {
             {stages.map((stage, idx) => {
               const isPassed = idx < currentStageIndex;
               const isCurrent = idx === currentStageIndex;
-              const isUpcoming = idx > currentStageIndex;
               
               const StageIcon = stage.icon;
 

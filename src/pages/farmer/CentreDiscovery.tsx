@@ -100,6 +100,30 @@ export default function CentreDiscovery() {
         }
     }, [farmer]);
 
+    // Auto-locate on mount if no exact coordinates saved
+    useEffect(() => {
+        if (!farmer?.latitude && !farmer?.longitude && 'geolocation' in navigator) {
+            setIsLocating(true);
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    setFarmerLocation([lat, lon]);
+                    setActiveVillage('Current GPS');
+                    setFocusedCentre(null);
+                    setSelectedRecId(null);
+                    setCameraKey(`gps-auto-${Date.now()}`);
+                    setIsLocating(false);
+                },
+                (error) => {
+                    console.warn('Auto-geolocation failed:', error.message);
+                    setIsLocating(false);
+                },
+                { enableHighAccuracy: true, timeout: 6000 }
+            );
+        }
+    }, [farmer?.latitude, farmer?.longitude]);
+
     useEffect(() => {
         SupabaseDataService.getCentres().then(data => {
             if (data && data.length > 0) {

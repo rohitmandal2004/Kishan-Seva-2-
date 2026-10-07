@@ -1,220 +1,227 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Leaf, Building2, Shield, ArrowRight, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
-import AnimatedPage from '@/components/ui/AnimatedPage';
 import { gsap, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
-import { useSupabase } from '@/context/SupabaseContext';
-import { toast } from 'sonner';
 
 export default function RoleSelection() {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { setDemoRole } = useSupabase();
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // Header animation
-    gsap.from(".role-header", {
-      y: 30,
+    gsap.from(".header-anim", {
+      y: 20,
       opacity: 0,
       duration: 0.8,
-      ease: "power2.out"
+      stagger: 0.1,
+      ease: "power3.out"
     });
 
-    // Stagger cards
     gsap.from(".role-card", {
       y: 40,
       opacity: 0,
       duration: 0.8,
       stagger: 0.15,
-      ease: "back.out(1.2)",
+      ease: "back.out(1.1)",
       delay: 0.2
     });
   }, { scope: container });
 
   return (
-    <AnimatedPage className="min-h-screen bg-[#f5f5f7] flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 relative overflow-hidden font-sans">
-      <div ref={container} className="w-full max-w-5xl flex flex-col items-center justify-center relative z-10">
-      {/* Dynamic Background Mesh */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-emerald-200/40 blur-[120px]" />
-        <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] rounded-full bg-blue-200/30 blur-[140px]" />
-        <div className="absolute -bottom-[20%] left-[20%] w-[50%] h-[50%] rounded-full bg-amber-100/40 blur-[120px]" />
-      </div>
-
-      <div className="w-full flex flex-wrap items-center justify-between gap-3 mb-6 sm:mb-8 relative z-10">
-        <Link 
-          to="/" 
-          className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-500 hover:text-slate-900 font-semibold transition-colors bg-white/70 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
-        >
-          <ChevronLeft className="w-4 h-4" /> {t('back_to_home')}
-        </Link>
-        <div className="bg-white/70 backdrop-blur-md rounded-2xl border border-white/40 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <LanguageSelector variant="compact" />
-        </div>
-      </div>
-
-      {/* Header */}
-      <div className="role-header flex flex-col items-center justify-center text-center mb-10 sm:mb-12 relative z-10">
-        <KishanSevaLogo size="xl" showSubtitle={true} animated={false} className="mb-2" />
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center p-4 sm:p-6 md:p-10 relative overflow-hidden font-sans">
+      <div ref={container} className="w-full max-w-7xl flex flex-col relative z-10 flex-1">
         
-        <p className="text-sm sm:text-base text-slate-500 max-w-lg mx-auto font-medium mt-4">
-          {t('Select Portal')}
-        </p>
-      </div>
-
-      {/* Role Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 w-full relative z-10">
+        {/* Subtle Background Pattern */}
+        <div className="fixed inset-0 z-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#e2e8f0 1.5px, transparent 1.5px)', backgroundSize: '36px 36px', opacity: 0.5 }}></div>
         
-        {/* Farmer Card */}
-        <div className="role-card">
-          <Card 
-            onMouseEnter={() => import('./auth/FarmerLogin')}
-            onClick={() => navigate('/farmer/login')}
-            className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
+        {/* Top Navigation */}
+        <div className="w-full flex items-center justify-between mb-6 sm:mb-8 relative z-10 header-anim">
+          <Link 
+            to="/" 
+            className="group flex items-center gap-3 text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors"
           >
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/20">
-                  <Leaf className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center group-hover:bg-slate-100 transition-colors shadow-sm">
+                <ChevronLeft className="w-5 h-5" />
+            </div>
+            {t('back_to_home')}
+          </Link>
+          <div className="bg-white rounded-full p-1.5 border border-slate-200 shadow-sm flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-3 pr-1 hidden sm:block">Language</span>
+              <LanguageSelector variant="compact" />
+          </div>
+        </div>
+
+        {/* Header Section */}
+        <div className="flex flex-col items-center text-center mb-10 sm:mb-12 relative z-10">
+          <div className="header-anim mb-5 p-5 bg-white rounded-[2rem] shadow-sm border border-slate-100 inline-flex items-center justify-center">
+             <KishanSevaLogo size="xl" showSubtitle={false} animated={false} />
+          </div>
+          <h1 className="header-anim text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight mb-5">
+            {t('Select Portal')}
+          </h1>
+          <p className="header-anim text-base sm:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
+            Welcome to the Smart Agriculture Portal. Please select your dedicated workspace below to access customized tools, metrics, and services.
+          </p>
+        </div>
+
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 w-full relative z-10 max-w-6xl mx-auto flex-1 content-start">
+          
+          {/* Farmer Card */}
+          <div className="role-card h-full">
+            <Card 
+              onMouseEnter={() => import('./auth/FarmerLogin')}
+              onClick={() => navigate('/farmer/login')}
+              className="group p-8 sm:p-10 bg-white border-2 border-transparent hover:border-emerald-500/20 shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(16,185,129,0.15)] transition-all duration-500 cursor-pointer flex flex-col h-full rounded-[2.5rem] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-50 rounded-bl-full -mr-24 -mt-24 z-0"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-5 mb-8">
+                  <div className="p-4 rounded-[1.25rem] bg-emerald-100 text-emerald-600 shadow-sm ring-1 ring-emerald-200/50 group-hover:bg-emerald-500 group-hover:text-white transition-colors duration-500">
+                    <Leaf className="w-7 h-7" />
+                  </div>
+                  <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 block mb-1">
+                        {t('role_farmer_subtitle')}
+                      </span>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-emerald-700 transition-colors">{t('role_farmer_title')}</h3>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-white border border-slate-100 text-slate-400 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors duration-300">
-                  <ArrowRight className="w-4 h-4" />
+                
+                <p className="text-sm text-slate-500 leading-relaxed mb-8 font-medium">
+                  {t('role_farmer_desc')}
+                </p>
+              </div>
+
+              <div className="relative z-10 mt-auto pt-6 border-t border-slate-100">
+                <ul className="space-y-4 text-xs sm:text-sm text-slate-600 font-medium mb-8">
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-emerald-50 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600"/></div>
+                      <span className="leading-relaxed">{t('f_check_1')}</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-emerald-50 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-600"/></div>
+                      <span className="leading-relaxed">{t('f_check_2')}</span>
+                  </li>
+                </ul>
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 text-sm font-black text-emerald-600 uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+                        Enter Portal <ArrowRight className="w-4 h-4" />
+                    </div>
                 </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2 block">
-                {t('role_farmer_subtitle')}
-              </span>
-              <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{t('role_farmer_title')}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                {t('role_farmer_desc')}
-              </p>
-            </div>
+            </Card>
+          </div>
 
-            <div>
-              <ul className="space-y-3 pt-5 border-t border-slate-200/50 text-xs text-slate-600 font-medium">
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('f_check_1')}</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('f_check_2')}</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
-        </div>
-
-        {/* Operator Card */}
-        <div className="role-card">
-          <Card 
-            onMouseEnter={() => import('./auth/OperatorLogin')}
-            onClick={() => navigate('/operator/login')}
-            className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
-          >
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/20">
-                  <Building2 className="w-6 h-6" />
+          {/* Operator Card */}
+          <div className="role-card h-full">
+            <Card 
+              onMouseEnter={() => import('./auth/OperatorLogin')}
+              onClick={() => navigate('/operator/login')}
+              className="group p-8 sm:p-10 bg-white border-2 border-transparent hover:border-blue-500/20 shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(59,130,246,0.15)] transition-all duration-500 cursor-pointer flex flex-col h-full rounded-[2.5rem] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50 rounded-bl-full -mr-24 -mt-24 z-0"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-5 mb-8">
+                  <div className="p-4 rounded-[1.25rem] bg-blue-100 text-blue-600 shadow-sm ring-1 ring-blue-200/50 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-500">
+                    <Building2 className="w-7 h-7" />
+                  </div>
+                  <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 block mb-1">
+                        {t('role_operator_subtitle')}
+                      </span>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">{t('role_operator_title')}</h3>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-white border border-slate-100 text-slate-400 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors duration-300">
-                  <ArrowRight className="w-4 h-4" />
+                
+                <p className="text-sm text-slate-500 leading-relaxed mb-8 font-medium">
+                  {t('role_operator_desc')}
+                </p>
+              </div>
+
+              <div className="relative z-10 mt-auto pt-6 border-t border-slate-100">
+                <ul className="space-y-4 text-xs sm:text-sm text-slate-600 font-medium mb-8">
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-blue-50 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-blue-600"/></div>
+                      <span className="leading-relaxed">{t('op_check_1')}</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-blue-50 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-blue-600"/></div>
+                      <span className="leading-relaxed">{t('op_check_2')}</span>
+                  </li>
+                </ul>
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 text-sm font-black text-blue-600 uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+                        Enter Portal <ArrowRight className="w-4 h-4" />
+                    </div>
                 </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2 block">
-                {t('role_operator_subtitle')}
-              </span>
-              <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{t('role_operator_title')}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                {t('role_operator_desc')}
-              </p>
-            </div>
+            </Card>
+          </div>
 
-            <div>
-              <ul className="space-y-3 pt-5 border-t border-slate-200/50 text-xs text-slate-600 font-medium">
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('op_check_1')}</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('op_check_2')}</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
-        </div>
-
-        {/* Admin Card */}
-        <div className="role-card">
-          <Card 
-            onMouseEnter={() => import('./auth/AdminLogin')}
-            onClick={() => navigate('/admin/login')}
-            className="p-6 sm:p-8 border border-white/60 bg-white/60 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-shadow duration-500 cursor-pointer flex flex-col justify-between h-full rounded-[2rem] relative overflow-hidden group"
-          >
-            <div>
-              <div className="flex justify-between items-start mb-6">
-                <div className="p-3.5 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 text-white shadow-lg shadow-slate-900/20">
-                  <Shield className="w-6 h-6" />
+          {/* Admin Card */}
+          <div className="role-card h-full">
+            <Card 
+              onMouseEnter={() => import('./auth/AdminLogin')}
+              onClick={() => navigate('/admin/login')}
+              className="group p-8 sm:p-10 bg-white border-2 border-transparent hover:border-slate-800/20 shadow-sm hover:shadow-[0_20px_40px_-15px_rgba(15,23,42,0.15)] transition-all duration-500 cursor-pointer flex flex-col h-full rounded-[2.5rem] relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-slate-100 rounded-bl-full -mr-24 -mt-24 z-0"></div>
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-5 mb-8">
+                  <div className="p-4 rounded-[1.25rem] bg-slate-100 text-slate-700 shadow-sm ring-1 ring-slate-200/50 group-hover:bg-slate-900 group-hover:text-white transition-colors duration-500">
+                    <Shield className="w-7 h-7" />
+                  </div>
+                  <div>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mb-1">
+                        {t('role_admin_subtitle')}
+                      </span>
+                      <h3 className="text-2xl font-black text-slate-900 tracking-tight group-hover:text-slate-700 transition-colors">{t('role_admin_title')}</h3>
+                  </div>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-white border border-slate-100 text-slate-400 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors duration-300">
-                  <ArrowRight className="w-4 h-4" />
+                
+                <p className="text-sm text-slate-500 leading-relaxed mb-8 font-medium">
+                  {t('role_admin_desc')}
+                </p>
+              </div>
+
+              <div className="relative z-10 mt-auto pt-6 border-t border-slate-100">
+                <ul className="space-y-4 text-xs sm:text-sm text-slate-600 font-medium mb-8">
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-slate-100 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-slate-700"/></div>
+                      <span className="leading-relaxed">{t('adm_check_1')}</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                      <div className="mt-0.5 rounded-full bg-slate-100 p-1"><CheckCircle2 className="w-3.5 h-3.5 text-slate-700"/></div>
+                      <span className="leading-relaxed">{t('adm_check_2')}</span>
+                  </li>
+                </ul>
+                <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2 text-sm font-black text-slate-800 uppercase tracking-wider group-hover:gap-3 transition-all duration-300">
+                        Enter Portal <ArrowRight className="w-4 h-4" />
+                    </div>
                 </div>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2 block">
-                {t('role_admin_subtitle')}
-              </span>
-              <h3 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">{t('role_admin_title')}</h3>
-              <p className="text-xs text-slate-500 leading-relaxed mb-6 font-medium">
-                {t('role_admin_desc')}
-              </p>
-            </div>
-
-            <div>
-              <ul className="space-y-3 pt-5 border-t border-slate-200/50 text-xs text-slate-600 font-medium">
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-slate-700 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('adm_check_1')}</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                    <CheckCircle2 className="w-4 h-4 text-slate-700 shrink-0 mt-0.5"/> 
-                    <span className="leading-tight">{t('adm_check_2')}</span>
-                </li>
-              </ul>
-            </div>
-          </Card>
+            </Card>
+          </div>
+          
         </div>
         
-      </div>
-
-      {/* Demo Mode Action */}
-      <div className="mt-10 flex flex-col items-center relative z-10 w-full animate-in fade-in slide-in-from-bottom-4 duration-700 delay-500 fill-mode-both">
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <span className="text-sm font-semibold text-slate-500">Just want to look around?</span>
-          <Button 
-            onClick={() => {
-              setDemoRole('FARMER');
-              toast.success('Logged in with Demo Farmer Profile');
-              navigate('/farmer/dashboard');
-            }}
-            className="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold border border-emerald-300 shadow-sm rounded-full px-6 transition-all duration-300 hover:shadow-md gap-2 cursor-pointer"
-          >
-            <Leaf className="w-4 h-4" />
-            Quick Demo: Farmer Dashboard
-          </Button>
+        {/* Footer help */}
+        <div className="header-anim mt-16 sm:mt-auto pt-8 pb-4 text-center text-sm text-slate-400 font-medium relative z-10 flex items-center justify-center gap-2 w-full">
+          <div className="bg-white/80 backdrop-blur-sm px-6 py-3 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
+            {t('need_help')} <strong className="text-slate-800 font-bold tracking-wide">1800-180-1551</strong>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-12 text-center text-xs text-slate-400 font-medium relative z-10">
-        {t('need_help')} <strong className="text-slate-700 font-bold tracking-wide">1800-180-1551</strong>
       </div>
-      </div>
-    </AnimatedPage>
+    </div>
   );
 }

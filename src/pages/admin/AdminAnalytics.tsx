@@ -1,5 +1,4 @@
 import { useMemo, useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
 import { useKishanData } from '@/context/DataContext';
 import { 
  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -88,10 +87,10 @@ export default function AdminAnalytics() {
 
   return (
   <div className="p-4 md:p-8 max-w-[1400px] mx-auto space-y-8 font-sans bg-white min-h-screen text-slate-900">
-  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b-2 border-slate-900 pb-4">
+  <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-slate-200 pb-4">
   <div>
   <h1 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">State Agricultural Procurement Command</h1>
-  <h2 className="text-2xl sm:text-3xl font-black tracking-tight leading-none">Analytics & Reports</h2>
+  <h2 className="text-2xl sm:text-3xl font-bold tracking-tight leading-none">Analytics & Reports</h2>
   <p className="text-slate-600 text-sm font-mono mt-2">Statewide procurement insights and financial disbursals.</p>
   </div>
   <div className="flex items-center gap-2 bg-slate-900 px-4 py-2 text-sm font-bold text-white uppercase tracking-widest">
@@ -101,37 +100,37 @@ export default function AdminAnalytics() {
   </div>
 
   {/* KPI Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-5 gap-0 border-2 border-slate-900 bg-slate-900">
-  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 last:border-none min-h-[120px]">
+  <div className="grid grid-cols-1 md:grid-cols-5 gap-0 border border-slate-200 bg-slate-900">
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r border-slate-200 last:border-none min-h-[120px]">
   <div className="flex items-center justify-between mb-4">
   <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-emerald-100 px-2 py-0.5">Total Procured</p>
   <Sprout className="w-5 h-5 text-emerald-700" />
   </div>
-  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
+  <h3 className="text-3xl font-bold text-slate-900 font-mono tracking-tighter">{stats.totalProcuredQuintals.toLocaleString()} Q</h3>
   </div>
 
-  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r border-slate-200 min-h-[120px]">
   <div className="flex items-center justify-between mb-4">
   <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-blue-100 px-2 py-0.5">DBT Disbursed</p>
   <TrendingUp className="w-5 h-5 text-blue-700" />
   </div>
-  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">₹{stats.totalDisbursedCrores} Cr</h3>
+  <h3 className="text-3xl font-bold text-slate-900 font-mono tracking-tighter">₹{stats.totalDisbursedCrores} Cr</h3>
   </div>
 
-  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r border-slate-200 min-h-[120px]">
   <div className="flex items-center justify-between mb-4">
   <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-amber-100 px-2 py-0.5">Active Farmers</p>
   <Users className="w-5 h-5 text-amber-700" />
   </div>
-  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.totalFarmers.toLocaleString()}</h3>
+  <h3 className="text-3xl font-bold text-slate-900 font-mono tracking-tighter">{stats.totalFarmers.toLocaleString()}</h3>
   </div>
 
-  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r-2 border-slate-900 min-h-[120px]">
+  <div className="p-5 flex flex-col justify-between bg-white border-b-2 md:border-b-0 md:border-r border-slate-200 min-h-[120px]">
   <div className="flex items-center justify-between mb-4">
   <p className="text-[10px] font-bold text-slate-900 uppercase tracking-widest bg-purple-100 px-2 py-0.5">Active Mandis</p>
   <Building2 className="w-5 h-5 text-purple-700" />
   </div>
-  <h3 className="text-3xl font-black text-slate-900 font-mono tracking-tighter">{stats.activeCentres} / {centres.length}</h3>
+  <h3 className="text-3xl font-bold text-slate-900 font-mono tracking-tighter">{stats.activeCentres} / {centres.length}</h3>
   </div>
 
   <div className={`p-5 flex flex-col justify-between bg-white min-h-[120px] ${(avgRating && avgRating < 3.0) ? 'bg-red-50' : ''}`}>
@@ -139,7 +138,7 @@ export default function AdminAnalytics() {
   <p className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 ${(avgRating && avgRating < 3.0) ? 'bg-red-900 text-white' : 'bg-orange-100 text-slate-900'}`}>Service Quality</p>
   <Star className={`w-5 h-5 ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-orange-700'}`} />
   </div>
-  <h3 className={`text-3xl font-black font-mono tracking-tighter ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-slate-900'}`}>
+  <h3 className={`text-3xl font-bold font-mono tracking-tighter ${(avgRating && avgRating < 3.0) ? 'text-red-700' : 'text-slate-900'}`}>
     {avgRating ? `${avgRating}/5.0` : 'N/A'}
   </h3>
   </div>
@@ -149,8 +148,8 @@ export default function AdminAnalytics() {
  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
  
  {/* Main Area Chart */}
- <div className="lg:col-span-2 p-0 border-2 border-slate-900 bg-white">
- <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+ <div className="lg:col-span-2 p-0 border border-slate-200 bg-white">
+ <div className="p-4 border-b border-slate-200 bg-slate-50">
   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Procurement Volume Trend (Quintals)</h3>
  </div>
  <div className="h-[300px] w-full p-6">
@@ -176,8 +175,8 @@ export default function AdminAnalytics() {
  </div>
 
  {/* Pie Chart */}
- <div className="p-0 border-2 border-slate-900 bg-white flex flex-col">
- <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+ <div className="p-0 border border-slate-200 bg-white flex flex-col">
+ <div className="p-4 border-b border-slate-200 bg-slate-50">
   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Crop Distribution</h3>
  </div>
  <div className="flex-1 min-h-[200px] p-6 pb-0">
@@ -205,18 +204,18 @@ export default function AdminAnalytics() {
  {cropData.map((c, i) => (
  <div key={c.name} className={`flex justify-between items-center text-sm py-3 border-slate-200 ${i !== cropData.length - 1 ? 'border-b' : ''}`}>
  <div className="flex items-center gap-3">
- <div className="w-3 h-3 rounded-none border border-slate-900" style={{ backgroundColor: c.color }}></div>
+ <div className="w-3 h-3 rounded-full border border-slate-900" style={{ backgroundColor: c.color }}></div>
  <span className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">{c.name}</span>
  </div>
- <span className="font-black font-mono text-slate-900">{c.value}%</span>
+ <span className="font-bold font-mono text-slate-900">{c.value}%</span>
  </div>
  ))}
  </div>
  </div>
 
  {/* Bar Chart */}
- <div className="lg:col-span-3 p-0 border-2 border-slate-900 bg-white">
- <div className="p-4 border-b-2 border-slate-900 bg-slate-50">
+ <div className="lg:col-span-3 p-0 border border-slate-200 bg-white">
+ <div className="p-4 border-b border-slate-200 bg-slate-50">
   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Top Mandis Queue vs Capacity</h3>
  </div>
  <div className="h-[300px] w-full p-6">
@@ -238,8 +237,8 @@ export default function AdminAnalytics() {
  </div>
  
  {/* Expected Arrivals (Next 7 Days) */}
- <div className="lg:col-span-3 p-0 border-2 border-slate-900 bg-white mt-4">
- <div className="p-4 border-b-2 border-slate-900 bg-slate-50 flex justify-between items-center">
+ <div className="lg:col-span-3 p-0 border border-slate-200 bg-white mt-4">
+ <div className="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-900">Pre-Harvest Arrival Forecast (Quintals)</h3>
   <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">Based on FPO & Farmer Bookings</span>
  </div>

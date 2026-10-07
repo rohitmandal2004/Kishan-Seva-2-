@@ -106,11 +106,28 @@ export function calculateQueuePrediction(
  // Total active workload
  const effectiveQueue = checkedIn + currentlyProcessing + Math.round(expectedArrivals * 0.4);
 
+ // Calculate historical processing time from completed bookings at this centre today/recently
+ const completedRecent = centreBookings.filter(b => b.status === 'COMPLETED' && b.checked_in_at && b.completed_at);
+ let actualAvgMins = averageProcessingTimeMins;
+ if (completedRecent.length > 0) {
+  const totalProcessingMs = completedRecent.reduce((sum, b) => {
+   const start = new Date(b.checked_in_at!).getTime();
+   const end = new Date(b.completed_at!).getTime();
+   const diff = end - start;
+   return diff > 0 && diff < 14400000 ? sum + diff : sum;
+  }, 0);
+  const avgMs = totalProcessingMs / completedRecent.length;
+  if (avgMs > 0) {
+   actualAvgMins = avgMs / 60000;
+   actualAvgMins = Math.max(2, Math.min(30, actualAvgMins)); // Clamp bounds
+  }
+ }
+
  // Predicted wait calculation in minutes
- const predictedWaitMins = Math.max(5, Math.round(effectiveQueue * averageProcessingTimeMins));
+ const predictedWaitMins = Math.max(5, Math.round(effectiveQueue * actualAvgMins));
 
  // Processing rate per hour
- const processingRatePerHour = Math.round(60 / averageProcessingTimeMins);
+ const processingRatePerHour = Math.round(60 / actualAvgMins);
 
  // Confidence tier
  let confidence: 'HIGH' | 'MEDIUM' | 'LOW' = 'HIGH';

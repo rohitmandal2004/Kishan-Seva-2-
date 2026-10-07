@@ -43,15 +43,19 @@ export interface FarmerProfile {
 }
 
 export interface OperatorProfile {
- id: string;
- user_id?: string;
- operator_code: string;
- full_name: string;
- phone: string;
- centre_id: string;
- role_designation: string; // e.g. 'Quality Inspector', 'Weighbridge Operator'
- status: 'ACTIVE' | 'INACTIVE';
- created_at?: string;
+  id: string;
+  user_id?: string;
+  operator_code?: string;
+  full_name: string;
+  email?: string;
+  phone: string;
+  address?: string;
+  district?: string;
+  state?: string;
+  centre_id: string;
+  role_designation: string; // e.g. 'Quality Inspector', 'Weighbridge Operator'
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SUSPENDED' | 'ACTIVE' | 'INACTIVE';
+  created_at?: string;
 }
 
 export interface AdminProfile {
@@ -198,6 +202,7 @@ export interface QualityCheck {
  inspector_name: string;
  certificate_id: string;
  rejection_reason?: string;
+ evidence_photo_url?: string;
  timestamp?: string;
  disputed?: boolean;
  created_at?: string;

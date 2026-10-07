@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import AnimatedOutlet from '@/components/ui/AnimatedOutlet';
 import { LayoutDashboard, Users, Scale, FileCheck, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useKishanData } from '@/context/DataContext';
@@ -7,6 +8,8 @@ import { useLanguage } from '@/services/i18n';
 import { useSupabase } from '@/context/SupabaseContext';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { SyncManager } from '@/components/ui/SyncManager';
+import { useOperator } from '@/hooks/useOperator';
+import { toast } from 'sonner';
 
 export default function OperatorLayout() {
  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -15,7 +18,15 @@ export default function OperatorLayout() {
  const currentPath = location.pathname;
  const store = useKishanData();
  const { t } = useLanguage();
- const { user, signOut } = useSupabase();
+ const { user, clerkUser, signOut } = useSupabase();
+ const { operatorProfile, operatorCentreId } = useOperator();
+
+ const centre = store.getCentreById(operatorCentreId || '');
+
+ const getInitials = (name?: string) => {
+   if (!name) return 'OP';
+   return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+ };
 
  const handleLogout = async () => {
  try {
@@ -25,6 +36,13 @@ export default function OperatorLayout() {
  }
  navigate('/roles', { replace: true });
  };
+
+ useEffect(() => {
+   if (operatorProfile && (operatorProfile.status === 'PENDING' || operatorProfile.status === 'REJECTED' || operatorProfile.status === 'SUSPENDED')) {
+     toast.error(`Your account status is ${operatorProfile.status.toLowerCase()}. You have been signed out.`);
+     handleLogout();
+   }
+ }, [operatorProfile]);
 
  const waitingCount = store.getBookings().filter(b => b.status !== 'COMPLETED' && b.status !== 'CANCELLED').length;
 
@@ -79,9 +97,9 @@ export default function OperatorLayout() {
       </span>
     </div>
 
-    <div className="px-5 py-4 bg-slate-900 border-b border-slate-800">
+    <div className="px-5 py-4 bg-slate-900 border-b border-slate-200">
       <p className="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-1">Station Centre</p>
-      <p className="font-mono font-bold text-xs text-slate-200">Krishnapur (KSP-001)</p>
+      <p className="font-mono font-bold text-xs text-slate-200">{centre?.name || 'Loading...'} ({centre?.centre_code || '---'})</p>
       <div className="flex items-center gap-2 mt-2">
         <span className="w-1.5 h-1.5 bg-emerald-500 rounded-none animate-pulse"></span>
         <span className="text-[9px] font-mono text-emerald-400 uppercase tracking-widest">Weighbridge Active</span>
@@ -114,11 +132,11 @@ export default function OperatorLayout() {
       })}
     </nav>
 
-    <div className="px-4 py-3 border-t border-slate-800 bg-slate-950">
+    <div className="px-4 py-3 border-t border-slate-200 bg-slate-950">
       <SyncManager />
     </div>
 
-    <div className="p-4 border-t border-slate-800 bg-slate-950">
+    <div className="p-4 border-t border-slate-200 bg-slate-950">
       <Button 
         variant="ghost" 
         className="w-full justify-start text-[10px] font-bold font-mono uppercase tracking-widest text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
@@ -141,18 +159,18 @@ export default function OperatorLayout() {
  <div className="flex items-center gap-4">
  <LanguageSelector variant="compact" />
  <div className="text-right hidden sm:block">
- <p className="text-xs font-bold text-slate-800">Ramesh Kumar</p>
- <p className="text-[10px] text-slate-500 font-mono">Senior Weighbridge Officer (EMP-421)</p>
+ <p className="text-xs font-bold text-slate-800">{operatorProfile?.full_name || 'Operator'}</p>
+ <p className="text-[10px] text-slate-500 font-mono">{operatorProfile?.role_designation || 'Operator'} ({operatorProfile?.employee_id || '---'})</p>
  </div>
  <div className="w-9 h-9 rounded-xl bg-blue-100 border border-blue-200 text-blue-800 font-extrabold text-xs flex items-center justify-center shadow-xs">
- RK
+ {getInitials(operatorProfile?.full_name)}
  </div>
  </div>
  </header>
 
  {/* Page Content */}
  <main className="flex-1 overflow-auto bg-slate-50/60 p-4 md:p-6">
- <Outlet />
+ <AnimatedOutlet />
  </main>
  </div>
 
@@ -191,7 +209,7 @@ export default function OperatorLayout() {
  </div>
  <div className="px-5 py-3.5 bg-white/5 border-b border-white/10">
  <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Station Centre</p>
- <p className="font-bold text-xs text-white mt-0.5">Krishnapur Centre (KSP-001)</p>
+ <p className="font-bold text-xs text-white mt-0.5">{centre?.name || 'Loading...'} ({centre?.centre_code || '---'})</p>
  <div className="flex items-center gap-1.5 mt-1 text-[11px] text-emerald-400">
  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
  <span>Electronic Weighbridge Active</span>

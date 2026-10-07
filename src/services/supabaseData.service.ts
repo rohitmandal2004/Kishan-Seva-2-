@@ -88,10 +88,13 @@ export const SupabaseDataService = {
   getBookings: async (): Promise<Booking[]> => {
     if (isSupabaseConfigured()) {
       try {
+        const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
         const { data, error } = await supabase
           .from('bookings')
           .select('*, quality_checks(*), weighments(*)')
-          .order('created_at', { ascending: false });
+          .gte('slot_date', sevenDaysAgo)
+          .order('created_at', { ascending: false })
+          .limit(2000);
         if (!error && data) {
           const normalized: Booking[] = data.map((b: any) => {
             const qc = Array.isArray(b.quality_checks) ? b.quality_checks[0] : b.quality_checks;
@@ -401,13 +404,19 @@ export const SupabaseDataService = {
             'postgres_changes',
             bookingFilter as any,
             () => onUpdate()
-          )
-          .on(
+          );
+
+        // Only admins/operators need real-time centre updates (which trigger frequently)
+        // Farmers don't need real-time centre queues to trigger full app re-renders.
+        if (scope?.role === 'ADMIN' || scope?.role === 'OPERATOR') {
+          channel.on(
             'postgres_changes',
             { event: '*', schema: 'public', table: 'procurement_centres' },
             () => onUpdate()
-          )
-          .subscribe();
+          );
+        }
+
+        channel.subscribe();
 
         return () => {
           supabase.removeChannel(channel);

@@ -1,252 +1,165 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { Loader2, ChevronLeft, Mail, CheckCircle2 } from 'lucide-react';
+import { Loader2, ChevronLeft, Mail, CheckCircle2, Lock, Fingerprint } from 'lucide-react';
 import { useLanguage } from '@/services/i18n';
 import { LanguageSelector } from '@/components/ui/language-selector';
 import { useClerk } from '@clerk/react';
 import { useSignIn } from '@clerk/react/legacy';
 import { useSupabase } from '@/context/SupabaseContext';
+import { supabase } from '@/lib/supabase';
 import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-
-const OTP_RESEND_COOLDOWN = 30; // seconds
 
 export default function OperatorLogin() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const clerk = useClerk();
   const { signIn, isLoaded, setActive } = useSignIn();
-  const { user, isConfigured, isProfileLoading, refreshProfile, signOut, resolveRole, setDemoRole } = useSupabase();
+  const { user, isConfigured, isProfileLoading, refreshProfile, signOut, setDemoRole } = useSupabase();
   
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'EMAIL' | 'OTP'>('EMAIL');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
 
-  // Set intended role so multi-role users resolve to the correct profile
   useEffect(() => {
     try {
       localStorage.setItem('kishan_intended_role', 'OPERATOR');
     } catch {}
   }, []);
 
-  // Cooldown timer for OTP resend
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setTimeout(() => setResendCooldown(prev => prev - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [resendCooldown]);
-
-  // Auto-redirect if already logged in with a valid operator session
   useEffect(() => {
     if (isConfigured && !isProfileLoading && user && user.role === 'OPERATOR') {
       navigate('/operator/dashboard', { replace: true });
     }
-  }, [user, isConfigured, isProfileLoading, navigate]);
+  }, [user, isProfileLoading, isConfigured, navigate]);
 
-  const handleSendOtp = useCallback(async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    const cleanEmail = email.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@') || cleanEmail.length < 5) {
-      toast.error('Please enter a valid email address');
-      return;
-    }
-    
-    if (!isLoaded || !signIn) {
-      toast.error('Authentication is still loading. Please wait.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // Pre-auth verification: Operator profile must exist in Supabase
-      if (isSupabaseConfigured()) {
-        try {
-          const { data: operatorProfile, error: dbError } = await supabase
-            .from('operator_profiles')
-            .select('id, full_name, centre_id')
-            .ilike('email', cleanEmail)
-            .maybeSingle();
-
-          if (dbError) {
-            console.error('[Kishan Seva] Operator check error:', dbError);
-            toast.error("We couldn't connect to Kishan Seva right now. Please try again.");
-            return;
-          }
-
-          if (!operatorProfile) {
-            toast.error('Operator profile not found. Contact administrator.');
-            return;
-          }
-        } catch (dbErr) {
-          console.error('[Kishan Seva] DB connection error:', dbErr);
-          toast.error("We couldn't connect to Kishan Seva right now. Please try again.");
-          return;
-        }
-      }
-
-      // Start the sign-in process with Clerk using normalized email
-      const result = await signIn.create({
-        identifier: cleanEmail,
-      });
-
-      const emailCodeFactor = result.supportedFirstFactors?.find(
-        (f: any) => f.strategy === 'email_code'
-      );
-
-      if (!emailCodeFactor) {
-        throw new Error('Email OTP is not available for this account. Please check your Clerk configuration.');
-      }
-
-      await signIn.prepareFirstFactor({
-        strategy: 'email_code',
-        emailAddressId: (emailCodeFactor as any).emailAddressId,
-      });
-      
-      toast.success(`OTP sent to ${cleanEmail}`);
-      setStep('OTP');
-      setOtp('');
-      setResendCooldown(OTP_RESEND_COOLDOWN);
-    } catch (err: any) {
-      console.error('[Kishan Seva] Operator login OTP send error:', err);
-      const clerkError = err.errors?.[0];
-      const isNotFound = 
-        clerkError?.code === 'form_identifier_not_found' ||
-        clerkError?.code === 'identifier_not_found' ||
-        clerkError?.code?.includes('not_found') ||
-        clerkError?.message?.toLowerCase().includes("couldn't find") ||
-        clerkError?.message?.toLowerCase().includes("not found");
-
-      if (isNotFound) {
-        toast.error('Operator profile not found. Contact administrator.');
-      } else if (clerkError?.code === 'session_exists') {
-        toast.info('Active session detected. Checking profile...');
-        await refreshProfile(clerk.user?.id || '', cleanEmail);
-        const { role } = await resolveRole(clerk.user?.id || '', cleanEmail);
-        if (role === 'OPERATOR') {
-          navigate('/operator/dashboard', { replace: true });
-        } else {
-          toast.error('You do not have operator privileges.');
-        }
-      } else {
-        toast.error(clerkError?.message || "We couldn't connect to Kishan Seva right now. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [email, isLoaded, signIn, refreshProfile, user, navigate]);
-
-  const handleResendOtp = useCallback(async () => {
-    if (resendCooldown > 0) {
-      toast.info('Please wait before requesting another OTP.');
-      return;
-    }
-    if (!isLoaded || !signIn) return;
-    
-    setLoading(true);
-    try {
-      const emailCodeFactor = signIn.supportedFirstFactors?.find(
-        (f: any) => f.strategy === 'email_code'
-      );
-      if (!emailCodeFactor) {
-        throw new Error('Email code factor not available');
-      }
-      await signIn.prepareFirstFactor({
-        strategy: 'email_code',
-        emailAddressId: (emailCodeFactor as any).emailAddressId,
-      });
-      setOtp('');
-      setResendCooldown(OTP_RESEND_COOLDOWN);
-      toast.success('New verification code sent');
-    } catch (err: any) {
-      console.error('[Kishan Seva] Resend OTP error:', err);
-      toast.error(err.errors?.[0]?.message || 'Unable to resend code. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [resendCooldown, isLoaded, signIn]);
-
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp.length !== 6) {
-      toast.error('Please enter a valid 6-digit OTP');
-      return;
-    }
+    if (!isLoaded) return;
     
-    if (!isLoaded || !signIn) {
-      toast.error('Authentication is still loading. Please wait.');
-      return;
-    }
-
     setLoading(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: 'email_code',
-        code: otp,
+      if (clerk.session) {
+        await clerk.signOut();
+        await signOut();
+      }
+
+      let signinEmail = email;
+      if (email.toUpperCase().startsWith('KSO-')) {
+          const { data: opData } = await supabase.from('operator_profiles').select('email').eq('operator_code', email.toUpperCase()).maybeSingle();
+          if (opData?.email) {
+              signinEmail = opData.email;
+          }
+      }
+
+      const res = await signIn.create({
+        identifier: signinEmail,
+        password: password,
       });
 
-      if (result.status === 'complete') {
-        if (typeof (signIn as any).finalize === 'function') {
-          try {
-            await (signIn as any).finalize();
-          } catch {}
-        }
-
-        if (setActive && result.createdSessionId) {
-          await setActive({ session: result.createdSessionId });
-        }
-
-        const clerkUserId = clerk.user?.id || clerk.session?.user?.id || '';
-        const cleanEmail = email.trim().toLowerCase();
-
-        // Query Supabase for role strictly from database tables
-        const { role } = await resolveRole(clerkUserId, cleanEmail);
-
-        if (role === 'OPERATOR') {
-          await refreshProfile();
-          toast.success('Operator Authentication Successful');
-          navigate('/operator/dashboard', { replace: true });
-        } else if (role === 'FARMER') {
-          toast.info('You are registered as a Farmer. Redirecting to your dashboard...');
-          navigate('/farmer/dashboard', { replace: true });
-        } else if (role === 'ADMIN') {
-          toast.info('You are registered as an Admin. Redirecting to your dashboard...');
-          navigate('/admin/dashboard', { replace: true });
+      if (res.status === 'complete') {
+        await setActive({ session: res.createdSessionId });
+        const result = await refreshProfile(undefined, email);
+        const profile = result?.profile;
+        const resolvedRole = result?.role;
+        
+        if (resolvedRole === 'OPERATOR' && profile) {
+            if (profile.status === 'PENDING') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator account is pending admin approval.');
+            } else if (profile.status === 'REJECTED') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator registration has been rejected.');
+            } else if (profile.status === 'SUSPENDED') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator account has been suspended.');
+            } else if (!profile.assigned_centre_id) {
+                await clerk.signOut();
+                await signOut();
+                toast.error('You have not been assigned to a procurement centre.');
+            } else {
+                toast.success('Successfully logged in as Operator');
+                navigate('/operator/dashboard');
+            }
         } else {
-          toast.error('Account does not have operator privileges.');
+             await clerk.signOut();
+             await signOut();
+             toast.error('Operator profile not found. Please register.');
         }
       } else {
-        throw new Error('Verification could not be completed. Please try again.');
+        toast.error('Unable to complete login. Further action required.');
       }
     } catch (err: any) {
-      console.error('[Kishan Seva] OTP verification error:', err);
-      const clerkError = err.errors?.[0];
-      if (clerkError?.code === 'form_code_incorrect') {
-        toast.error('Invalid OTP. Please check the code and try again.');
-      } else if (clerkError?.code === 'verification_expired') {
-        toast.error('This OTP has expired. Please request a new code.');
-        setOtp('');
+      console.error('[Kishan Seva] Operator login error:', err);
+      toast.error(err.errors?.[0]?.message || 'Invalid email or password.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasskeyLogin = async () => {
+    if (!isLoaded) return;
+    setLoading(true);
+    try {
+      if (clerk.session) {
+        await clerk.signOut();
+        await signOut();
+      }
+
+      const res = await signIn.authenticateWithPasskey();
+
+      if (res.status === 'complete') {
+        await setActive({ session: res.createdSessionId });
+        const result = await refreshProfile(undefined, res.identifier || undefined);
+        const profile = result?.profile;
+        const resolvedRole = result?.role;
+        
+        if (resolvedRole === 'OPERATOR' && profile) {
+            if (profile.status === 'PENDING') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator account is pending admin approval.');
+            } else if (profile.status === 'REJECTED') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator registration has been rejected.');
+            } else if (profile.status === 'SUSPENDED') {
+                await clerk.signOut();
+                await signOut();
+                toast.error('Your operator account has been suspended.');
+            } else if (!profile.assigned_centre_id) {
+                await clerk.signOut();
+                await signOut();
+                toast.error('You have not been assigned to a procurement centre.');
+            } else {
+                toast.success('Successfully logged in via Biometrics');
+                navigate('/operator/dashboard');
+            }
+        } else {
+             await clerk.signOut();
+             await signOut();
+             toast.error('Operator profile not found. Please register.');
+        }
+      }
+    } catch (err: any) {
+      if (err.errors?.[0]?.code === 'passkey_not_supported') {
+        toast.error('Passkeys are not supported on this device.');
       } else {
-        toast.error(clerkError?.message || 'Invalid OTP. Please check the code and try again.');
+         toast.error(err.errors?.[0]?.longMessage || 'Biometric login failed or was cancelled.');
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChangeEmail = () => {
-    setStep('EMAIL');
-    setOtp('');
-    setResendCooldown(0);
-  };
-
-  const isDemoModeEnabled = true; // Hardcoded for hackathon demo
+  const isDemoModeEnabled = import.meta.env.VITE_ENABLE_DEMO_MODE === 'true';
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-blue-50/40 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
@@ -275,7 +188,7 @@ export default function OperatorLogin() {
             Operator Portal Login
           </h2>
           <p className="text-slate-500 text-xs">
-            Enter your email to access the operator dashboard
+            Enter your email and password to access the operator dashboard
           </p>
         </div>
 
@@ -292,7 +205,7 @@ export default function OperatorLogin() {
                 onClick={() => navigate('/operator/dashboard')}
                 className="bg-blue-700 hover:bg-blue-800 text-white text-xs h-8 px-3.5 rounded-xl font-bold shadow-xs"
               >
-                Go to Dashboard →
+                Go to Dashboard  
               </Button>
               <Button
                 type="button"
@@ -308,8 +221,8 @@ export default function OperatorLogin() {
               </Button>
             </div>
           </div>
-        ) : step === 'EMAIL' ? (
-          <form onSubmit={handleSendOtp} className="space-y-5">
+        ) : (
+          <form onSubmit={handleLogin} className="space-y-5">
             <div className="space-y-1.5">
               <Label htmlFor="email" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5 text-blue-600" />
@@ -317,78 +230,52 @@ export default function OperatorLogin() {
               </Label>
               <Input 
                 id="email" 
-                type="email" 
-                placeholder="operator@example.com"
+                type="text"
+                placeholder="Email or Operator ID (e.g. KSO-BAS-0001)"
                 value={email}
                 onChange={(e) => setEmail(e.target.value.toLowerCase())}
                 required
                 autoFocus
                 className="h-11 rounded-xl text-sm font-semibold tracking-wide"
               />
-              <p className="text-[10px] text-slate-500">A 6-digit one-time code will be sent to this email inbox.</p>
             </div>
             
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white rounded-xl h-11 text-xs font-bold shadow-md gap-2"
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Send OTP
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyOtp} className="space-y-5">
             <div className="space-y-1.5">
-              <div className="flex justify-between items-center">
-                <Label htmlFor="otp" className="text-xs font-bold text-slate-700">
-                  Enter OTP
-                </Label>
-                <button 
-                  type="button" 
-                  onClick={handleChangeEmail}
-                  className="text-xs font-bold text-blue-700 hover:underline cursor-pointer"
-                >
-                  Change email
-                </button>
-              </div>
-              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-center gap-2 mb-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span className="truncate">Sent to <strong className="text-slate-900">{email}</strong></span>
-              </div>
+              <Label htmlFor="password" className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-blue-600" />
+                Password
+              </Label>
               <Input 
-                id="otp" 
-                type="text" 
-                placeholder="● ● ● ● ● ●" 
-                value={otp}
-                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
-                maxLength={6}
-                autoFocus
-                className="h-12 rounded-xl text-center text-xl font-bold tracking-[0.3em]"
+                id="password" 
+                type="password" 
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-11 rounded-xl text-sm font-semibold tracking-wide"
               />
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] text-slate-500 font-semibold">
-                  Check your email inbox for the 6-digit code
-                </p>
-                <button
-                  type="button"
-                  onClick={handleResendOtp}
-                  disabled={resendCooldown > 0 || loading}
-                  className="text-[11px] text-blue-700 font-bold hover:underline disabled:text-slate-500 disabled:no-underline cursor-pointer"
-                >
-                  {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend OTP'}
-                </button>
-              </div>
             </div>
             
-            <Button 
-              type="submit" 
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white rounded-xl h-11 text-xs font-bold shadow-md gap-2"
-              disabled={loading}
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              Verify OTP
-            </Button>
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <Button 
+                type="submit" 
+                className="flex-1 bg-blue-700 hover:bg-blue-800 text-white rounded-xl h-11 text-xs font-bold shadow-md gap-2"
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                Sign In
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline"
+                onClick={handlePasskeyLogin}
+                className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50 rounded-xl h-11 text-xs font-bold gap-2"
+                disabled={loading}
+              >
+                <Fingerprint className="w-4 h-4" />
+                Quick Login
+              </Button>
+            </div>
           </form>
         )}
 
@@ -404,16 +291,24 @@ export default function OperatorLogin() {
               }}
               className="w-full h-10 rounded-xl text-xs font-bold border-blue-200 text-blue-800 bg-blue-50/50 hover:bg-blue-100 cursor-pointer"
             >
-              ⚡ Quick Demo Access (Skip OTP)
+              🚀 Quick Demo Access
             </Button>
           )}
 
-          <p className="text-xs text-slate-500 font-medium">
-            Not an operator?{' '}
-            <Link to="/roles" className="font-bold text-blue-700 hover:text-blue-800 hover:underline">
-              Back to Roles
-            </Link>
-          </p>
+          <div className="flex flex-col gap-2 mt-2">
+            <p className="text-xs text-slate-500 font-medium">
+              New candidate?{' '}
+              <Link to="/operator/register" className="font-bold text-blue-700 hover:text-blue-800 hover:underline">
+                Register here
+              </Link>
+            </p>
+            <p className="text-xs text-slate-500 font-medium">
+              Not an operator?{' '}
+              <Link to="/roles" className="font-bold text-blue-700 hover:text-blue-800 hover:underline">
+                Back to Roles
+              </Link>
+            </p>
+          </div>
         </div>
       </Card>
       

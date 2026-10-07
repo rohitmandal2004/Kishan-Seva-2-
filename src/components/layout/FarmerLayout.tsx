@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import AnimatedOutlet from '@/components/ui/AnimatedOutlet';
 import {
     Home, MapPin, CalendarClock, Ticket, Bell, LogOut, PhoneCall,
     User, CreditCard, BookOpen, HelpCircle, ShieldCheck, Sun, Moon, Mic, MicOff, CheckCircle2, Droplets, ArrowDownToLine, Menu, X,
@@ -410,7 +411,7 @@ export default function FarmerLayout() {
                         </div>
                     )}
 
-                    <Outlet />
+                    <AnimatedOutlet />
                 </main>
             </div>
 

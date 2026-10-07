@@ -14,6 +14,7 @@ import {
    ShieldCheck,
    QrCode,
    AlertTriangle,
+   Camera,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKishanData } from '@/context/DataContext';
@@ -21,6 +22,7 @@ import { SupabaseDataService } from '@/services/supabaseData.service';
 import { QRScannerModal } from '@/components/operator/QRScannerModal';
 import { AnomalyDetectionEngine } from '@/services/anomalyDetection';
 import { useSupabase } from '@/context/SupabaseContext';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { useOperator } from '@/hooks/useOperator';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -73,6 +75,7 @@ export default function QualityCheck() {
    const [loading, setLoading] = useState(false);
    const [success, setSuccess] = useState(false);
    const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
+   const [evidencePhoto, setEvidencePhoto] = useState<File | null>(null);
 
    const selectedBooking = bookings.find((b) => b.id === selectedTokenId) || bookings[0];
 
@@ -113,8 +116,28 @@ export default function QualityCheck() {
    const onSubmit = async (data: QualityCheckFormData) => {
       if (!selectedBooking) return;
 
+      if (grade === 'Rejected' && !evidencePhoto) {
+         toast.error('Photo evidence is required for all rejected crops.');
+         return;
+      }
+
       setLoading(true);
       try {
+         let evidencePhotoUrl = undefined;
+         if (evidencePhoto && isSupabaseConfigured()) {
+            const fileExt = evidencePhoto.name.split('.').pop();
+            const fileName = `qc-evidence-${Date.now()}.${fileExt}`;
+            const { data: uploadData, error } = await supabase.storage
+               .from('qc-evidence')
+               .upload(`rejections/${fileName}`, evidencePhoto);
+            if (!error && uploadData) {
+               evidencePhotoUrl = uploadData.path;
+            } else if (error) {
+               console.error('Evidence upload error:', error);
+               toast.warning('Evidence upload failed, but proceeding with rejection.');
+            }
+         }
+
          const nextStatus = grade === 'Rejected' ? 'CANCELLED' : 'WEIGHMENT';
          await SupabaseDataService.updateBookingStatus(selectedBooking.id, nextStatus, {
             booking_id: selectedBooking.id,
@@ -125,6 +148,7 @@ export default function QualityCheck() {
             inspector_name: data.inspectorName,
             certificate_id: `QC-KSP-${Math.floor(1000 + Math.random() * 9000)}`,
             rejection_reason: grade === 'Rejected' ? data.rejectionReason : undefined,
+            evidence_photo_url: evidencePhotoUrl,
          });
 
          setLoading(false);
@@ -414,18 +438,37 @@ export default function QualityCheck() {
                         </div>
 
                         {grade === 'Rejected' && (
-                           <div className="space-y-2 p-4 bg-red-50 border-2 border-red-500">
-                              <Label className="text-[10px] font-bold text-red-900 uppercase tracking-widest">Rejection Reason Required</Label>
-                              <Input
-                                 type="text"
-                                 {...register('rejectionReason')}
-                                 placeholder="SPECIFY REASON FOR REJECTION..."
-                                 className={`h-12 rounded-none font-mono text-xs font-bold uppercase border-2 bg-white ${errors.rejectionReason ? 'border-red-600 focus-visible:ring-red-600' : 'border-red-500 focus-visible:ring-red-500'
-                                    }`}
-                              />
-                              {errors.rejectionReason && (
-                                 <p className="text-red-600 font-mono text-[10px] font-bold uppercase tracking-widest">{errors.rejectionReason.message}</p>
-                              )}
+                           <div className="space-y-4 p-4 bg-red-50 border-2 border-red-500">
+                              <div className="space-y-2">
+                                 <Label className="text-[10px] font-bold text-red-900 uppercase tracking-widest">Rejection Reason Required</Label>
+                                 <Input
+                                    type="text"
+                                    {...register('rejectionReason')}
+                                    placeholder="SPECIFY REASON FOR REJECTION..."
+                                    className={`h-12 rounded-none font-mono text-xs font-bold uppercase border-2 bg-white ${errors.rejectionReason ? 'border-red-600 focus-visible:ring-red-600' : 'border-red-500 focus-visible:ring-red-500'
+                                       }`}
+                                 />
+                                 {errors.rejectionReason && (
+                                    <p className="text-red-600 font-mono text-[10px] font-bold uppercase tracking-widest">{errors.rejectionReason.message}</p>
+                                 )}
+                              </div>
+                              <div className="space-y-2 border-t border-red-200 pt-4 mt-2">
+                                 <Label className="text-[10px] font-bold text-red-900 uppercase tracking-widest flex items-center gap-1.5">
+                                    <Camera className="w-3.5 h-3.5" /> Mandatory Photo Evidence
+                                 </Label>
+                                 <div className="flex items-center gap-3">
+                                    <Input 
+                                       type="file" 
+                                       accept="image/*" 
+                                       capture="environment"
+                                       onChange={(e) => {
+                                          if (e.target.files?.[0]) setEvidencePhoto(e.target.files[0]);
+                                       }}
+                                       className="rounded-none border-2 border-red-500 bg-white file:bg-red-100 file:border-0 file:text-red-900 file:font-bold file:uppercase file:text-[10px] file:mr-4 file:px-4 file:py-1 hover:file:bg-red-200 h-12"
+                                    />
+                                 </div>
+                                 {!evidencePhoto && <p className="text-red-600 font-mono text-[10px] font-bold uppercase tracking-widest">A photo of the rejected crop must be uploaded.</p>}
+                              </div>
                            </div>
                         )}
 

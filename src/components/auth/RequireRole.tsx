@@ -57,10 +57,15 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
   // STATE D: Role mismatch
   if (user && user.role && !allowedRoles.includes(user.role as Role)) {
     if (user.role === 'FARMER') return <Navigate to="/farmer/dashboard" replace />;
-    if (user.role === 'OPERATOR') return <Navigate to="/operator/dashboard" replace />;
+    if (user.role === 'OPERATOR') {
+      return <Navigate to="/operator/dashboard" replace />;
+    }
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
     return <Navigate to="/roles" replace />;
   }
+
+
+
 
   // STATE E: Farmer portal route but no farmer profile exists in database
   if (allowedRoles.includes('FARMER') && (!farmer || user?.role !== 'FARMER')) {

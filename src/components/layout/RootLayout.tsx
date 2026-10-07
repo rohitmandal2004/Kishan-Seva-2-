@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import AnimatedOutlet from '@/components/ui/AnimatedOutlet';
 import { ScrollSmoother, useGSAP } from '@/lib/gsap';
 import { useRef } from 'react';
 
@@ -20,7 +21,7 @@ export default function RootLayout() {
   return (
     <div ref={container} className="min-h-screen bg-background font-sans antialiased" id="smooth-wrapper">
       <div id="smooth-content">
-        <Outlet />
+        <AnimatedOutlet />
       </div>
     </div>
   );

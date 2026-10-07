@@ -118,27 +118,6 @@ export default function FarmerRegistration() {
     return () => clearTimeout(timer);
   }, [resendCooldown]);
 
-  /**
-   * Check Supabase first for existing registered farmer before touching Clerk.
-   * If email exists in farmer_profiles, halt with: "Email already exists. Please log in instead."
-   */
-  const checkSupabaseDuplicate = async (normalizedEmail: string): Promise<boolean> => {
-    if (!isSupabaseConfigured()) return false;
-    try {
-      const { data: existingFarmer, error } = await supabase
-        .from('farmer_profiles')
-        .select('id')
-        .ilike('email', normalizedEmail)
-        .maybeSingle();
-
-      if (!error && existingFarmer) {
-        return true;
-      }
-    } catch (err) {
-      console.warn('[Kishan Seva] Supabase pre-registration check error:', err);
-    }
-    return false;
-  };
 
   /**
    * Send Clerk email verification code (OTP)

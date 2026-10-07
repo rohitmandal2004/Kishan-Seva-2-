@@ -134,114 +134,114 @@ export default function AdminCentres() {
  return (
  <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto space-y-8 font-sans">
  {/* Header Banner */}
- <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b-2 border-slate-900 pb-6">
+ <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b border-slate-200 pb-6">
  <div>
- <span className="text-[10px] uppercase font-black bg-slate-900 text-white px-2 py-0.5 tracking-widest inline-block mb-2">
+ <span className="text-[10px] uppercase font-bold bg-white text-slate-900 px-2 py-0.5 tracking-widest inline-block mb-2">
  Infrastructure &amp; Mandi Control
  </span>
- <h2 className="text-2xl sm:text-4xl font-black text-slate-900 leading-tight uppercase">
+ <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
  Procurement Centre &amp; Mandi Management
  </h2>
- <p className="text-xs font-bold text-slate-700 mt-2 uppercase tracking-widest">
+ <p className="text-sm text-slate-500 mt-2">
  Configure weighbridge scales, capacity thresholds, and live operational status across {centres.length} Mandis.
  </p>
  </div>
  <button
  onClick={() => setIsAddModalOpen(true)}
- className="bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-black uppercase tracking-widest border-2 border-slate-900 px-4 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all flex items-center gap-2"
+ className="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2 shadow-sm rounded-lg transition-all flex items-center gap-2"
  >
- <Plus className="w-4 h-4" /> ADD NEW MANDI
+ <Plus className="w-4 h-4" /> Add New Mandi
  </button>
  </div>
 
  {/* KPI Overview */}
- <div className="grid grid-cols-2 lg:grid-cols-4 gap-0 bg-slate-900 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)]">
- <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+ <div className="p-6 bg-white flex flex-col justify-between border border-slate-200 rounded-xl shadow-sm">
  <div className="flex items-center justify-between mb-6">
- <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Total Mandis</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Mandis</span>
  <Building2 className="w-4 h-4 text-slate-900" />
  </div>
  <div>
  <div className="flex items-baseline gap-2">
- <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">{centres.length}</h3>
+ <h3 className="text-3xl font-bold tracking-tight text-slate-900">{centres.length}</h3>
  </div>
- <p className="text-[10px] text-white bg-emerald-900 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-emerald-950">
+ <p className="text-[10px] text-white bg-emerald-50 text-emerald-800  font-bold mt-3 uppercase tracking-widest px-2 py-1 inline-block border border-emerald-200 rounded-md">
  {activeCount} Active
  </p>
- <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest block">Spread across {districts.length - 1} districts</p>
+ <p className="text-xs text-slate-500 mt-2 block">Spread across {districts.length - 1} districts</p>
  </div>
  </div>
 
- <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="p-6 bg-white flex flex-col justify-between border border-slate-200 rounded-xl shadow-sm">
  <div className="flex items-center justify-between mb-6">
- <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">State Capacity</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">State Capacity</span>
  <Scale className="w-4 h-4 text-emerald-600" />
  </div>
  <div>
  <div className="flex items-baseline gap-2">
- <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">
+ <h3 className="text-3xl font-bold tracking-tight text-slate-900">
  {totalCapacity.toLocaleString('en-IN')}
  </h3>
- <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Q/DAY</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Q/DAY</span>
  </div>
- <p className="text-[10px] font-bold text-slate-600 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">Computerized scale certified</p>
+ <p className="text-xs text-slate-500 mt-4 pt-4 border-t border-slate-100">Computerized scale certified</p>
  </div>
  </div>
 
- <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="p-6 bg-white flex flex-col justify-between border border-slate-200 rounded-xl shadow-sm">
  <div className="flex items-center justify-between mb-6">
- <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Vehicles In Yard</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Vehicles In Yard</span>
  <Users className="w-4 h-4 text-blue-600" />
  </div>
  <div>
  <div className="flex items-baseline gap-2">
- <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">{totalQueue}</h3>
- <span className="text-xs font-black text-slate-500 uppercase tracking-widest">TOKENS</span>
+ <h3 className="text-3xl font-bold tracking-tight text-slate-900">{totalQueue}</h3>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">TOKENS</span>
  </div>
- <p className="text-[10px] text-blue-900 bg-blue-100 font-mono font-black mt-3 uppercase tracking-widest px-2 py-1 inline-block border-2 border-blue-900">
+ <p className="text-[10px] text-blue-800 bg-blue-50 font-medium mt-3 px-2 py-1 inline-block border border-blue-200 rounded-lg text-xs">
  TURNAROUND: ~20M
  </p>
  </div>
  </div>
 
- <div className="p-6 bg-white flex flex-col justify-between border-[1px] border-slate-900">
+ <div className="p-6 bg-white flex flex-col justify-between border border-slate-200 rounded-xl shadow-sm">
  <div className="flex items-center justify-between mb-6">
- <span className="text-[10px] font-black text-slate-900 uppercase tracking-widest">Mandi Health</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mandi Health</span>
  <TrendingUp className="w-4 h-4 text-purple-600" />
  </div>
  <div>
  <div className="flex items-baseline gap-2">
- <h3 className="text-4xl sm:text-5xl font-mono font-black text-slate-900 tabular-nums tracking-tighter">
+ <h3 className="text-3xl font-bold tracking-tight text-slate-900">
  {Math.round((activeCount / (centres.length || 1)) * 100)}%
  </h3>
- <span className="text-xs font-black text-slate-500 uppercase tracking-widest">OPR</span>
+ <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">OPR</span>
  </div>
- <p className="text-[10px] font-bold text-slate-600 mt-4 uppercase tracking-widest block border-t-2 border-slate-900 pt-2">Zero downtime this week</p>
+ <p className="text-xs text-slate-500 mt-4 pt-4 border-t border-slate-100">Zero downtime this week</p>
  </div>
  </div>
  </div>
 
  {/* Filter and Search Bar */}
- <div className="p-4 border-2 border-slate-900 bg-white shadow-[8px_8px_0px_rgba(0,0,0,1)]">
+ <div className="p-4 border border-slate-200 bg-white shadow-sm rounded-xl overflow-hidden">
  <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
  <div className="relative w-full md:w-96">
- <Search className="w-4 h-4 text-slate-900 absolute left-4 top-1/2 -translate-y-1/2 font-black" />
+ <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
  <input
  value={searchTerm}
  onChange={(e) => setSearchTerm(e.target.value)}
- placeholder="SEARCH BY MANDI NAME, CODE..."
- className="pl-12 w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 placeholder:text-slate-400"
+ placeholder="Search by mandi name or code..."
+ className="pl-12 w-full text-sm font-medium text-slate-500 rounded-full border border-slate-200 bg-slate-50 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 placeholder:text-slate-400"
  />
  </div>
 
  <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
- <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-3 py-2">
+ <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm">
  <Filter className="w-4 h-4 text-slate-900" />
- <span className="text-xs font-black uppercase tracking-widest text-slate-900">DISTRICT:</span>
+ <span className="text-sm font-medium text-slate-500 text-slate-900">DISTRICT:</span>
  <select
  value={districtFilter}
  onChange={(e) => setDistrictFilter(e.target.value)}
- className="text-xs font-black uppercase tracking-widest bg-transparent text-slate-900 focus:outline-none cursor-pointer"
+ className="text-sm font-medium text-slate-500 bg-transparent text-slate-900 focus:outline-none cursor-pointer"
  >
  {districts.map((d) => (
  <option key={d} value={d}>
@@ -251,12 +251,12 @@ export default function AdminCentres() {
  </select>
  </div>
 
- <div className="flex items-center gap-2 bg-slate-50 border-2 border-slate-900 px-3 py-2">
- <span className="text-xs font-black uppercase tracking-widest text-slate-900">STATUS:</span>
+ <div className="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-2 shadow-sm">
+ <span className="text-sm font-medium text-slate-500 text-slate-900">STATUS:</span>
  <select
  value={statusFilter}
  onChange={(e) => setStatusFilter(e.target.value)}
- className="text-xs font-black uppercase tracking-widest bg-transparent text-slate-900 focus:outline-none cursor-pointer"
+ className="text-sm font-medium text-slate-500 bg-transparent text-slate-900 focus:outline-none cursor-pointer"
  >
  <option value="ALL">ALL STATUSES</option>
  <option value="ACTIVE">ACTIVE ONLY</option>
@@ -279,20 +279,20 @@ export default function AdminCentres() {
  return (
  <div
  key={centre.id}
- className="p-5 border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white flex flex-col justify-between"
+ className="p-5 border border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white flex flex-col justify-between"
  >
  <div>
  <div className="flex items-start justify-between gap-2 mb-4">
  <div>
- <span className="text-[10px] font-mono font-black border-2 border-slate-900 bg-slate-100 text-slate-900 px-2 py-0.5 tracking-widest uppercase">
+ <span className="text-[10px]  font-bold border border-slate-200 bg-slate-100 text-slate-900 px-2 py-0.5 tracking-widest uppercase">
  {centre.centre_code}
  </span>
- <h3 className="font-black text-xl text-slate-900 mt-3 leading-snug uppercase tracking-widest">
+ <h3 className="font-bold text-xl text-slate-900 mt-3 leading-snug uppercase tracking-widest">
  {centre.name}
  </h3>
  </div>
  <button
- className={`text-[10px] font-black border-2 border-slate-900 px-2 py-1 select-none transition uppercase tracking-widest flex items-center shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none ${
+ className={`text-[10px] font-bold border border-slate-200 px-2 py-1 select-none transition uppercase tracking-widest flex items-center shadow-[2px_2px_0px_rgba(0,0,0,1)] hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none ${
  centre.status === 'ACTIVE'
  ? 'bg-emerald-400 text-slate-900'
  : centre.status === 'MAINTENANCE'
@@ -309,20 +309,20 @@ export default function AdminCentres() {
  </button>
  </div>
 
- <p className="text-[10px] text-slate-700 font-bold flex items-center gap-1 mt-1 uppercase tracking-widest border-b-2 border-slate-900 pb-4">
+ <p className="text-[10px] text-slate-700 font-bold flex items-center gap-1 mt-1 uppercase tracking-widest border-b border-slate-200 pb-4">
  <MapPin className="w-3 h-3 text-slate-900 shrink-0" />
  <span className="truncate">{centre.address}, {centre.district}</span>
  </p>
 
  {/* Live Capacity Meter */}
- <div className="mt-4 p-4 bg-slate-50 border-2 border-slate-900 space-y-3">
+ <div className="mt-4 p-4 bg-slate-50 border border-slate-200 space-y-3">
  <div className="flex justify-between items-center text-[10px]">
- <span className="text-slate-900 font-black uppercase tracking-widest">Live Yard Utilization</span>
- <span className="font-black text-slate-900 bg-white border-2 border-slate-900 px-1 py-0.5">{loadPercent}%</span>
+ <span className="text-slate-900 font-bold uppercase tracking-widest">Live Yard Utilization</span>
+ <span className="font-bold text-slate-900 bg-white border border-slate-200 px-1 py-0.5">{loadPercent}%</span>
  </div>
- <div className="w-full h-4 bg-white border-2 border-slate-900 overflow-hidden relative">
+ <div className="w-full h-4 bg-white border border-slate-200 overflow-hidden relative">
  <div
- className={`absolute h-full border-r-2 border-slate-900 ${
+ className={`absolute h-full border-r border-slate-200 ${
  loadPercent > 85 ? 'bg-red-500' : loadPercent > 60 ? 'bg-amber-400' : 'bg-emerald-400'
  }`}
  style={{ width: `${loadPercent}%` }}
@@ -331,18 +331,18 @@ export default function AdminCentres() {
 
  <div className="grid grid-cols-2 gap-2 pt-3 border-t-2 border-slate-900 text-center text-xs">
  <div>
- <span className="text-[9px] text-slate-700 block font-black uppercase tracking-widest mb-1">Active Queue</span>
- <span className="font-black text-slate-900 tabular-nums">{centre.current_queue_length} VEHS</span>
+ <span className="text-[9px] text-slate-700 block font-bold uppercase tracking-widest mb-1">Active Queue</span>
+ <span className="font-bold text-slate-900 ">{centre.current_queue_length} VEHS</span>
  </div>
  <div className="border-l-2 border-slate-900">
- <span className="text-[9px] text-slate-700 block font-black uppercase tracking-widest mb-1">Daily Quota</span>
- <span className="font-black text-slate-900 tabular-nums">{centre.daily_capacity_quintals} Q</span>
+ <span className="text-[9px] text-slate-700 block font-bold uppercase tracking-widest mb-1">Daily Quota</span>
+ <span className="font-bold text-slate-900 ">{centre.daily_capacity_quintals} Q</span>
  </div>
  </div>
  </div>
 
  {/* Hardware Spec */}
- <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest text-slate-900 mt-4 px-1">
+ <div className="flex items-center justify-between text-[9px] font-bold uppercase tracking-widest text-slate-900 mt-4 px-1">
  <span className="flex items-center gap-1">
  <Scale className="w-3 h-3 text-slate-900" />
  COMPUTERIZED
@@ -361,13 +361,13 @@ export default function AdminCentres() {
  setEditingCentre(centre);
  setNewCapacity(centre.daily_capacity_quintals);
  }}
- className="flex-1 bg-white hover:bg-slate-900 text-slate-900 hover:text-white text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 py-3 transition-colors flex justify-center items-center gap-2"
+ className="flex-1 bg-white hover:bg-slate-900 text-slate-900 hover:text-white text-[10px] font-bold uppercase tracking-widest border border-slate-200 py-3 transition-colors flex justify-center items-center gap-2"
  >
  <SlidersHorizontal className="w-3 h-3" /> Adjust Capacity
  </button>
  <button
  onClick={() => handleToggleStatus(centre)}
- className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold border-2 border-slate-900 px-4 py-3 transition-colors"
+ className="bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold border border-slate-200 px-4 py-3 transition-colors"
  >
  <ArrowUpDown className="w-4 h-4" />
  </button>
@@ -378,9 +378,9 @@ export default function AdminCentres() {
  </div>
 
  {filteredCentres.length === 0 && (
- <div className="p-12 text-center border-2 border-slate-900 shadow-[8px_8px_0px_rgba(0,0,0,1)] bg-white">
+ <div className="p-12 text-center border border-slate-200 shadow-sm rounded-xl overflow-hidden bg-white">
  <Building2 className="w-12 h-12 text-slate-900 mx-auto mb-4" />
- <h3 className="font-black text-slate-900 uppercase tracking-widest text-lg">NO MANDIS MATCH YOUR FILTERS</h3>
+ <h3 className="font-bold text-slate-900 uppercase tracking-widest text-lg">NO MANDIS MATCH YOUR FILTERS</h3>
  <p className="text-[10px] font-bold text-slate-600 mt-2 uppercase tracking-widest">Try resetting the search query or district filter.</p>
  <button
  onClick={() => {
@@ -388,7 +388,7 @@ export default function AdminCentres() {
  setDistrictFilter('ALL');
  setStatusFilter('ALL');
  }}
- className="mt-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 border-2 border-slate-900 transition-colors"
+ className="mt-6 text-[10px] font-bold uppercase tracking-widest bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 border border-slate-200 transition-colors"
  >
  RESET FILTERS
  </button>
@@ -397,10 +397,10 @@ export default function AdminCentres() {
 
  {/* Adjust Capacity Modal */}
  <Dialog open={!!editingCentre} onOpenChange={(open) => !open && setEditingCentre(null)}>
- <DialogContent className="sm:max-w-md bg-white border-2 border-slate-900 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,1)] p-0">
+ <DialogContent className="sm:max-w-md bg-white border border-slate-200 rounded-full shadow-sm rounded-xl overflow-hidden p-0">
  <div className="p-6">
  <DialogHeader>
- <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-widest">
+ <DialogTitle className="text-xl font-bold text-slate-900 uppercase tracking-widest">
  Adjust Mandi Daily Capacity
  </DialogTitle>
  <DialogDescription className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">
@@ -410,7 +410,7 @@ export default function AdminCentres() {
 
  <div className="space-y-4 py-6">
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">
  Daily Capacity Threshold (Quintals)
  </label>
  <input
@@ -420,7 +420,7 @@ export default function AdminCentres() {
  min={100}
  max={10000}
  step={50}
- className="w-full text-sm font-black rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+ className="w-full text-sm font-bold rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  <p className="text-[9px] font-bold text-slate-600 mt-2 uppercase tracking-widest">
  Recommended range: 500 Q to 5,000 Q based on active weighbridges.
@@ -432,14 +432,14 @@ export default function AdminCentres() {
  <button
  type="button"
  onClick={() => setEditingCentre(null)}
- className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 px-6 py-3 transition-colors mr-0 sm:mr-4"
+ className="w-full sm:w-auto text-[10px] font-bold uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border border-slate-200 px-6 py-3 transition-colors mr-0 sm:mr-4"
  >
  Cancel
  </button>
  <button
  type="button"
  onClick={handleSaveCapacity}
- className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-6 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
+ className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-bold uppercase tracking-widest border border-slate-200 px-6 py-3 shadow-sm rounded-lg hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
  >
  Save Capacity
  </button>
@@ -450,11 +450,11 @@ export default function AdminCentres() {
 
  {/* Add New Mandi Modal */}
  <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
- <DialogContent className="sm:max-w-lg bg-white border-2 border-slate-900 rounded-none shadow-[8px_8px_0px_rgba(0,0,0,1)] p-0">
+ <DialogContent className="sm:max-w-lg bg-white border border-slate-200 rounded-full shadow-sm rounded-xl overflow-hidden p-0">
  <div className="p-6">
  <form onSubmit={handleAddMandi}>
  <DialogHeader>
- <DialogTitle className="text-xl font-black text-slate-900 uppercase tracking-widest">
+ <DialogTitle className="text-xl font-bold text-slate-900 uppercase tracking-widest">
  Register New Procurement Mandi
  </DialogTitle>
  <DialogDescription className="text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-2">
@@ -464,33 +464,33 @@ export default function AdminCentres() {
 
  <div className="space-y-4 py-6 text-left">
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Mandi Name *</label>
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">Mandi Name *</label>
  <input
  required
  value={newMandiName}
  onChange={(e) => setNewMandiName(e.target.value)}
  placeholder="E.G. BARASAT KRISHAK BAZAAR"
- className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+ className="w-full text-sm font-medium text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
 
  <div className="grid grid-cols-2 gap-4">
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Mandi Code *</label>
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">Mandi Code *</label>
  <input
  required
  value={newMandiCode}
  onChange={(e) => setNewMandiCode(e.target.value)}
  placeholder="E.G. MANDI-WB-09"
- className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+ className="w-full text-sm font-medium text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">District *</label>
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">District *</label>
  <select
  value={newMandiDistrict}
  onChange={(e) => setNewMandiDistrict(e.target.value)}
- className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none cursor-pointer"
+ className="w-full text-sm font-medium text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none cursor-pointer"
  >
  {districts
  .filter((d) => d !== 'ALL')
@@ -504,25 +504,25 @@ export default function AdminCentres() {
  </div>
 
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Depot Address *</label>
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">Depot Address *</label>
  <input
  required
  value={newMandiAddress}
  onChange={(e) => setNewMandiAddress(e.target.value)}
  placeholder="E.G. NH-34 HIGHWAY CROSSING, BARASAT"
- className="w-full text-xs font-black uppercase tracking-widest rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+ className="w-full text-sm font-medium text-slate-500 rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
 
  <div>
- <label className="text-[10px] font-black uppercase tracking-widest text-slate-900 block mb-2">Daily Capacity (Quintals)</label>
+ <label className="text-[10px] font-bold uppercase tracking-widest text-slate-900 block mb-2">Daily Capacity (Quintals)</label>
  <input
  type="number"
  min={100}
  step={50}
  value={newMandiCapacity}
  onChange={(e) => setNewMandiCapacity(Number(e.target.value))}
- className="w-full text-sm font-black rounded-none border-2 border-slate-900 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+ className="w-full text-sm font-bold rounded-full border border-slate-200 bg-slate-50 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
  />
  </div>
  </div>
@@ -531,13 +531,13 @@ export default function AdminCentres() {
  <button
  type="button"
  onClick={() => setIsAddModalOpen(false)}
- className="w-full sm:w-auto text-[10px] font-black uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border-2 border-slate-900 px-6 py-3 transition-colors mr-0 sm:mr-4"
+ className="w-full sm:w-auto text-[10px] font-bold uppercase tracking-widest bg-white hover:bg-slate-100 text-slate-900 border border-slate-200 px-6 py-3 transition-colors mr-0 sm:mr-4"
  >
  Cancel
  </button>
  <button
  type="submit"
- className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-black uppercase tracking-widest border-2 border-slate-900 px-6 py-3 shadow-[4px_4px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
+ className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-[10px] font-bold uppercase tracking-widest border border-slate-200 px-6 py-3 shadow-sm rounded-lg hover:shadow-none hover:translate-y-[4px] hover:translate-x-[4px] transition-all mt-4 sm:mt-0"
  >
  Register Mandi
  </button>

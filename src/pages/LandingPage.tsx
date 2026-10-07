@@ -6,7 +6,7 @@ import {
     Leaf, Clock, ShieldCheck, Banknote, Building2, CalendarCheck,
     CheckCircle2, Play, User, ChevronRight, BarChart3,
     Search, MapPin, ArrowRight, X, PhoneCall, ChevronDown, Menu,
-    Home, HelpCircle, TrendingUp
+    Home, HelpCircle, TrendingUp, ArrowLeft, Mail
 } from 'lucide-react';
 import { OFFICIAL_MSP_RATES } from '@/lib/constants';
 import { useKishanData } from '@/context/DataContext';
@@ -87,7 +87,6 @@ export default function LandingPage() {
     // State
     const [centreSearch, setCentreSearch] = useState('');
     const [selectedCropFilter, setSelectedCropFilter] = useState('All');
-    const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
     const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
     const westBengalCenter: [number, number] = [22.9868, 87.8550];
@@ -172,7 +171,7 @@ export default function LandingPage() {
     ];
 
     return (
-        <AnimatedPage className="flex flex-col min-h-screen bg-slate-50 font-sans pb-24 lg:pb-0">
+        <div ref={containerRef} className="flex flex-col min-h-screen bg-slate-50 font-sans pb-24 lg:pb-0">
             {/* Static Fixed Top Header: Govt Notice Bar + Main Nav + Live MSP Ticker */}
             <header className="fixed top-0 left-0 right-0 z-50 shadow-sm bg-white">
                 {/* Top Govt of India Notice Bar */}
@@ -331,14 +330,6 @@ export default function LandingPage() {
                                     <ChevronRight className="w-4 h-4" />
                                 </Button>
                             </Link>
-                            <Button
-                                onClick={() => setIsVideoModalOpen(true)}
-                                variant="outline"
-                                className="w-full sm:w-auto text-sm px-6 h-12 rounded-full border-emerald-700 text-emerald-800 hover:bg-emerald-50 gap-2 font-bold bg-white justify-center cursor-pointer"
-                            >
-                                <Play className="w-4 h-4 text-emerald-700 fill-emerald-700" />
-                                {t('watch_tour')}
-                            </Button>
                         </div>
                         <div className="hero-anim mb-10">
                             <Button
@@ -399,6 +390,8 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+
 
             {/* Live Procurement Centre Discovery Tool on Landing Page */}
             <section id="centres" className="py-16 px-6 lg:px-16 bg-white border-b border-slate-200">
@@ -672,110 +665,100 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            {/* Video Walkthrough Modal */}
-            {isVideoModalOpen && (
-                <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-                    <div className="bg-white rounded-3xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-                        <button
-                            onClick={() => setIsVideoModalOpen(false)}
-                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 text-slate-500"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                        <div className="flex items-center gap-2 mb-4 text-emerald-800 pr-8">
-                            <Play className="w-5 h-5 fill-emerald-600 text-emerald-600 shrink-0" />
-                            <h3 className="font-bold text-base sm:text-lg">Kishan Seva — Digital Procurement Walkthrough</h3>
-                        </div>
-                        <div className="bg-slate-950 rounded-2xl aspect-video flex flex-col items-center justify-center text-white p-4 sm:p-6 relative overflow-hidden border border-slate-800">
-                            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-emerald-600 flex items-center justify-center mb-3 shadow-lg shadow-emerald-900/50 shrink-0">
-                                <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
-                            </div>
-                            <h4 className="font-bold text-sm sm:text-base mb-1 text-center">Live Interactive Demo Active</h4>
-                            <p className="text-xs text-slate-300 text-center max-w-md mb-4 hidden sm:block">
-                                The Kishan Seva portal is fully interactive. You can book a live slot, test moisture quality assay, process weighing, and view real-time tokens directly!
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full sm:w-auto">
-                                <Button
-                                    onClick={() => {
-                                        setIsVideoModalOpen(false);
-                                        navigate('/farmer/book');
-                                    }}
-                                    className="bg-emerald-600 hover:bg-emerald-700 text-xs rounded-full font-semibold px-5 h-10 justify-center"
-                                >
-                                    Try Booking a Slot
-                                </Button>
-                                <Button
-                                    onClick={() => {
-                                        setIsVideoModalOpen(false);
-                                        navigate('/operator/dashboard');
-                                    }}
-                                    variant="outline"
-                                    className="bg-white/10 hover:bg-white/20 text-white border-white/20 text-xs rounded-full font-semibold px-5 h-10 justify-center"
-                                >
-                                    Test Mandi Operator Portal
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
 
-            {/* Main Footer with Big Logo */}
-            <footer className="relative z-10 bg-[#0b2415] text-white pt-12 sm:pt-14 pb-8 px-4 sm:px-6 lg:px-16 border-t border-emerald-950">
-                <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
-                    <div className="sm:col-span-2">
-                        <div className="flex items-center gap-3.5 mb-4">
-                            <div className="p-2 sm:p-2.5 rounded-3xl bg-white border-2 border-emerald-200 shadow-md flex items-center justify-center shrink-0">
-                                <img src="/logo.svg" alt="Kishan Seva" className="h-14 w-14 sm:h-18 sm:w-18 object-contain" />
+            {/* Main Footer */}
+            <footer className="relative z-10 bg-slate-950 text-slate-300 pt-16 sm:pt-20 pb-10 px-6 lg:px-16 border-t border-slate-900 overflow-hidden">
+                {/* Background decorative elements */}
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                    <div className="absolute -top-24 -right-24 w-96 h-96 bg-emerald-900/20 rounded-full blur-3xl opacity-50"></div>
+                    <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-900/10 rounded-full blur-3xl opacity-50"></div>
+                </div>
+
+                <div className="max-w-7xl mx-auto relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-16">
+                    {/* Brand Column */}
+                    <div className="lg:col-span-4">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2.5 rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-900/50 flex items-center justify-center shrink-0">
+                                <img src="/logo.svg" alt="Kishan Seva" className="h-10 w-10 object-contain filter brightness-0 invert" />
                             </div>
                             <div>
-                                <h3 className="text-lg sm:text-xl font-black leading-tight">Kishan Seva</h3>
-                                <p className="text-xs text-emerald-300 font-bold">Smart Agriculture for a Better Tomorrow</p>
+                                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">Kishan Seva</h3>
+                                <p className="text-xs text-emerald-400 font-bold tracking-wide uppercase mt-0.5">Smart Agriculture Portal</p>
                             </div>
                         </div>
-                        <p className="text-xs text-emerald-200/80 leading-relaxed max-w-md mb-4">
+                        <p className="text-sm text-slate-400 leading-relaxed mb-8 pr-4">
                             {t('footer_initiative')}
                         </p>
-                        <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-emerald-300 font-bold">
-                            <span>{t('footer_tag1')}</span>
-                            <span>{t('footer_tag2')}</span>
-                            <span>{t('footer_tag3')}</span>
-                        </div>
                     </div>
 
-                    <div>
-                        <h4 className="font-extrabold text-sm text-white mb-3 uppercase tracking-wider">Quick Portals</h4>
-                        <ul className="space-y-2 text-xs text-emerald-200/80 font-medium">
-                            <li><Link to="/farmer/login" className="hover:text-white transition-colors">Farmer Login & Registration</Link></li>
-                            <li><Link to="/farmer/centres" className="hover:text-white transition-colors">Find Nearby Mandi Centres</Link></li>
-                            <li><Link to="/farmer/book" className="hover:text-white transition-colors">Book Procurement Slot</Link></li>
-                            <li><Link to="/farmer/queue" className="hover:text-white transition-colors">Live Token Queue Tracking</Link></li>
-                            <li><Link to="/operator/dashboard" className="hover:text-white transition-colors">Centre Operator Console</Link></li>
-                            <li><Link to="/admin/dashboard" className="hover:text-white transition-colors">State Administrator Portal</Link></li>
+                    {/* Quick Links Column */}
+                    <div className="lg:col-span-2 lg:col-start-6">
+                        <h4 className="font-extrabold text-sm text-white mb-6 uppercase tracking-wider">Quick Portals</h4>
+                        <ul className="space-y-4 text-sm font-medium">
+                            <li><Link to="/farmer/login" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Farmer Portal</Link></li>
+                            <li><Link to="/farmer/centres" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Mandi Locator</Link></li>
+                            <li><Link to="/farmer/book" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Book Slot</Link></li>
+                            <li><Link to="/farmer/queue" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Live Queue</Link></li>
                         </ul>
                     </div>
 
-                    <div>
-                        <h4 className="font-extrabold text-sm text-white mb-3 uppercase tracking-wider">Farmer Helpline</h4>
-                        <p className="text-xs text-emerald-200/80 mb-1.5 font-medium">{t('call_centre')}</p>
-                        <p className="text-xl sm:text-2xl font-black text-amber-400 font-mono mb-3">1800-180-1551</p>
-                        <p className="text-xs text-emerald-200/80">Email Support: support@kishanseva.gov.in</p>
-                        <p className="text-xs text-emerald-200/80 mt-1">Krishi Bhawan, New Delhi, 110001</p>
+                    {/* Admin Links Column */}
+                    <div className="lg:col-span-2">
+                        <h4 className="font-extrabold text-sm text-white mb-6 uppercase tracking-wider">Administration</h4>
+                        <ul className="space-y-4 text-sm font-medium">
+                            <li><Link to="/operator/dashboard" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Mandi Operator</Link></li>
+                            <li><Link to="/admin/dashboard" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">State Admin</Link></li>
+                            <li><Link to="/roles" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Role Directory</Link></li>
+                            <li><a href="#faqs" className="hover:text-emerald-400 hover:translate-x-1 transition-all inline-block">Help & FAQ</a></li>
+                        </ul>
+                    </div>
+
+                    {/* Contact Column */}
+                    <div className="lg:col-span-3">
+                        <h4 className="font-extrabold text-sm text-white mb-6 uppercase tracking-wider">Farmer Helpline</h4>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-3">
+                                <PhoneCall className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-xs text-slate-400 mb-1">{t('call_centre')}</p>
+                                    <p className="text-xl font-black text-white font-mono">1800-180-1551</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <Mail className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-xs text-slate-400 mb-1">Email Support</p>
+                                    <p className="text-sm font-semibold text-white">support@kishanseva.gov.in</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-3 pt-2">
+                                <MapPin className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                                <p className="text-sm text-slate-400 leading-relaxed">
+                                    Krishi Bhawan, Dr. Rajendra Prasad Road,<br />
+                                    New Delhi, 110001
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto pt-6 border-t border-emerald-900/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-300/70 text-center sm:text-left">
-                    <div className="flex flex-col gap-1">
-                        <p>{t('footer_rights')}</p>
-                        <p className="text-amber-200/90 italic max-w-2xl font-semibold">
-                            Disclaimer: This application is a prototype submitted for the Smart India Hackathon (SIH) 2026. It is not an official service of the Government of India.
+                {/* Bottom Bar */}
+                <div className="max-w-7xl mx-auto relative z-10 pt-8 border-t border-slate-800/80 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
+                    <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
+                        <p className="text-slate-500 font-medium">
+                            &copy; {new Date().getFullYear()} Kishan Seva. {t('footer_rights')}
                         </p>
+                        <div className="hidden md:block w-1.5 h-1.5 rounded-full bg-slate-800"></div>
+                        <span className="text-xs px-3 py-1 rounded-full bg-amber-500/10 text-amber-500/90 border border-amber-500/20 font-bold tracking-wide">
+                            SIH 2026 PROTOTYPE
+                        </span>
                     </div>
-                    <div className="flex flex-wrap justify-center sm:justify-start gap-3 sm:gap-4">
-                        <span className="hover:text-white cursor-pointer">Privacy Policy</span>
-                        <span className="hover:text-white cursor-pointer">Terms of Service</span>
-                        <span className="hover:text-white cursor-pointer">Hyperlinking Policy</span>
-                        <span className="hover:text-white cursor-pointer">Accessibility Statement</span>
+                    
+                    <div className="flex flex-wrap justify-center gap-6 font-medium text-slate-500">
+                        <a href="#" className="hover:text-white transition-colors">Privacy</a>
+                        <a href="#" className="hover:text-white transition-colors">Terms</a>
+                        <a href="#" className="hover:text-white transition-colors">Accessibility</a>
+                        <a href="#" className="hover:text-white transition-colors">Sitemap</a>
                     </div>
                 </div>
             </footer>
@@ -804,7 +787,7 @@ export default function LandingPage() {
                     <span className="text-[10px] font-bold text-center leading-tight">Login</span>
                 </Link>
             </div>
-        </AnimatedPage>
+        </div>
     );
 }
 

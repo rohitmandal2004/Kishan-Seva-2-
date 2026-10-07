@@ -38,7 +38,7 @@ async function testConcurrency() {
   console.log(`Using Farmer: ${farmer.full_name} (${farmer.id})`);
   console.log(`Using Centre: ${centre.name} (${centre.id})`);
 
-  const numRequests = 10;
+  const numRequests = 50;
   const slotDate = new Date().toISOString().split('T')[0];
   const slotTime = "10:00 AM - 11:00 AM";
 

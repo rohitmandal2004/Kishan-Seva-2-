@@ -2,6 +2,7 @@ import React, { createContext, useContext, ReactNode, useState, useEffect, useCa
 import { Booking, ProcurementCentre, QualityCheck, Weighment, BookingStatus } from '@/types';
 import { SupabaseDataService } from '@/services/supabaseData.service';
 import { toast } from 'sonner';
+import debounce from 'lodash.debounce';
 
 // --- OFFLINE SYNC QUEUE ---
 const OFFLINE_QUEUE_KEY = 'kishan_offline_queue';
@@ -133,11 +134,18 @@ export function KishanDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refreshData();
 
-    const unsubscribe = SupabaseDataService.subscribeRealtime(() => {
+    // Debounce the realtime updates to prevent render cascades and excessive API calls 
+    // when multiple users (e.g., 500 concurrent) trigger frequent database changes.
+    const debouncedRefresh = debounce(() => {
       refreshData();
+    }, 2000, { leading: true, trailing: true });
+
+    const unsubscribe = SupabaseDataService.subscribeRealtime(() => {
+      debouncedRefresh();
     });
 
     return () => {
+      debouncedRefresh.cancel();
       unsubscribe();
     };
   }, [refreshData]);

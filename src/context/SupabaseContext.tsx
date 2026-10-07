@@ -30,6 +30,7 @@ export type RegistrationState =
   | 'REGISTRATION_FAILED';
 
 export interface AuthSessionUser {
+  credentialStatus?: string;
   id: string;
   email?: string;
   role: AppRole | null;
@@ -52,8 +53,8 @@ interface SupabaseContextType {
   profileExists: boolean;
   profileError: string | null;
   fetchFarmerProfile: (clerkUserId: string, email?: string) => Promise<FarmerProfile | null>;
-  refreshProfile: (targetClerkUserId?: string, targetEmail?: string) => Promise<FarmerProfile | null | void>;
-  resolveRole: (clerkUserId: string, email?: string) => Promise<{ role: AppRole | null; farmerProfile: FarmerProfile | null }>;
+  refreshProfile: (targetClerkUserId?: string, targetEmail?: string) => Promise<{ role: AppRole | null; profile: any | null } | null>;
+  resolveRole: (clerkUserId: string, email?: string) => Promise<{ role: AppRole | null; farmerProfile: FarmerProfile | null; profile: any | null }>;
 
   // --- COMPATIBILITY & SYSTEM ---
   user: AuthSessionUser | null;
@@ -255,9 +256,9 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const resolveRole = useCallback(async (
     targetClerkId: string, 
     email?: string
-  ): Promise<{ role: AppRole | null; farmerProfile: FarmerProfile | null }> => {
+  ): Promise<{ role: AppRole | null; farmerProfile: FarmerProfile | null; profile: any | null }> => {
     if (!isSupabaseConfigured()) {
-      return { role: null, farmerProfile: null };
+      return { role: null, farmerProfile: null, profile: null };
     }
 
     const cleanEmail = email?.trim().toLowerCase();
@@ -272,28 +273,13 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (targetClerkId) {
           const { data: adminByClerk } = await supabase
             .from('admin_profiles')
-            .select('id')
+            .select('*')
             .eq('clerk_user_id', targetClerkId)
             .maybeSingle();
-          if (adminByClerk) return true;
-        }
-        if (cleanEmail) {
-          const { data: adminByEmail } = await supabase
-            .from('admin_profiles')
-            .select('id')
-            .ilike('email', cleanEmail)
-            .maybeSingle();
-          if (adminByEmail) {
-            if (targetClerkId) {
-              try {
-                await supabase.from('admin_profiles').update({ clerk_user_id: targetClerkId }).eq('id', adminByEmail.id);
-              } catch {}
-            }
-            return true;
-          }
+          if (adminByClerk) return adminByClerk;
         }
       } catch {}
-      return false;
+      return null;
     };
 
     const checkOperator = async () => {
@@ -301,28 +287,13 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (targetClerkId) {
           const { data: opByClerk } = await supabase
             .from('operator_profiles')
-            .select('id')
+            .select('*')
             .eq('clerk_user_id', targetClerkId)
             .maybeSingle();
-          if (opByClerk) return true;
-        }
-        if (cleanEmail) {
-          const { data: opByEmail } = await supabase
-            .from('operator_profiles')
-            .select('id')
-            .ilike('email', cleanEmail)
-            .maybeSingle();
-          if (opByEmail) {
-            if (targetClerkId) {
-              try {
-                await supabase.from('operator_profiles').update({ clerk_user_id: targetClerkId }).eq('id', opByEmail.id);
-              } catch {}
-            }
-            return true;
-          }
+          if (opByClerk) return opByClerk;
         }
       } catch {}
-      return false;
+      return null;
     };
 
     const checkFarmer = async () => {
@@ -336,23 +307,31 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     // Prioritize intended role
     if (intendedRole === 'FARMER') {
       const p = await checkFarmer();
-      if (p) return { role: 'FARMER', farmerProfile: p };
+      if (p) return { role: 'FARMER', farmerProfile: p, profile: p };
     } else if (intendedRole === 'OPERATOR') {
-      if (await checkOperator()) return { role: 'OPERATOR', farmerProfile: null };
+      const op = await checkOperator();
+      if (op) return { role: 'OPERATOR', farmerProfile: null, profile: op };
     } else if (intendedRole === 'ADMIN') {
-      if (await checkAdmin()) return { role: 'ADMIN', farmerProfile: null };
+      const ad = await checkAdmin();
+      if (ad) return { role: 'ADMIN', farmerProfile: null, profile: ad };
     }
 
     // Fallbacks if not found in intended role (or intended role is missing)
-    if (intendedRole !== 'ADMIN' && await checkAdmin()) return { role: 'ADMIN', farmerProfile: null };
-    if (intendedRole !== 'OPERATOR' && await checkOperator()) return { role: 'OPERATOR', farmerProfile: null };
+    if (intendedRole !== 'ADMIN') {
+      const ad = await checkAdmin();
+      if (ad) return { role: 'ADMIN', farmerProfile: null, profile: ad };
+    }
+    if (intendedRole !== 'OPERATOR') {
+      const op = await checkOperator();
+      if (op) return { role: 'OPERATOR', farmerProfile: null, profile: op };
+    }
     if (intendedRole !== 'FARMER') {
       const p = await checkFarmer();
-      if (p) return { role: 'FARMER', farmerProfile: p };
+      if (p) return { role: 'FARMER', farmerProfile: p, profile: p };
     }
 
     // No profile found in database
-    return { role: null, farmerProfile: null };
+    return { role: null, farmerProfile: null, profile: null };
   }, [fetchFarmerProfile]);
 
   // Sync Clerk session with Supabase database profile
@@ -374,7 +353,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setProfileError(null);
 
         const email = clerkUser.primaryEmailAddress?.emailAddress?.trim().toLowerCase();
-        const { role: resolvedRole, farmerProfile } = await resolveRole(clerkUser.id, email);
+        const { role: resolvedRole, farmerProfile, profile } = await resolveRole(clerkUser.id, email);
 
         if (!isMounted) return;
 
@@ -384,6 +363,7 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             id: clerkUser.id,
             email,
             role: effectiveRole,
+            credentialStatus: 'ACTIVE',
           };
         });
         setFarmerState(prev => farmerProfile || prev);
@@ -464,21 +444,22 @@ export const SupabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const refreshProfile = useCallback(async (targetClerkUserId?: string, targetEmail?: string) => {
     const effectiveUserId = targetClerkUserId || clerkUser?.id || user?.id;
     const effectiveEmail = (targetEmail || clerkUser?.primaryEmailAddress?.emailAddress || user?.email)?.trim().toLowerCase();
-    if (!effectiveUserId && !effectiveEmail) return;
+    if (!effectiveUserId && !effectiveEmail) return null;
 
     setIsProfileLoading(true);
     setProfileError(null);
-    const { role: resolvedRole, farmerProfile } = await resolveRole(effectiveUserId || '', effectiveEmail);
+    const { role: resolvedRole, farmerProfile, profile } = await resolveRole(effectiveUserId || '', effectiveEmail);
     
     setUser(prev => ({
       id: effectiveUserId || prev?.id || '',
       email: effectiveEmail || prev?.email,
       role: resolvedRole || (prev?.role ?? null),
+      credentialStatus: 'ACTIVE',
     }));
 
     setFarmerState(prev => farmerProfile || prev);
     setIsProfileLoading(false);
-    return farmerProfile;
+    return { role: resolvedRole, profile };
   }, [clerkUser, user, resolveRole, setFarmer]);
 
   const signOut = async () => {

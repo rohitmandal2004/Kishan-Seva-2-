@@ -69,19 +69,58 @@ CREATE TABLE public.farmer_profiles (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 7. Procurement Centres (Mandis)
+CREATE TABLE public.procurement_centres (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  centre_code VARCHAR(50) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  address TEXT NOT NULL,
+  state VARCHAR(100) NOT NULL DEFAULT 'West Bengal',
+  district VARCHAR(100) NOT NULL DEFAULT 'North 24 Parganas',
+  latitude DECIMAL(10, 8) NOT NULL,
+  longitude DECIMAL(11, 8) NOT NULL,
+  daily_capacity_quintals DECIMAL(10, 2) NOT NULL DEFAULT 500,
+  current_queue_length INTEGER NOT NULL DEFAULT 0,
+  est_wait_time_mins INTEGER NOT NULL DEFAULT 30,
+  distance_km DECIMAL(6, 2) DEFAULT 5.0,
+  accepted_crops TEXT[] NOT NULL DEFAULT ARRAY['Paddy (Grade A)', 'Common Paddy', 'Wheat'],
+  status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'MAINTENANCE')),
+  contact_number VARCHAR(50) DEFAULT '+91 33 2568 1122',
+  opening_time TIME DEFAULT '08:00:00',
+  closing_time TIME DEFAULT '18:00:00',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 3. Operator Profiles
 CREATE TABLE public.operator_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   clerk_user_id VARCHAR(255),
-  operator_code VARCHAR(50) UNIQUE NOT NULL,
+  operator_code VARCHAR(50) UNIQUE,
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   email VARCHAR(255),
-  centre_id UUID,
-  role_designation VARCHAR(100) DEFAULT 'Quality & Weighbridge In-charge',
-  status VARCHAR(50) DEFAULT 'ACTIVE',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  address TEXT,
+  district VARCHAR(100),
+  state VARCHAR(100),
+  requested_centre_id UUID REFERENCES public.procurement_centres(id),
+  assigned_centre_id UUID REFERENCES public.procurement_centres(id),
+  role_designation VARCHAR(100) DEFAULT 'Operator',
+  credential_status VARCHAR(50) DEFAULT 'NOT_CREATED',
+  last_login_at TIMESTAMPTZ,
+  last_active_at TIMESTAMPTZ,
+  department VARCHAR(100),
+  organization VARCHAR(255),
+  experience_years INTEGER,
+  status VARCHAR(50) DEFAULT 'PENDING',
+  rejection_reason TEXT,
+  approved_by VARCHAR(255),
+  approved_at TIMESTAMPTZ,
+  rejected_by VARCHAR(255),
+  rejected_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- 4. Admin Profiles
@@ -125,28 +164,6 @@ CREATE TABLE public.farmer_crops (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 7. Procurement Centres (Mandis)
-CREATE TABLE public.procurement_centres (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  centre_code VARCHAR(50) UNIQUE NOT NULL,
-  name VARCHAR(255) NOT NULL,
-  address TEXT NOT NULL,
-  state VARCHAR(100) NOT NULL DEFAULT 'West Bengal',
-  district VARCHAR(100) NOT NULL DEFAULT 'North 24 Parganas',
-  latitude DECIMAL(10, 8) NOT NULL,
-  longitude DECIMAL(11, 8) NOT NULL,
-  daily_capacity_quintals DECIMAL(10, 2) NOT NULL DEFAULT 500,
-  current_queue_length INTEGER NOT NULL DEFAULT 0,
-  est_wait_time_mins INTEGER NOT NULL DEFAULT 30,
-  distance_km DECIMAL(6, 2) DEFAULT 5.0,
-  accepted_crops TEXT[] NOT NULL DEFAULT ARRAY['Paddy (Grade A)', 'Common Paddy', 'Wheat'],
-  status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'MAINTENANCE')),
-  contact_number VARCHAR(50) DEFAULT '+91 33 2568 1122',
-  opening_time TIME DEFAULT '08:00:00',
-  closing_time TIME DEFAULT '18:00:00',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
-);
 
 -- 8. Slots
 CREATE TABLE public.slots (
@@ -318,6 +335,74 @@ CREATE TABLE public.recommendation_factors (
 -- STORED PROCEDURES & ATOMIC RPCs
 -- ==============================================================================
 
+-- 0. Admin Approval of Operators
+CREATE OR REPLACE FUNCTION public.approve_operator(
+  p_operator_id UUID,
+  p_assigned_centre_id UUID,
+  p_admin_name VARCHAR
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_operator RECORD;
+  v_centre RECORD;
+  v_code VARCHAR;
+  v_result JSONB;
+BEGIN
+  SELECT * INTO v_operator FROM public.operator_profiles WHERE id = p_operator_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Operator not found';
+  END IF;
+  
+  SELECT * INTO v_centre FROM public.procurement_centres WHERE id = p_assigned_centre_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Assigned centre not found';
+  END IF;
+
+  IF v_operator.status = 'APPROVED' THEN
+    RAISE EXCEPTION 'Operator is already approved';
+  END IF;
+
+  -- Generate unique operator_code: KSO-[CENTRE_CODE_3_CHARS]-[1000-9999]
+  v_code := 'KSO-' || UPPER(SUBSTRING(REPLACE(v_centre.name, ' ', ''), 1, 3)) || '-' || (1000 + FLOOR(RANDOM() * 9000))::INTEGER;
+
+  UPDATE public.operator_profiles
+  SET 
+    status = 'APPROVED',
+    assigned_centre_id = p_assigned_centre_id,
+    operator_code = v_code,
+    approved_by = p_admin_name,
+    approved_at = NOW(),
+    updated_at = NOW()
+  WHERE id = p_operator_id;
+
+  SELECT to_jsonb(o) INTO v_result FROM public.operator_profiles o WHERE id = p_operator_id;
+  RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION public.reject_operator(
+  p_operator_id UUID,
+  p_rejection_reason TEXT,
+  p_admin_name VARCHAR
+)
+RETURNS JSONB AS $$
+DECLARE
+  v_result JSONB;
+BEGIN
+  UPDATE public.operator_profiles
+  SET 
+    status = 'REJECTED',
+    rejection_reason = p_rejection_reason,
+    rejected_by = p_admin_name,
+    rejected_at = NOW(),
+    updated_at = NOW()
+  WHERE id = p_operator_id
+  RETURNING to_jsonb(operator_profiles.*) INTO v_result;
+  
+  RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- 1. Atomic Booking Creation with Capacity Lock & Token Generation
 CREATE OR REPLACE FUNCTION public.create_booking(
   p_farmer_id TEXT,
@@ -364,6 +449,12 @@ BEGIN
 
   -- Generate Unique Token (e.g. KSP-1042)
   v_token := 'KSP-' || (1000 + FLOOR(RANDOM() * 9000))::INTEGER;
+
+  -- Check Slot Capacity limits (assume 20 max capacity)
+  SELECT COUNT(*) INTO v_seq FROM public.bookings WHERE centre_id = p_centre_id AND slot_date = p_slot_date AND slot_time = p_slot_time;
+  IF v_seq >= 20 THEN
+    RAISE EXCEPTION 'Slot is fully booked. Capacity reached.';
+  END IF;
 
   -- Calculate Queue Sequence
   SELECT COALESCE(MAX(queue_sequence), 0) + 1 INTO v_seq 
@@ -590,7 +681,7 @@ FROM public.crops
 WHERE name IN ('Paddy (Grade A)', 'Wheat', 'Mustard');
 
 -- 5. Operators & Admins
-INSERT INTO public.operator_profiles (id, operator_code, full_name, phone, email, centre_id, role_designation) VALUES
+INSERT INTO public.operator_profiles (id, operator_code, full_name, phone, email, assigned_centre_id, role_designation) VALUES
   ('e1111111-1111-1111-1111-111111111111', 'OP-001', 'Pradip Ghosh', '9830012345', 'operator@kishanseva.gov.in', 'c1111111-1111-1111-1111-111111111111', 'Weighbridge Senior Operator'),
   ('e2222222-2222-2222-2222-222222222222', 'OP-002', 'Subhasish Das', '9830067890', 'inspector@kishanseva.gov.in', 'c1111111-1111-1111-1111-111111111111', 'Chief Quality Assay Inspector');
 

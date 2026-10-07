@@ -21,6 +21,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 // Auth Pages
 const FarmerLogin = lazy(() => import('./pages/auth/FarmerLogin'));
 const OperatorLogin = lazy(() => import('./pages/auth/OperatorLogin'));
+const OperatorRegistration = lazy(() => import('./pages/auth/OperatorRegistration'));
 const AdminLogin = lazy(() => import('./pages/auth/AdminLogin'));
 const FarmerRegistration = lazy(() => import('./pages/auth/FarmerRegistration'));
 
@@ -51,13 +52,13 @@ const AdminCentres = lazy(() => import('./pages/admin/AdminCentres'));
 const AdminSlots = lazy(() => import('./pages/admin/AdminSlots'));
 const AdminAnalytics = lazy(() => import('./pages/admin/AdminAnalytics'));
 const AdminTransactions = lazy(() => import('./pages/admin/AdminTransactions'));
+const AdminOperators = lazy(() => import('./pages/admin/AdminOperators'));
 const AdminDisputes = lazy(() => import('./pages/admin/AdminDisputes'));
 
 function AnimatedRoutes() {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+    <Routes location={location}>
 
         {/* Public Landing, Auth & Roles (Uses GSAP ScrollSmoother) */}
         <Route element={<RootLayout />}>
@@ -65,6 +66,7 @@ function AnimatedRoutes() {
           <Route path="/roles" element={<RoleSelection />} />
           <Route path="/farmer/login" element={<FarmerLogin />} />
           <Route path="/operator/login" element={<OperatorLogin />} />
+          <Route path="/operator/register" element={<OperatorRegistration />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/farmer/register" element={<FarmerRegistration />} />
           <Route path="*" element={<NotFound />} />
@@ -105,6 +107,7 @@ function AnimatedRoutes() {
           <Route path="slots" element={<AdminSlots />} />
           <Route path="analytics" element={<AdminAnalytics />} />
           <Route path="transactions" element={<AdminTransactions />} />
+          <Route path="operators" element={<AdminOperators />} />
           <Route path="disputes" element={<AdminDisputes />} />
         </Route>
 
@@ -120,7 +123,6 @@ function AnimatedRoutes() {
         <Route path="/weighment" element={<Navigate to="/operator/weighment" replace />} />
 
       </Routes>
-    </AnimatePresence>
   );
 }
 
@@ -131,7 +133,7 @@ function App() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsSplashVisible(false);
-    }, 2500);
+    }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
