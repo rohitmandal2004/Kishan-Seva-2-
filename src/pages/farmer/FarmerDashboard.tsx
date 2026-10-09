@@ -302,7 +302,7 @@ export default function FarmerDashboard() {
       };
     }
     
-    if (lastCompletedBooking && lastCompletedBooking.weighment_data?.dbt_status !== 'SUCCESS') {
+    if (lastCompletedBooking && lastCompletedBooking.weighment_data?.dbt_status !== 'DISBURSED') {
       return {
         title: "Your procurement is complete. Payment is processing.",
         cta: "Track Payment",
@@ -323,14 +323,6 @@ export default function FarmerDashboard() {
 
   return (
     <div className="relative w-full min-h-full flex flex-col bg-slate-50 pb-20">
-      
-      {/* Offline Banner */}
-      {isOffline && (
-        <div className="bg-amber-100 text-amber-900 px-4 py-2 text-xs font-semibold flex items-center justify-center gap-2 relative z-50">
-          <WifiOff className="w-4 h-4" />
-          <span>⚠ Offline mode. Showing last known status.</span>
-        </div>
-      )}
 
       {/* TOP HEADER - Premium Aesthetic */}
       <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white pt-6 pb-24 px-4 sm:px-6 rounded-b-[2.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.1)] relative overflow-hidden shrink-0">

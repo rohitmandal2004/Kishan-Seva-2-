@@ -434,7 +434,8 @@ export default function AdminOperators() {
                           setGeneratedCredentials({
                              id: data.operatorId || viewingOperator.operator_id, 
                              password: data.password, 
-                             email: viewingOperator.email 
+                             email: viewingOperator.email,
+                             setupUrl: `${window.location.origin}/operator/login`
                           });
                         } catch (err: any) {
                           console.error(err);
@@ -445,7 +446,8 @@ export default function AdminOperators() {
                              setGeneratedCredentials({
                                id: simulatedId,
                                password: `KSP${Math.floor(100000 + Math.random() * 900000)}`,
-                               email: viewingOperator.email
+                               email: viewingOperator.email,
+                               setupUrl: `${window.location.origin}/operator/login`
                              });
                           } else {
                              toast.error(err.message || 'Failed to generate password');
