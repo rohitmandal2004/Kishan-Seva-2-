@@ -2,6 +2,7 @@ import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/react';
 
 // Standard Components
 import RootLayout from './components/layout/RootLayout';
@@ -161,6 +162,7 @@ function App() {
         <Suspense fallback={null}>
           <AppReady onReady={() => setIsReady(true)} />
           <AnimatedRoutes />
+          <Analytics />
         </Suspense>
       )}
     </Router>
