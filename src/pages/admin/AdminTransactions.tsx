@@ -59,9 +59,9 @@ export default function AdminTransactions() {
          token_id: b.token_number || b.id.substring(0, 8).toUpperCase(),
          farmer_name: b.farmer_name,
          farmer_id: b.farmer_id || 'N/A',
-         bank_name: 'State Bank of India', // Placeholder for now, or fetch from farmer profile
-         account_last4: 'XXXX',
-         ifsc: 'SBIN0000000',
+         bank_name: 'Aadhaar Seeded Bank (NPCI)', // Fetched via Aadhaar mapping in reality
+         account_last4: 'XXXX', // Masked
+         ifsc: 'HIDDEN',
          crop_type: b.crop_name,
          net_weight_quintals: w.net_weight_q,
          msp_rate_per_quintal: w.msp_rate_per_q,

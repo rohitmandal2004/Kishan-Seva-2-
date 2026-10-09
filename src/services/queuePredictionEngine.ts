@@ -1,5 +1,6 @@
 import { QueuePrediction, Booking } from '@/types';
 import { SupabaseDataService } from './supabaseData.service';
+import { getLiveWeatherForecast } from './weatherService';
 
 /**
  * Queue Prediction Engine — v2 (Database-first)
@@ -27,21 +28,24 @@ export async function calculateQueuePredictionAsync(
       const queueState = calculateQueuePrediction(centreId, bookings, averageProcessingTimeMins, noShowRatePercent);
       const date = new Date();
 
-      const response = await fetch(`${mlServiceUrl}/predict_wait_time`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          centre_id: centreId,
-          day_of_week: date.getDay(),
-          hour_of_day: date.getHours(),
-          current_queue_length: queueState.current_queue,
-          active_counters: 2,
-          avg_quantity_qtl: 30,
-          avg_service_time_min: averageProcessingTimeMins,
-          no_show_count: Math.round(queueState.prebooked_tokens * (noShowRatePercent / 100)),
-          weather_condition: 'Clear',
-        }),
-      });
+        const weatherForecast = await getLiveWeatherForecast('West Bengal'); // Defaulting to WB for SIH or derive from centre
+        const currentWeather = weatherForecast[0]?.condition || 'Clear';
+
+        const response = await fetch(`${mlServiceUrl}/predict_wait_time`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            centre_id: centreId,
+            day_of_week: date.getDay(),
+            hour_of_day: date.getHours(),
+            current_queue_length: queueState.current_queue,
+            active_counters: 2,
+            avg_quantity_qtl: 30,
+            avg_service_time_min: averageProcessingTimeMins,
+            no_show_count: Math.round(queueState.prebooked_tokens * (noShowRatePercent / 100)),
+            weather_condition: currentWeather,
+          }),
+        });
 
       if (response.ok) {
         const mlData = await response.json();

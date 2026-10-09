@@ -90,7 +90,7 @@ export default function FarmerLayout() {
     ];
 
     return (
-        <div className={`bg-slate-50 min-h-screen md:h-screen md:overflow-hidden pb-24 md:pb-0 flex flex-col relative ${lang === 'en' ? 'font-poppins' : 'font-sans'}`}>
+        <div className={`bg-slate-50 min-h-dvh md:h-dvh md:overflow-hidden pb-24 md:pb-0 flex flex-col relative ${lang === 'en' ? 'font-poppins' : 'font-sans'}`}>
             {/* Mobile Top Bar */}
             <div className="md:hidden bg-white/95 backdrop-blur-md px-3.5 py-2.5 flex justify-between items-center sticky top-0 z-40 border-b border-slate-200 shadow-xs">
                 <div className="flex items-center gap-2.5 min-w-0">

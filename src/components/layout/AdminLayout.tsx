@@ -37,7 +37,7 @@ export default function AdminLayout() {
  ];
 
  return (
-   <div className="bg-[#f8fafc] min-h-screen md:h-screen md:overflow-hidden pb-20 md:pb-0 flex flex-col font-sans relative">
+   <div className="bg-[#f8fafc] min-h-dvh md:h-dvh md:overflow-hidden pb-20 md:pb-0 flex flex-col font-sans relative">
      {/* Mobile Top Bar */}
      <div className="md:hidden bg-white px-4 py-3 flex justify-between items-center sticky top-0 z-40 border-b border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
        <div className="flex items-center gap-3 min-w-0">

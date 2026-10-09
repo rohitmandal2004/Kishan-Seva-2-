@@ -25,7 +25,7 @@ export default function AdminAnalytics() {
     return {
       date: format(d, 'dd MMM'),
       procured: procured,
-      target: 600,
+      target: centres.reduce((sum, c) => sum + (c.daily_capacity_quintals || 0), 0),
     };
   });
  }, [bookings]);
@@ -207,7 +207,7 @@ export default function AdminAnalytics() {
  <div className="w-3 h-3 rounded-full border border-slate-900" style={{ backgroundColor: c.color }}></div>
  <span className="text-slate-900 font-bold uppercase tracking-wider text-[10px]">{c.name}</span>
  </div>
- <span className="font-bold font-mono text-slate-900">{c.value}%</span>
+ <span className="font-bold font-mono text-slate-900">{c.value} Q</span>
  </div>
  ))}
  </div>

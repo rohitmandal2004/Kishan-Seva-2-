@@ -54,7 +54,7 @@ export default function OperatorLayout() {
  ];
 
  return (
- <div className="bg-slate-100 h-screen flex flex-col md:flex-row font-sans overflow-hidden">
+ <div className="bg-slate-100 h-dvh flex flex-col md:flex-row font-sans overflow-hidden">
  {/* Mobile Top Bar */}
  <div className="md:hidden bg-[#0a192f] text-white px-3 sm:px-4 py-2.5 flex justify-between items-center sticky top-0 z-40 shadow-sm">
  <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
@@ -160,7 +160,7 @@ export default function OperatorLayout() {
  <LanguageSelector variant="compact" />
  <div className="text-right hidden sm:block">
  <p className="text-xs font-bold text-slate-800">{operatorProfile?.full_name || 'Operator'}</p>
- <p className="text-[10px] text-slate-500 font-mono">{operatorProfile?.role_designation || 'Operator'} ({operatorProfile?.employee_id || '---'})</p>
+ <p className="text-[10px] text-slate-500 font-mono">{operatorProfile?.role_designation || 'Operator'} ({operatorProfile?.operator_id || '---'})</p>
  </div>
  <div className="w-9 h-9 rounded-xl bg-blue-100 border border-blue-200 text-blue-800 font-extrabold text-xs flex items-center justify-center shadow-xs">
  {getInitials(operatorProfile?.full_name)}

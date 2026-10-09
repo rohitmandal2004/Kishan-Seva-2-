@@ -144,7 +144,7 @@ export default function SlotBooking() {
         setSelectedCentreId(recommendations[0].centre.id);
       }
     }
-  }, [preSelectedCentreId, recommendations]);
+  }, [preSelectedCentreId, recommendations, selectedCentreId]);
 
   const availableDates = Array.from({ length: 7 }).map((_, i) => addDays(new Date(), i + 1));
   const [selectedDate, setSelectedDate] = useState<Date>(availableDates[0]);
@@ -286,7 +286,7 @@ export default function SlotBooking() {
       }
 
       setCurrentStep(4);
-      toast.custom((t) => (
+      toast.custom((_t) => (
         <div className="bg-[#075E54] text-white p-4 rounded-xl shadow-lg w-80 flex gap-3 pointer-events-auto items-start animate-in fade-in slide-in-from-top-2 mx-auto">
           <div className="bg-[#25D366] rounded-full p-2 shrink-0">
             <MessageCircle className="w-5 h-5 text-white" />

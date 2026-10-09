@@ -11,17 +11,40 @@ import { toast } from 'sonner';
  */
 export class SmsGateway {
   static async sendSmsNotification(phone: string, message: string): Promise<boolean> {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 800));
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-    console.log(`[Simulated SMS via Kishan Seva] Sending SMS to ${phone}: ${message}`);
+      if (!supabaseUrl || !supabaseAnonKey) {
+        throw new Error('Supabase URL or Key not found for SMS');
+      }
 
-    // Simulated delivery toast (not a real SMS)
-    toast.success(`📱 SMS Sent to ${phone} [Simulated SMS via Kishan Seva]`, {
-      description: message,
-      duration: 6000,
-    });
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-sms`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+        },
+        body: JSON.stringify({ phone, message }),
+      });
 
-    return true;
+      if (!response.ok) {
+        throw new Error(`Edge function failed: ${response.statusText}`);
+      }
+
+      console.log(`[Kishan Seva SMS Gateway] Sent SMS to ${phone}`);
+
+      // We still show a toast so the UI operator knows it went through
+      toast.success(`📱 SMS Sent to ${phone}`, {
+        description: message,
+        duration: 4000,
+      });
+
+      return true;
+    } catch (error) {
+      console.error('[Kishan Seva SMS Gateway] Failed to send SMS:', error);
+      toast.error('Failed to send SMS notification');
+      return false;
+    }
   }
 }

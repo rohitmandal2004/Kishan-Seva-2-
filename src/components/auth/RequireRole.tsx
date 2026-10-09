@@ -57,9 +57,7 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
   // STATE D: Role mismatch
   if (user && user.role && !allowedRoles.includes(user.role as Role)) {
     if (user.role === 'FARMER') return <Navigate to="/farmer/dashboard" replace />;
-    if (user.role === 'OPERATOR') {
-      return <Navigate to="/operator/dashboard" replace />;
-    }
+    if (user.role === 'OPERATOR') return <Navigate to="/operator/dashboard" replace />;
     if (user.role === 'ADMIN') return <Navigate to="/admin/dashboard" replace />;
     return <Navigate to="/roles" replace />;
   }
@@ -67,10 +65,8 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
 
 
 
-  // STATE E: Farmer portal route but no farmer profile exists in database
+  // STATE E: Missing profile after loading finishes
   if (allowedRoles.includes('FARMER') && (!farmer || user?.role !== 'FARMER')) {
-
-    // If there was a database network error, show error screen with reload
     if (profileError) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center space-y-4 p-4">
@@ -89,6 +85,11 @@ export const RequireRole: React.FC<RequireRoleProps> = ({ children, allowedRoles
     }
     // Genuinely missing farmer profile → redirect to register
     return <Navigate to="/farmer/register" replace />;
+  }
+
+  if (allowedRoles.includes('OPERATOR') && user?.role !== 'OPERATOR') {
+    // Missing operator profile → redirect to register
+    return <Navigate to="/operator/register" replace />;
   }
 
   // STATE F: Access granted

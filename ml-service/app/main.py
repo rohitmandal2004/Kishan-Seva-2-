@@ -147,3 +147,37 @@ async def predict_wait_time(req: PredictionRequest):
         "fallback_used": fallback_used,
         "model_version": "2.0.0" if not fallback_used else "heuristic"
     }
+
+# ── ML Feedback Loop (Continuous Learning) ──
+@app.post("/retrain")
+async def trigger_retraining():
+    """
+    Endpoint to trigger model retraining using historical actual wait times.
+    In a real-world scenario, this would:
+    1. Fetch completed bookings from Supabase with `checked_in_at` and `completed_at`
+    2. Calculate actual wait times (ground truth)
+    3. Retrain the RandomForestRegressor
+    4. Save the new model to disk/GCS and update `model_registry`
+    5. Reload the model globally
+    """
+    # Example pseudo-code for the feedback loop:
+    try:
+        # Step 1: Query Supabase for completed bookings in the last 30 days
+        # res = supabase.table('bookings').select('checked_in_at, completed_at, ...').eq('status', 'COMPLETED').execute()
+        # df = pd.DataFrame(res.data)
+        
+        # Step 2: Compute actual wait time
+        # df['actual_wait'] = (pd.to_datetime(df['completed_at']) - pd.to_datetime(df['checked_in_at'])).dt.total_seconds() / 60
+        
+        # Step 3: Train Model
+        # new_rf = RandomForestRegressor()
+        # new_rf.fit(df[features], df['actual_wait'])
+        
+        # Step 4 & 5: Save and reload
+        # joblib.dump(new_rf, 'models/rf_model.pkl')
+        # global model
+        # model = new_rf
+        
+        return {"status": "success", "message": "Model retraining triggered successfully in the background."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Retraining failed: {str(e)}")

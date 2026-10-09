@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,7 @@ import {
   FileText, CloudRain, ArrowRight, ShieldCheck,
   Banknote, Download, CheckCircle2, AlertCircle, X, Sparkles,
   CalendarClock, Ticket, User, Users, PhoneCall, Truck,
-  TrendingUp, TrendingDown, Sun, Cloud, Bell, Building, BellRing, CreditCard, Edit2
+  TrendingUp, TrendingDown, Sun, Cloud, Bell, Building, BellRing, CreditCard, Edit2, Activity, WifiOff, FileArchive, AlertTriangle
 } from 'lucide-react';
 import { useKishanData } from '@/context/DataContext';
 import { Booking as BookingRecord } from '@/types';
@@ -262,418 +262,252 @@ export default function FarmerDashboard() {
     return 1;
   };
 
+
+
+  const lastCompletedBooking = completedBookings.length > 0 
+    ? completedBookings.sort((a, b) => new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime())[0]
+    : null;
+
+  const getNextAction = () => {
+    if (activeBooking) {
+      if (['COMPLETED', 'PROCUREMENT', 'WEIGHMENT'].includes(activeBooking.status)) {
+        return {
+          title: "Your procurement is processing.",
+          cta: "Track Payment",
+          link: "/farmer/payments",
+          icon: <Banknote className="w-5 h-5 text-emerald-600" />
+        };
+      }
+      if (activeBooking.status === 'QUALITY_TESTING') {
+        return {
+          title: "Quality testing is in progress.",
+          cta: "View Queue",
+          link: "/farmer/queue",
+          icon: <Activity className="w-5 h-5 text-blue-600" />
+        };
+      }
+      if (activeBooking.status === 'CHECKED_IN') {
+        return {
+          title: "You are currently in the queue.",
+          cta: "Track Queue",
+          link: "/farmer/queue",
+          icon: <Users className="w-5 h-5 text-amber-600" />
+        };
+      }
+      return {
+        title: "Your procurement is scheduled for today.",
+        cta: "View Digital Pass",
+        onClick: () => setIsQrModalOpen(true),
+        icon: <Ticket className="w-5 h-5 text-indigo-600" />
+      };
+    }
+    
+    if (lastCompletedBooking && lastCompletedBooking.weighment_data?.dbt_status !== 'SUCCESS') {
+      return {
+        title: "Your procurement is complete. Payment is processing.",
+        cta: "Track Payment",
+        link: "/farmer/payments",
+        icon: <Banknote className="w-5 h-5 text-emerald-600" />
+      };
+    }
+    
+    return {
+      title: "Book a procurement slot for your crop.",
+      cta: "Find Best Centre",
+      link: "/farmer/book",
+      icon: <MapPin className="w-5 h-5 text-emerald-600" />
+    };
+  };
+
+  const nextAction = getNextAction();
+
   return (
-    <div className="relative w-full min-h-full flex flex-col">
-      {/* Absolute background for the top right hero effect */}
-      <div className="absolute top-0 right-0 w-[500px] h-[250px] z-0 pointer-events-none opacity-40">
-        <img src="/hero-bg.jpg" alt="Farmer Background" className="w-full h-full object-cover" style={{ maskImage: 'linear-gradient(to bottom left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)', WebkitMaskImage: 'linear-gradient(to bottom left, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)' }} />
+    <div className="relative w-full min-h-full flex flex-col bg-slate-50 pb-20">
+      
+      {/* Offline Banner */}
+      {isOffline && (
+        <div className="bg-amber-100 text-amber-900 px-4 py-2 text-xs font-semibold flex items-center justify-center gap-2 relative z-50">
+          <WifiOff className="w-4 h-4" />
+          <span>⚠ Offline mode. Showing last known status.</span>
+        </div>
+      )}
+
+      {/* TOP HEADER - Premium Aesthetic */}
+      <div className="bg-gradient-to-br from-emerald-800 to-emerald-950 text-white pt-6 pb-24 px-4 sm:px-6 rounded-b-[2.5rem] shadow-[0_4px_20px_rgb(0,0,0,0.1)] relative overflow-hidden shrink-0">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500 rounded-full blur-[80px] opacity-40 -mr-20 -mt-20"></div>
+        <div className="max-w-4xl mx-auto relative z-10 flex justify-between items-start">
+          <div>
+            <p className="text-emerald-200/90 text-sm font-medium flex items-center gap-2">
+              Namaste, <span className="bg-white/10 backdrop-blur-md px-2 py-0.5 rounded text-[10px] uppercase tracking-wider border border-white/5">{t('lang_name') || 'English'}</span>
+            </p>
+            <h1 className="text-3xl font-bold mt-1 tracking-tight">{farmer.full_name}</h1>
+          </div>
+          <div className="flex gap-3">
+            <Link to="/farmer/notifications" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10 shadow-sm">
+              <Bell className="w-4 h-4 text-white" />
+            </Link>
+            <Link to="/farmer/profile" className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center hover:bg-white/20 transition-all border border-white/10 shadow-sm">
+              <User className="w-4 h-4 text-white" />
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="p-4 md:p-6 max-w-6xl mx-auto w-full pb-24 md:pb-6 font-sans relative z-10 space-y-4">
-
+      <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 -mt-16 relative z-20 space-y-5">
+        
         {/* PWA Install Banner */}
         {isInstallable && (
-          <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-3 animate-in fade-in slide-in-from-top-2 duration-300 mb-4">
+          <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-xl px-4 py-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <Download className="w-5 h-5 text-emerald-600 shrink-0" />
-            <p className="text-sm text-emerald-800 flex-1 font-medium">
-              Install Kishan Seva to your home screen for quick access and full offline capabilities.
-            </p>
-            <button
-              onClick={promptInstall}
-              className="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-md hover:bg-emerald-700 shrink-0 shadow-sm"
-            >
-              Install App
-            </button>
+            <p className="text-sm text-slate-800 flex-1 font-medium">Install Kishan Seva to your home screen.</p>
+            <button onClick={promptInstall} className="text-xs font-bold bg-emerald-600 text-white px-3 py-1.5 rounded-lg hover:bg-emerald-700 shadow-sm">Install</button>
           </div>
         )}
 
-        {/* Push Notification Permission Banner (Item 8) */}
+        {/* Push Notification Permission Banner */}
         {showPushBanner && activeBooking && (
-          <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-3 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md border border-indigo-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-xl px-4 py-3 animate-in fade-in slide-in-from-top-2 duration-300">
             <BellRing className="w-5 h-5 text-indigo-600 shrink-0" />
-            <p className="text-sm text-indigo-800 flex-1 font-medium">
-              {t('push_banner_text') || 'Enable slot reminders to get notified 2 hours before your procurement appointment.'}
-            </p>
-            <button
-              onClick={async () => {
-                await Notification.requestPermission();
-                setPushBannerDismissed(true);
-                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { }
-              }}
-              className="text-xs font-bold text-indigo-700 hover:underline shrink-0"
-            >
-              {t('enable') || 'Enable'}
-            </button>
-            <button
-              onClick={() => {
-                setPushBannerDismissed(true);
-                try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { }
-              }}
-              className="text-slate-400 hover:text-slate-600"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            <p className="text-sm text-slate-800 flex-1 font-medium">{t('push_banner_text') || 'Enable slot reminders.'}</p>
+            <button onClick={async () => { await Notification.requestPermission(); setPushBannerDismissed(true); try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { } }} className="text-xs font-bold bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 shadow-sm">{t('enable') || 'Enable'}</button>
+            <button onClick={() => { setPushBannerDismissed(true); try { localStorage.setItem('kishan_push_banner_dismissed', '1'); } catch { } }} className="text-slate-400 hover:text-slate-600 p-1"><X className="w-4 h-4" /></button>
           </div>
         )}
 
-        {/* TOP ROW: KPI Overview Cards & New Widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-          <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white/80 backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100/50 shadow-sm">
-                <Leaf className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('total_procured')}</span>
-                <p className="text-2xl font-bold text-slate-900 leading-tight truncate mt-0.5">{totalQuintalsSold.toFixed(1)} <span className="text-xs font-semibold text-slate-400">Q</span></p>
-              </div>
-            </div>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest bg-slate-50 inline-block px-2 py-1 rounded-md">{t('historical_sales')}</p>
-            <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-amber-50 to-orange-50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-          </Card>
-
-          <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-white/80 backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100/50 shadow-sm">
-                <Banknote className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{t('dbt_disbursed')}</span>
-                <p className="text-2xl font-bold text-slate-900 leading-tight truncate mt-0.5">₹{totalAmountReceived.toLocaleString('en-IN')}</p>
-              </div>
-            </div>
-            <p className="text-[10px] text-emerald-700 font-bold uppercase tracking-widest bg-emerald-50 border border-emerald-100/50 inline-block px-2 py-1 rounded-md">Direct Bank Transfer</p>
-            <div className="absolute -top-6 -right-6 w-20 h-20 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500"></div>
-          </Card>
-
-          {/* Yield Estimator */}
-          <Card className="p-6 border border-indigo-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gradient-to-br from-indigo-50/40 to-white backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest flex items-center gap-1.5"><Sprout className="w-3.5 h-3.5" /> AI Yield Estimator</span>
-                <p className="text-xl font-bold text-slate-900 mt-1.5">{expectedTotalQuintals.toFixed(0)} Q <span className="text-xs font-semibold text-slate-500">{t('est_harvest')}</span></p>
-              </div>
-              <Badge className="bg-indigo-100 text-indigo-800 border border-indigo-200 shadow-sm text-[10px] px-2 py-0.5 rounded-full">{farmer.land_area_acres} Acres</Badge>
-            </div>
-            <div className="mt-4 pt-4 border-t border-indigo-100/60">
-              <p className="text-[11px] text-slate-500 flex justify-between items-center font-medium">
-                <span>{t('est_msp_value')}</span>
-                <span className="font-bold text-indigo-700 text-sm bg-indigo-50 px-2 py-0.5 rounded">₹{expectedTotalValue.toLocaleString('en-IN')}</span>
-              </p>
-            </div>
-          </Card>
-
-          {/* Live Market Prices */}
-          <Card className="p-6 border border-emerald-100/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] bg-gradient-to-br from-emerald-50/40 to-white backdrop-blur-xl rounded-2xl relative overflow-hidden group transition-all duration-300">
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-1.5"><TrendingUp className="w-3.5 h-3.5" /> Market Advantage</span>
-                <p className="text-xl font-bold text-emerald-700 mt-1.5">₹{cropMsp.rate_per_quintal} <span className="text-xs font-semibold text-slate-500">/ Q (MSP)</span></p>
-              </div>
-              <Badge className="bg-emerald-500 text-white border border-emerald-600 shadow-sm text-[10px] px-2 py-0.5 rounded-full font-bold">+{Math.round(((cropMsp.rate_per_quintal - openMarketRate) / openMarketRate) * 100)}%</Badge>
-            </div>
-            <div className="mt-4 pt-4 border-t border-emerald-100/60">
-              <p className="text-[11px] text-slate-500 flex justify-between items-center font-medium">
-                <span>{t('local_market_rate')}</span>
-                <span className="font-bold text-rose-600 flex items-center gap-1 bg-rose-50 px-2 py-0.5 rounded border border-rose-100"><TrendingDown className="w-3 h-3" /> ₹{openMarketRate.toFixed(0)}</span>
-              </p>
-            </div>
-          </Card>
-        </div>
-
-        {/* FULL WIDTH PRICE HISTORY CHART */}
-        <Card className="p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white/90 backdrop-blur-xl rounded-2xl relative z-20">
-          <PriceHistoryChart cropName={farmer.crop_name || 'Paddy (Grade A)'} mspRate={cropMsp.rate_per_quintal} />
-        </Card>
-
-        {/* DECISION CARDS: Active Booking OR Recommendation */}
+        {/* MAIN HERO */}
         {activeBooking ? (
-          <Card className="p-5 sm:p-6 border border-emerald-200/80 bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_rgba(16,185,129,0.08)] rounded-2xl relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-2 h-full bg-gradient-to-b from-emerald-400 to-emerald-600"></div>
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
-
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6 relative z-10">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 flex items-center justify-center shadow-lg shadow-emerald-900/20">
-                  <Sprout className="w-7 h-7 text-emerald-50" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full mb-1.5 inline-flex items-center gap-1.5 border border-emerald-200/50 shadow-sm">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {t('active_pass')}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
-                      {activeBooking.crop_name} • {activeBooking.expected_quantity_q} Q
-                    </h2>
-                    <Badge className="bg-amber-100 text-amber-900 border border-amber-200 shadow-sm font-bold text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                      {activeBooking.status}
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Link to="/farmer/queue">
-                  <Button className="bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-xl text-xs font-bold px-6 h-11 shadow-lg shadow-emerald-900/10 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                    {t('track_queue')} <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </Link>
-                <Button variant="outline" onClick={() => setIsQrModalOpen(true)} className="border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold px-5 h-11 gap-2 bg-emerald-50 hover:bg-emerald-100 shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
-                  <Ticket className="w-4 h-4" /> Show QR
-                </Button>
-              </div>
+          <Card className="p-5 sm:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden relative group">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-50/50 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none group-hover:scale-110 transition-transform duration-700"></div>
+            <div className="flex justify-between items-start mb-4 relative z-10">
+               <div>
+                  <Badge className="bg-emerald-100/80 text-emerald-800 border-0 uppercase tracking-widest text-[10px] mb-2 px-2.5 py-0.5 shadow-none font-bold">Today's Booking</Badge>
+                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900">{activeBooking.crop_name} • {activeBooking.expected_quantity_q} Q</h2>
+                  <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-1.5"><MapPin className="w-4 h-4 text-emerald-600/70"/> {activeBooking.centre_name}</p>
+               </div>
+               <div className="text-right">
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Token</p>
+                  <p className="text-lg font-mono font-bold text-emerald-700 bg-emerald-50 px-2 rounded mt-0.5 border border-emerald-100">{activeBooking.token_number}</p>
+               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 pt-5 border-t border-slate-100/80 relative z-10">
-              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
-                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><FileText className="w-4 h-4" /></div>
-                <div>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Token No.</p>
-                  <p className="text-sm font-bold text-slate-800 mt-1 font-mono bg-white px-1.5 py-0.5 rounded border border-slate-100 shadow-sm inline-block">{activeBooking.token_number}</p>
-                </div>
-              </div>
-              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
-                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><MapPin className="w-4 h-4" /></div>
-                <div>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Mandi Centre</p>
-                  <p className="font-bold text-slate-800 mt-1 text-xs leading-snug">{activeBooking.centre_name}</p>
-                </div>
-              </div>
-              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
-                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><CalendarClock className="w-4 h-4" /></div>
-                <div>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Schedule</p>
-                  <p className="font-bold text-slate-800 mt-1 text-xs">{activeBooking.slot_time}</p>
-                  <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Today, {activeBooking.slot_date}</p>
-                </div>
-              </div>
-              <div className="flex gap-3.5 items-start bg-slate-50/50 p-3 rounded-xl border border-slate-100/50">
-                <div className="p-2 bg-white rounded-lg border border-slate-100 shadow-sm text-slate-500"><Truck className="w-4 h-4" /></div>
-                <div>
-                  <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">Vehicle</p>
-                  <p className="font-bold text-slate-800 mt-1 text-xs">{activeBooking.vehicle_number || '—'}</p>
-                  {!activeBooking.vehicle_number && <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Not added</p>}
-                </div>
-              </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-3 mb-6 bg-slate-50/80 rounded-xl p-3 border border-slate-100 relative z-10">
+               <div>
+                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Schedule</p>
+                 <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5"><CalendarClock className="w-3.5 h-3.5 text-slate-400" /> {activeBooking.slot_time}</p>
+               </div>
+               <div>
+                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Est. Wait</p>
+                 <p className="text-sm font-bold text-slate-900">~ 24 mins</p>
+               </div>
+               <div>
+                 <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Status</p>
+                 <Badge className="bg-amber-100 text-amber-800 border-0 uppercase text-[10px]">{activeBooking.status}</Badge>
+               </div>
+            </div>
+
+            <div className="flex gap-3 relative z-10">
+              <Link to="/farmer/queue" className="flex-1">
+                <Button className="w-full bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-xl h-12 text-sm font-bold shadow-lg shadow-emerald-900/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Track Queue <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+              <Button variant="outline" onClick={() => setIsQrModalOpen(true)} className="flex-1 border-emerald-200 text-emerald-800 hover:bg-emerald-50 rounded-xl h-12 text-sm font-bold shadow-sm transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Ticket className="w-4 h-4 mr-2" /> Digital Pass
+              </Button>
+            </div>
+          </Card>
+        ) : lastCompletedBooking && lastCompletedBooking.slot_date === format(new Date(), 'yyyy-MM-dd') ? (
+          <Card className="p-5 sm:p-6 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.06)] bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
+            <div className="flex justify-between items-start mb-4">
+               <div>
+                  <Badge className="bg-emerald-100 text-emerald-800 border-0 uppercase tracking-widest text-[10px] mb-2 px-2.5 py-0.5 shadow-none font-bold">Procurement Completed</Badge>
+                  <h2 className="text-xl font-bold text-slate-900">{lastCompletedBooking.crop_name}</h2>
+                  <p className="text-sm text-slate-500 font-medium mt-1">Quantity: {lastCompletedBooking.weighment_data?.net_weight_q} Q</p>
+               </div>
+               <div className="text-right">
+                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Value</p>
+                  <p className="text-lg font-bold text-emerald-700 mt-0.5">₹{lastCompletedBooking.weighment_data?.net_payable.toLocaleString('en-IN')}</p>
+               </div>
             </div>
             
-            {/* SERVICE PROGRESS TIMELINE */}
-            <div className="mt-5 pt-5 border-t border-slate-100/80 relative z-10">
-              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Service Progress</p>
-              <div className="flex flex-col sm:flex-row gap-3">
-                {[
-                  { step: 'Booking', key: 'BOOKED', done: true },
-                  { step: 'Check-in', key: 'CHECKED_IN', done: ['CHECKED_IN', 'QUALITY_TESTING', 'WEIGHMENT', 'PROCUREMENT', 'COMPLETED'].includes(activeBooking.status) },
-                  { step: 'Queue', key: 'QUEUE', active: activeBooking.status === 'CHECKED_IN', done: ['QUALITY_TESTING', 'WEIGHMENT', 'PROCUREMENT', 'COMPLETED'].includes(activeBooking.status) },
-                  { step: 'Quality', key: 'QUALITY_TESTING', active: activeBooking.status === 'QUALITY_TESTING', done: ['WEIGHMENT', 'PROCUREMENT', 'COMPLETED'].includes(activeBooking.status) },
-                  { step: 'Weighment', key: 'WEIGHMENT', active: activeBooking.status === 'WEIGHMENT', done: ['PROCUREMENT', 'COMPLETED'].includes(activeBooking.status) },
-                  { step: 'Payment', key: 'COMPLETED', active: false, done: activeBooking.status === 'COMPLETED' },
-                ].map((s, idx) => (
-                  <div key={idx} className={`flex-1 flex items-center gap-2 p-2 rounded-lg border ${
-                    s.done ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 
-                    s.active ? 'bg-blue-50 border-blue-300 text-blue-900 shadow-sm' : 
-                    'bg-slate-50 border-slate-200 text-slate-400'
-                  }`}>
-                    <div className="w-5 h-5 flex items-center justify-center shrink-0">
-                      {s.done ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : 
-                       s.active ? <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span> : 
-                       <span className="w-2 h-2 rounded-full bg-slate-300"></span>}
-                    </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider">{s.step}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+            <Link to="/farmer/payments">
+              <Button className="w-full bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-xl h-12 text-sm font-bold shadow-lg mt-2 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                Track Payment <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
           </Card>
         ) : (
-          recLoading ? (
-            <div className="p-5 border border-slate-200/80 bg-white/90 rounded-lg shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Skeleton className="w-12 h-12 rounded-md" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-3 w-32 rounded" />
-                  <Skeleton className="h-5 w-48 rounded" />
-                </div>
-              </div>
-              <div className="grid grid-cols-4 gap-4 pt-4 border-t border-slate-100">
-                {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-8 rounded" />)}
-              </div>
+          <Card className="p-6 border border-emerald-800 shadow-xl bg-gradient-to-br from-emerald-800 to-[#0A2E1A] rounded-2xl overflow-hidden relative text-white group">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none group-hover:scale-125 transition-transform duration-700"></div>
+            <h2 className="text-2xl font-bold tracking-tight mb-2 relative z-10">Ready to sell your crop?</h2>
+            <p className="text-emerald-100/90 text-sm mb-6 relative z-10 max-w-[280px]">Book a procurement slot at your nearest MSP centre to get the best price.</p>
+            
+            <div className="flex flex-col sm:flex-row gap-3 relative z-10">
+              <Link to="/farmer/book" className="flex-1">
+                <Button className="w-full bg-white text-emerald-900 hover:bg-emerald-50 rounded-xl h-12 text-sm font-bold shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Book Procurement Slot
+                </Button>
+              </Link>
+              <Link to="/farmer/centres" className="flex-1">
+                <Button variant="outline" className="w-full border-emerald-400/30 bg-emerald-800/40 hover:bg-emerald-800/60 text-white rounded-xl h-12 text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98]">
+                  Find Best Centre
+                </Button>
+              </Link>
             </div>
-          ) : bestCentreRec && (
-            <Card className="p-4 sm:p-5 border border-slate-200/80 bg-white/90 backdrop-blur-md shadow-sm rounded-lg relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1.5 h-full bg-emerald-200 group-hover:bg-emerald-400 transition-colors"></div>
-
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-md bg-emerald-50 border border-emerald-100 flex items-center justify-center">
-                    <Leaf className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full inline-block mb-1 border border-emerald-100">
-                      RECOMMENDED FOR TODAY'S HARVEST
-                    </span>
-                    <h3 className="text-lg font-semibold text-slate-900 leading-tight">
-                      {bestCentreRec.centre.name}
-                    </h3>
-                    <p className="text-[11px] font-medium text-slate-500 mt-0.5">Best match based on your crop and location</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <div className="bg-emerald-50 border border-emerald-100 text-emerald-800 font-bold text-xs px-3 py-1.5 rounded-full shadow-xs flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span>{bestCentreRec.journey_score}/100 Match Score</span>
-                  </div>
-                  <Link to={`/farmer/book?centre=${bestCentreRec.centre.id}`}>
-                    <Button className="bg-[#0A2E1A] hover:bg-emerald-900 text-white rounded-lg text-xs font-bold px-5 h-10 shadow-md gap-2 transition-colors transition-transform active:scale-[0.97]">
-                      Book New Slot <ArrowRight className="w-4 h-4" />
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-100 text-xs px-2">
-                <div className="flex gap-3 items-center">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600"><MapPin className="w-4 h-4" /></div>
-                  <div>
-                    <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Distance</p>
-                    <p className="text-xs font-bold text-slate-800 mt-0.5">{bestCentreRec.distance_km} km ({bestCentreRec.travel_time_mins} min)</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600"><Users className="w-4 h-4" /></div>
-                  <div>
-                    <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Current Queue</p>
-                    <p className="text-xs font-bold text-slate-900 mt-0.5">{bestCentreRec.current_queue} vehicle waiting</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600"><Clock className="w-4 h-4" /></div>
-                  <div>
-                    <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Predicted Wait</p>
-                    <p className="text-xs font-bold text-slate-900 mt-0.5">~ {bestCentreRec.predicted_wait_mins} mins</p>
-                  </div>
-                </div>
-                <div className="flex gap-3 items-center">
-                  <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600"><ShieldCheck className="w-4 h-4" /></div>
-                  <div>
-                    <p className="text-slate-500 text-[10px] font-medium uppercase tracking-wider">Yard Capacity</p>
-                    <p className="text-xs font-bold text-slate-900 mt-0.5">{bestCentreRec.centre.daily_capacity_quintals} Q/day</p>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          )
+          </Card>
         )}
 
-        {/* COMPACT ACTIONS & HELPLINE ROW */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <Card className="md:col-span-2 p-5 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white rounded-2xl flex items-center justify-between">
-            <h3 className="font-bold text-slate-900 text-sm hidden sm:block shrink-0 mr-6 tracking-wide">Quick Actions</h3>
-            <div className="flex gap-3 w-full justify-between sm:justify-end">
-              <Link to="/farmer/book" className="flex flex-col items-center gap-2 group">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-emerald-700 group-hover:bg-emerald-50 group-hover:border-emerald-100 group-hover:shadow-md transition-all">
-                  <Calendar className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Book Slot</span>
+        {/* SMART NEXT ACTION */}
+        <div className="bg-indigo-50/80 border border-indigo-100 p-4 rounded-xl flex items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-200/40 rounded-full blur-2xl -mr-16 -mt-16 pointer-events-none group-hover:scale-150 transition-transform duration-700"></div>
+          <div className="flex items-center gap-3 relative z-10">
+             <div className="w-10 h-10 bg-white rounded-lg shadow-sm border border-indigo-50 flex items-center justify-center shrink-0 text-indigo-600">
+               {nextAction.icon}
+             </div>
+             <div>
+               <p className="text-[10px] uppercase tracking-widest font-bold text-indigo-400 mb-0.5">Next Action</p>
+               <p className="text-sm font-semibold text-indigo-950 leading-tight">{nextAction.title}</p>
+             </div>
+          </div>
+          <div className="relative z-10">
+            {nextAction.link ? (
+              <Link to={nextAction.link}>
+                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold px-4 h-9 whitespace-nowrap shadow-sm transition-all hover:scale-[1.02]">
+                  {nextAction.cta}
+                </Button>
               </Link>
-              <Link to="/farmer/queue" className="flex flex-col items-center gap-2 group">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-blue-600 group-hover:bg-blue-50 group-hover:border-blue-100 group-hover:shadow-md transition-all">
-                  <Users className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Live Queue</span>
-              </Link>
-              <Link to="/farmer/centres" className="flex flex-col items-center gap-2 group">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-amber-600 group-hover:bg-amber-50 group-hover:border-amber-100 group-hover:shadow-md transition-all">
-                  <MapPin className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Centres</span>
-              </Link>
-              <Link to="/farmer/dashboard" className="flex flex-col items-center gap-2 group">
-                <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-100 shadow-sm flex items-center justify-center text-slate-600 group-hover:bg-slate-100 group-hover:shadow-md transition-all">
-                  <User className="w-5 h-5" />
-                </div>
-                <span className="text-[10px] text-slate-600 font-bold tracking-wide text-center">Profile</span>
-              </Link>
-            </div>
-          </Card>
-
-          <Card className="md:col-span-1 p-5 border border-emerald-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-gradient-to-br from-emerald-50/50 to-white rounded-2xl flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200/50 shadow-inner">
-              <PhoneCall className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-100/50 px-2 py-0.5 rounded">Kisan Helpline</span>
-              <p className="text-xl font-bold text-slate-900 mt-1 tracking-tight">1800-180-1551</p>
-            </div>
-          </Card>
+            ) : (
+              <Button onClick={nextAction.onClick} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold px-4 h-9 whitespace-nowrap shadow-sm transition-all hover:scale-[1.02]">
+                {nextAction.cta}
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* WEATHER, NOTIFICATIONS & AI PREDICTOR */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-white rounded-lg transition">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2"><Sun className="w-4 h-4 text-amber-500" /> Harvest Weather Advisory</h3>
-              <span className="text-[10px] text-slate-500 font-medium">{farmer.village}</span>
-            </div>
-            <div className="grid grid-cols-3 gap-2 h-[100px]">
-              {weatherForecast.length === 0 ? (
-                <>
-                  <Skeleton className="h-full w-full rounded-md" />
-                  <Skeleton className="h-full w-full rounded-md" />
-                  <Skeleton className="h-full w-full rounded-md" />
-                </>
-              ) : (
-                weatherForecast.map((w, idx) => (
-                  <div key={idx} className={`p-2.5 rounded-md border ${w.isGoodForHarvest ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'} text-center flex flex-col items-center justify-between h-full`}>
-                    <p className="text-[10px] font-bold text-slate-600 mb-1">{idx === 0 ? 'Today' : format(addDays(today, idx), 'EEE')}</p>
-                    <div className={`w-8 h-8 rounded-full mb-1 flex items-center justify-center ${w.isGoodForHarvest ? 'bg-emerald-100' : 'bg-red-100'}`}>
-                      {w.icon === 'sun' && <Sun className="w-4 h-4 text-amber-500" />}
-                      {w.icon === 'cloud' && <Cloud className="w-4 h-4 text-slate-500" />}
-                      {(w.icon === 'rain' || w.icon === 'cloud-rain') && <CloudRain className="w-4 h-4 text-blue-500" />}
-                    </div>
-                    <p className="text-[11px] font-semibold text-slate-800">{w.temp}°C</p>
-                    <div className="mt-2 text-[9px] font-bold leading-tight">
-                      {w.isGoodForHarvest ? (
-                        <span className="text-emerald-700">Clear</span>
-                      ) : (
-                        <span className="text-red-700">{w.message}</span>
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
-
-          <Card className="p-5 border border-slate-200/80 shadow-sm bg-white rounded-lg flex flex-col transition">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-slate-900 text-sm flex items-center gap-2"><Bell className="w-4 h-4 text-blue-500" /> Recent Updates</h3>
-              <Link to="/farmer/notifications" className="text-[10px] text-blue-600 font-bold hover:underline">View All</Link>
-            </div>
-            <div className="space-y-3 flex-1 overflow-y-auto">
-              {notifications.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500">
-                  <Bell className="w-8 h-8 opacity-20 mb-2" />
-                  <p className="text-xs font-medium">No recent notifications</p>
+        {/* QUICK ACTIONS */}
+        <div className="bg-white/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4">
+            {[
+              { label: 'Book Slot', icon: <Calendar className="w-5 h-5"/>, to: '/farmer/book', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+              { label: 'My Bookings', icon: <FileText className="w-5 h-5"/>, to: '/farmer/bookings', color: 'text-blue-600', bg: 'bg-blue-50' },
+              { label: 'Live Queue', icon: <Users className="w-5 h-5"/>, to: '/farmer/queue', color: 'text-amber-600', bg: 'bg-amber-50' },
+              { label: 'Payments', icon: <Banknote className="w-5 h-5"/>, to: '/farmer/payments', color: 'text-teal-600', bg: 'bg-teal-50' },
+              { label: 'Documents', icon: <FileArchive className="w-5 h-5"/>, to: '/farmer/documents', color: 'text-indigo-600', bg: 'bg-indigo-50' },
+              { label: 'Support', icon: <AlertTriangle className="w-5 h-5"/>, to: '/farmer/support', color: 'text-rose-600', bg: 'bg-rose-50' },
+            ].map((action, i) => (
+              <Link key={i} to={action.to} className="flex flex-col items-center gap-2 group outline-none">
+                <div className={`w-full aspect-[4/3] rounded-xl ${action.bg} ${action.color} flex items-center justify-center border border-transparent group-hover:border-slate-200 group-hover:shadow-sm transition-all focus:ring-2 focus:ring-emerald-500 min-h-[44px] min-w-[44px]`}>
+                  {action.icon}
                 </div>
-              ) : (
-                notifications.map(n => (
-                  <div key={n.id} className="flex gap-3 items-start pb-3 border-b border-slate-100 last:border-0 last:pb-0">
-                    <div className={`w-2 h-2 mt-1.5 rounded-full shrink-0 ${!n.read ? 'bg-blue-500' : 'bg-slate-300'}`} />
-                    <div>
-                      <p className={`text-xs ${!n.read ? 'font-bold text-slate-900' : 'font-medium text-slate-700'}`}>{n.title}</p>
-                      <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-1">{n.message}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </Card>
-
-          <SellPredictorWidget farmerVillage={farmer.village} cropName={farmer.crop_name} />
+                <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight">{action.label}</span>
+              </Link>
+            ))}
+          </div>
         </div>
+
+        {/* RECENT PROCUREMENT HISTORY & PAYMENT TRACKER */}
 
         {/* RECENT PROCUREMENT HISTORY & PAYMENT TRACKER */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">

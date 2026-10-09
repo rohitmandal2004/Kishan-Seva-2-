@@ -97,7 +97,7 @@ CREATE TABLE public.operator_profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   clerk_user_id VARCHAR(255),
-  operator_code VARCHAR(50) UNIQUE,
+  operator_id VARCHAR(50) UNIQUE,
   full_name VARCHAR(255) NOT NULL,
   phone VARCHAR(20) NOT NULL,
   email VARCHAR(255),

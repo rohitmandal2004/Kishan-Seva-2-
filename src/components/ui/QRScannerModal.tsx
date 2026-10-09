@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { Html5QrcodeScanner } from 'html5-qrcode';
 import { useNavigate } from 'react-router-dom';
 import { X, ScanLine, Camera, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,21 +19,43 @@ export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
   const [error, setError] = useState('');
   const [successToken, setSuccessToken] = useState('');
 
-  // Simulate scanning for demonstration purposes
+  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+
   useEffect(() => {
-    let timer: ReturnType<typeof setTimeout>;
     if (isOpen && isScanning) {
-      // In a real app, this would be tied to a barcode scanner hardware or camera stream
-      timer = setTimeout(() => {
-        // Find a mock booking that isn't completed to simulate scanning
-        const activeBookings = store.getBookings().filter(b => b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
-        if (activeBookings.length > 0) {
-          handleSuccess(activeBookings[0].token_number);
+      // Initialize scanner
+      const scanner = new Html5QrcodeScanner(
+        "qr-reader",
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        /* verbose= */ false
+      );
+      scannerRef.current = scanner;
+
+      scanner.render(
+        (decodedText) => {
+          // Verify if decoded text is a valid token in our system
+          const exists = store.getBookings().some(b => b.token_number === decodedText.toUpperCase() && b.status !== 'COMPLETED' && b.status !== 'CANCELLED');
+          if (exists) {
+            scanner.clear();
+            handleSuccess(decodedText.toUpperCase());
+          } else {
+            // Only alert if we haven't already shown an error recently to avoid spam
+            setError('Token scanned is not active or valid.');
+          }
+        },
+        (error) => {
+          // Log scan errors silently as they occur frequently while searching for a QR code
+          console.debug('QR Scan error:', error);
         }
-      }, 3000); // simulate a 3-second camera scan
+      );
+
+      return () => {
+        if (scannerRef.current) {
+          scannerRef.current.clear().catch(e => console.error("Failed to clear scanner", e));
+        }
+      };
     }
-    return () => clearTimeout(timer);
-  }, [isOpen, isScanning]);
+  }, [isOpen, isScanning, store]);
 
   if (!isOpen) return null;
 
@@ -98,18 +121,9 @@ export function QRScannerModal({ isOpen, onClose }: QRScannerModalProps) {
                 <div className="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-emerald-500 rounded-bl-xl z-10"></div>
                 <div className="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-emerald-500 rounded-br-xl z-10"></div>
                 
-                {/* Simulated Camera Feed (Dark Blur) */}
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-700 via-slate-900 to-black opacity-80"></div>
-                
-                {/* Scanning Laser Animation */}
-                {isScanning && (
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-400 shadow-[0_0_15px_3px_rgba(52,211,153,0.8)] z-20 animate-[scan_2s_ease-in-out_infinite]"></div>
-                )}
-                
-                <div className="absolute inset-0 flex flex-col items-center justify-center z-10 text-white/50">
-                  <ScanLine className="w-12 h-12 mb-2 opacity-50" />
-                  <p className="text-xs font-bold tracking-widest uppercase">Align QR Code Here</p>
-                  <p className="text-[10px] mt-1 text-white/30">(Simulating camera scan)</p>
+                <div className="absolute inset-0 bg-slate-900 z-10 flex flex-col items-center justify-center">
+                  <div id="qr-reader" className="w-full h-full text-white"></div>
+                  {/* Remove the simulated styling since Html5QrcodeScanner provides its own UI inside #qr-reader */}
                 </div>
               </div>
 

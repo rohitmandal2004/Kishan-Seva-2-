@@ -78,7 +78,7 @@ export default function AdminOverview() {
 
   const longestQueue = [...centres].sort((a, b) => b.current_queue_length - a.current_queue_length)[0];
   
-  const pendingPayments = storeBookings.filter(b => b.status === 'PROCUREMENT').length;
+  const pendingPayments = storeBookings.filter(b => b.status === 'COMPLETED').length;
 
   const parentRef = useRef<HTMLDivElement>(null);
   const rowVirtualizer = useVirtualizer({
@@ -412,7 +412,7 @@ export default function AdminOverview() {
               <div className="p-6">
                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-900 mb-2">Active Centres</p>
                 <div className="flex items-end gap-2 mb-4">
-                  <span className="text-3xl font-mono  font-semibold text-slate-900">{stats.activeCentres}</span>
+                  <span className="text-3xl font-mono  font-semibold text-slate-900">{centres.filter(c => c.status === 'ACTIVE').length}</span>
                   <span className="text-xs font-semibold font-mono text-slate-500 mb-1">ONLINE</span>
                 </div>
               </div>

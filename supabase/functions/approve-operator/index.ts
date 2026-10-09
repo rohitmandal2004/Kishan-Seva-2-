@@ -60,7 +60,7 @@ serve(async (req) => {
       const { data: existing } = await supabaseClient
         .from('operator_profiles')
         .select('id')
-        .eq('operator_code', operatorId)
+        .eq('operator_id', operatorId)
         .maybeSingle();
       if (!existing) isUnique = true;
     }
@@ -160,7 +160,8 @@ serve(async (req) => {
       .from('operator_profiles')
       .update({
         clerk_user_id: clerkUserId,
-        operator_code: operatorId,
+        operator_id: operatorId,
+        credential_status: 'SETUP_REQUIRED',
         status: 'APPROVED'
       })
       .eq('id', operatorProfileId);
@@ -176,7 +177,7 @@ serve(async (req) => {
       action: 'OPERATOR_APPROVED',
       entity_type: 'operator_profile',
       entity_id: operatorProfileId,
-      metadata: { operator_code: operatorId, email: email, center_id: assignedCentreId }
+      metadata: { operator_id: operatorId, email: email, center_id: assignedCentreId }
     });
 
     return new Response(

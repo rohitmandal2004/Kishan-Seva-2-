@@ -45,7 +45,7 @@ export interface FarmerProfile {
 export interface OperatorProfile {
   id: string;
   user_id?: string;
-  operator_code?: string;
+  operator_id?: string;
   full_name: string;
   email?: string;
   phone: string;

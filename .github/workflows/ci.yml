@@ -96,3 +96,28 @@ jobs:
       env:
         VITE_SUPABASE_URL: http://127.0.0.1:54321
         VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRlZmF1bHQiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTYyMjI2OTI5NiwiZXhwIjoxOTM3ODQ1Mjk2fQ.bL0L9jF_r3N9m8b_vXlW1X_KzB8a5L0m9G5F1o0qQQs
+
+  # ── E2E Tests (Playwright) ──
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [frontend]
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+      
+    - name: Run Playwright tests
+      run: npx playwright test
+      env:
+        VITE_SUPABASE_URL: https://placeholder.supabase.co
+        VITE_SUPABASE_ANON_KEY: placeholder-key

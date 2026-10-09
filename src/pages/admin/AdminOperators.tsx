@@ -160,7 +160,7 @@ export default function AdminOperators() {
   const filteredOperators = operators.filter(op => 
     op.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     op.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    op.employee_id?.toLowerCase().includes(searchTerm.toLowerCase())
+    op.operator_id?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -184,7 +184,7 @@ export default function AdminOperators() {
           <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input 
             type="text" 
-            placeholder="Search by name, email, or employee ID..." 
+            placeholder="Search by name, email, or operator ID..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 h-11 rounded-xl border border-slate-200 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm"
@@ -230,7 +230,7 @@ export default function AdminOperators() {
                         <div>
                           <div className="font-bold text-slate-900">{op.full_name}</div>
                           <div className="text-xs text-slate-500">{op.email} | {op.phone}</div>
-                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {op.employee_id}</div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {op.operator_id}</div>
                         </div>
                       </div>
                     </td>
@@ -346,15 +346,32 @@ export default function AdminOperators() {
                   </Button>
                 </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
-                <div className="flex items-center justify-between bg-white px-3 py-2 border border-slate-200 rounded-lg">
-                  <span className="font-mono font-bold text-slate-900">{generatedCredentials.password}</span>
-                  <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(generatedCredentials.password); toast.success('Copied Password'); }}>
-                    <Copy className="w-4 h-4 text-slate-400" />
-                  </Button>
+              {generatedCredentials.password && (
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Temporary Password</label>
+                  <div className="flex items-center justify-between bg-white px-3 py-2 border border-slate-200 rounded-lg">
+                    <span className="font-mono font-bold text-slate-900">{generatedCredentials.password}</span>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(generatedCredentials.password!); toast.success('Copied Password'); }}>
+                      <Copy className="w-4 h-4 text-slate-400" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
+              {generatedCredentials.setupUrl && (
+                <div className="space-y-1 w-full max-w-[100%] overflow-hidden">
+                  <label className="text-xs font-bold text-slate-500 uppercase">Password Setup Link</label>
+                  <div className="flex items-center justify-between bg-white px-3 py-2 border border-slate-200 rounded-lg overflow-hidden">
+                    <div className="flex-1 overflow-hidden mr-2">
+                      <p className="font-mono text-[10px] text-slate-900 break-all line-clamp-1">
+                        {generatedCredentials.setupUrl}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="h-6 w-6 p-0 shrink-0" onClick={() => { navigator.clipboard.writeText(generatedCredentials.setupUrl!); toast.success('Copied Link'); }}>
+                      <Copy className="w-4 h-4 text-slate-400" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <DialogFooter>
@@ -395,9 +412,49 @@ export default function AdminOperators() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-500 uppercase">Password</label>
-                  <div className="bg-white px-3 py-2 border border-slate-200 rounded-lg text-xs text-slate-500 font-medium italic">
-                    Encrypted securely. Administrator must regenerate if lost.
+                  <label className="text-xs font-bold text-slate-500 uppercase">Credential Status</label>
+                  <div className="flex items-center justify-between bg-white px-3 py-2 border border-slate-200 rounded-lg">
+                    <span className={`font-mono text-xs font-bold ${
+                      viewingOperator.credential_status === 'ACTIVE' ? 'text-emerald-600' :
+                      viewingOperator.credential_status === 'SETUP_REQUIRED' || viewingOperator.credential_status === 'RESET_REQUIRED' ? 'text-amber-600' :
+                      'text-slate-500'
+                    }`}>
+                      {viewingOperator.credential_status || 'NOT_CREATED'}
+                    </span>
+                    {(viewingOperator.status === 'APPROVED' || viewingOperator.status === 'ACTIVE') && (
+                      <Button variant="outline" size="sm" className="h-7 text-xs" onClick={async () => {
+                        try {
+                          const { data, error } = await supabase.functions.invoke('reset-operator-password', {
+                            body: { operatorProfileId: viewingOperator.id }
+                          });
+                          if (error) throw error;
+                          if (data && data.success === false) throw new Error(data.error);
+                          
+                          toast.success('System password generated');
+                          setGeneratedCredentials({
+                             id: data.operatorId || viewingOperator.operator_id, 
+                             password: data.password, 
+                             email: viewingOperator.email 
+                          });
+                        } catch (err: any) {
+                          console.error(err);
+                          // Fallback for demo mode if edge function is not deployed
+                          if (err.message?.includes('Failed to send a request') || import.meta.env.VITE_ENABLE_DEMO_MODE === 'true') {
+                             toast.success('System password generated (Simulated)');
+                             const simulatedId = viewingOperator.operator_id || `KSO-BAS-${Math.floor(1000 + Math.random() * 9000)}`;
+                             setGeneratedCredentials({
+                               id: simulatedId,
+                               password: `KSP${Math.floor(100000 + Math.random() * 900000)}`,
+                               email: viewingOperator.email
+                             });
+                          } else {
+                             toast.error(err.message || 'Failed to generate password');
+                          }
+                        }
+                      }}>
+                        Generate Password
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -409,8 +466,8 @@ export default function AdminOperators() {
                   <span className="font-bold text-slate-900">{viewingOperator.full_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-semibold text-slate-500">Employee ID</span>
-                  <span className="font-mono font-bold text-slate-900">{viewingOperator.employee_id}</span>
+                  <span className="font-semibold text-slate-500">Operator ID</span>
+                  <span className="font-mono font-bold text-slate-900">{viewingOperator.operator_id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="font-semibold text-slate-500">Phone Number</span>

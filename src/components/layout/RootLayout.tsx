@@ -19,7 +19,7 @@ export default function RootLayout() {
   }, { scope: container });
 
   return (
-    <div ref={container} className="min-h-screen bg-background font-sans antialiased" id="smooth-wrapper">
+    <div ref={container} className="min-h-dvh bg-background font-sans antialiased" id="smooth-wrapper">
       <div id="smooth-content">
         <AnimatedOutlet />
       </div>

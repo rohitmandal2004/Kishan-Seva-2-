@@ -77,7 +77,7 @@ export default function OperatorRegistration() {
 
       if (dbError) {
         console.error('Supabase error:', dbError);
-        // If employee_id / email exists, it might throw unique constraint error
+        // If operator_id / email exists, it might throw unique constraint error
         if (dbError.code === '23505') {
             toast.error('Operator ID or Email is already registered.');
         } else {

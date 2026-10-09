@@ -1,181 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Loader2, ChevronLeft, Mail, CheckCircle2, Lock, Fingerprint, Building2, Users, Leaf, BarChart3, ShieldCheck } from 'lucide-react';
-import { useLanguage } from '@/services/i18n';
-import { LanguageSelector } from '@/components/ui/language-selector';
-import { useClerk } from '@clerk/react';
-import { useSignIn } from '@clerk/react/legacy';
-import { useSupabase } from '@/context/SupabaseContext';
-import { supabase } from '@/lib/supabase';
-import { KishanSevaLogo } from '@/components/brand/KishanSevaLogo';
+const fs = require('fs');
 
-export default function OperatorLogin() {
-  const navigate = useNavigate();
-  const { t } = useLanguage();
-  const clerk = useClerk();
-  const { signIn, isLoaded, setActive } = useSignIn();
-  const { user, isConfigured, isProfileLoading, refreshProfile, signOut, setDemoRole } = useSupabase();
-  
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+const path = 'src/pages/auth/OperatorLogin.tsx';
+let content = fs.readFileSync(path, 'utf8');
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('kishan_intended_role', 'OPERATOR');
-    } catch {}
-  }, []);
+const startPattern = `  return (\n    <div className="min-h-screen flex flex-col`;
+const startIndex = content.indexOf(startPattern);
 
-  useEffect(() => {
-    if (isConfigured && !isProfileLoading && user && user.role === 'OPERATOR') {
-      navigate('/operator/dashboard', { replace: true });
-    }
-  }, [user, isProfileLoading, isConfigured, navigate]);
+if (startIndex === -1) {
+  console.error("Could not find start pattern!");
+  process.exit(1);
+}
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!isLoaded) return;
-    
-    setLoading(true);
-    try {
-      if (clerk.session) {
-        await clerk.signOut();
-        await signOut();
-      }
-
-      const rawInput = email.trim();
-      let signinEmail = rawInput;
-      if (rawInput.toUpperCase().startsWith('KSO-')) {
-          const { data: opData, error } = await supabase.from('operator_profiles').select('email').eq('operator_id', rawInput.toUpperCase()).maybeSingle();
-          if (error) console.error("Supabase lookup error:", error);
-          if (opData?.email) {
-              signinEmail = opData.email;
-          }
-      }
-      
-      console.log("Resolved identifier for Clerk:", signinEmail);
-
-      const res = await signIn.create({
-        identifier: signinEmail,
-        password: password.trim(),
-      });
-
-      if (res.status === 'complete') {
-        await setActive({ session: res.createdSessionId });
-        const result = await refreshProfile(undefined, email);
-        const profile = result?.profile;
-        const resolvedRole = result?.role;
-        
-        if (resolvedRole === 'OPERATOR' && profile) {
-            if (profile.status === 'PENDING') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator account is pending admin approval.');
-            } else if (profile.status === 'REJECTED') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator registration has been rejected.');
-            } else if (profile.status === 'SUSPENDED') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator account has been suspended.');
-            } else if (!profile.assigned_centre_id) {
-                await clerk.signOut();
-                await signOut();
-                toast.error('You have not been assigned to a procurement centre.');
-            } else {
-                toast.success('Successfully logged in as Operator');
-                if (profile.credential_status !== 'ACTIVE') {
-                     await supabase.from('operator_profiles').update({ credential_status: 'ACTIVE' }).eq('id', profile.id);
-                }
-                navigate('/operator/dashboard');
-            }
-        } else {
-             await clerk.signOut();
-             await signOut();
-             toast.error('Operator profile not found. Please register.');
-        }
-      } else {
-        toast.error('Unable to complete login. Further action required.');
-      }
-    } catch (err: any) {
-      console.error('[Kishan Seva] Operator login error:', err);
-      toast.error(err.errors?.[0]?.message || 'Invalid email or password.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePasskeyLogin = async () => {
-    if (!isLoaded) return;
-    setLoading(true);
-    try {
-      if (clerk.session) {
-        await clerk.signOut();
-        await signOut();
-      }
-
-      const res = await signIn.authenticateWithPasskey();
-
-      if (res.status === 'complete') {
-        await setActive({ session: res.createdSessionId });
-        const result = await refreshProfile(undefined, res.identifier || undefined);
-        const profile = result?.profile;
-        const resolvedRole = result?.role;
-        
-        if (resolvedRole === 'OPERATOR' && profile) {
-            if (profile.status === 'PENDING') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator account is pending admin approval.');
-            } else if (profile.status === 'REJECTED') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator registration has been rejected.');
-            } else if (profile.status === 'SUSPENDED') {
-                await clerk.signOut();
-                await signOut();
-                toast.error('Your operator account has been suspended.');
-            } else if (!profile.assigned_centre_id) {
-                await clerk.signOut();
-                await signOut();
-                toast.error('You have not been assigned to a procurement centre.');
-            } else {
-                toast.success('Successfully logged in via Biometrics');
-                if (profile.credential_status !== 'ACTIVE') {
-                     await supabase.from('operator_profiles').update({ credential_status: 'ACTIVE' }).eq('id', profile.id);
-                }
-                navigate('/operator/dashboard');
-            }
-        } else {
-             await clerk.signOut();
-             await signOut();
-             toast.error('Operator profile not found. Please register.');
-        }
-      }
-    } catch (err: any) {
-      if (err.errors?.[0]?.code === 'passkey_not_supported') {
-        toast.error('Passkeys are not supported on this device.');
-      } else {
-         toast.error(err.errors?.[0]?.longMessage || 'Biometric login failed or was cancelled.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const isDemoModeEnabled = true;
-
-  return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col lg:flex-row font-sans bg-slate-50">
+const newReturnBlock = `  return (
+    <div className="min-h-screen flex flex-col lg:flex-row font-sans bg-slate-50">
       
       {/* LEFT SIDE: Content & Illustration (Hidden on Mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between pt-8 px-10 xl:px-16 bg-white overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between pt-12 px-16 bg-white overflow-hidden shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
         
         {/* Top Logo */}
         <div className="relative z-10 flex items-center gap-3">
@@ -197,7 +37,7 @@ export default function OperatorLogin() {
         <div className="absolute top-12 left-12 w-8 h-8 rounded-full bg-blue-100 opacity-50 pointer-events-none"></div>
         <div className="absolute top-24 left-4 w-12 h-12 rounded-full bg-blue-100 opacity-30 pointer-events-none"></div>
 
-        <div className="relative z-10 mt-8 max-w-lg flex-1">
+        <div className="relative z-10 mt-16 max-w-lg flex-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-blue-50 text-blue-700 mb-6 border border-blue-100/50">
             <Building2 className="w-3.5 h-3.5" />
             <span className="text-[10px] font-extrabold tracking-widest uppercase">
@@ -210,7 +50,7 @@ export default function OperatorLogin() {
             <span className="text-blue-600">Logistics</span>
           </h2>
           
-          <p className="text-slate-600 text-[15px] leading-relaxed font-medium mb-8 max-w-md">
+          <p className="text-slate-600 text-[15px] leading-relaxed font-medium mb-12 max-w-md">
             Manage daily queues, authenticate farmers, verify crop quality, and execute precision weighments. Your command center for seamless mandi operations.
           </p>
 
@@ -255,22 +95,49 @@ export default function OperatorLogin() {
           </div>
         </div>
 
-        {/* Bottom Photographic Image */}
-        <div className="absolute bottom-0 left-0 w-full h-[180px] pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-transparent z-10 h-32"></div>
-          <img 
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-            alt="Beautiful Agricultural Landscape" 
-            className="w-full h-full object-cover object-bottom"
-          />
+        {/* Bottom Illustration Placeholder using CSS for vector look */}
+        <div className="relative w-full h-[220px] mt-10 shrink-0 mx-[-4rem]">
+          {/* Simple Vector Landscape created with pure CSS/HTML */}
+          <div className="absolute bottom-0 w-full h-full overflow-hidden">
+            {/* Sky */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-50/50 to-emerald-50/50"></div>
+            {/* Background Mountains */}
+            <div className="absolute bottom-16 left-[-10%] w-[60%] h-32 bg-blue-200/50 rounded-t-full blur-[2px]"></div>
+            <div className="absolute bottom-12 right-[-5%] w-[70%] h-40 bg-blue-200/60 rounded-t-full blur-[1px]"></div>
+            {/* Hills Layer 1 */}
+            <div className="absolute bottom-8 left-[-20%] w-[80%] h-32 bg-emerald-200/70 rounded-t-[100%]"></div>
+            <div className="absolute bottom-6 right-[-10%] w-[80%] h-24 bg-emerald-300/80 rounded-t-[100%]"></div>
+            {/* Front Field */}
+            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-b from-emerald-400 to-emerald-500 border-t-2 border-emerald-300"></div>
+            {/* Barn */}
+            <div className="absolute bottom-12 left-16 w-32 h-20 bg-white border-2 border-slate-200 flex items-end justify-center">
+               <div className="w-0 h-0 border-l-[64px] border-l-transparent border-r-[64px] border-r-transparent border-b-[32px] border-b-blue-500 absolute top-[-32px]"></div>
+               <div className="w-8 h-10 bg-slate-800 rounded-t-md"></div>
+               <div className="absolute top-2 w-16 h-6 flex justify-around">
+                  <div className="w-4 h-4 bg-blue-100 rounded-sm"></div>
+                  <div className="w-4 h-4 bg-blue-100 rounded-sm"></div>
+               </div>
+            </div>
+            {/* Tractor */}
+            <div className="absolute bottom-10 left-44 w-16 h-10 bg-red-600 rounded-tl-lg rounded-tr-sm flex items-end">
+               <div className="w-8 h-8 bg-slate-900 rounded-full border-4 border-slate-300 -ml-2 -mb-2 z-10 flex items-center justify-center"><div className="w-2 h-2 bg-slate-400 rounded-full"></div></div>
+               <div className="w-6 h-6 bg-slate-900 rounded-full border-2 border-slate-300 ml-auto mr-1 -mb-2 z-10 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-slate-400 rounded-full"></div></div>
+               <div className="absolute top-[-16px] right-2 w-8 h-4 bg-slate-200 border-b-4 border-slate-300"></div>
+               <div className="absolute top-[-24px] right-4 w-1 h-8 bg-slate-800"></div>
+            </div>
+            {/* Trees */}
+            <div className="absolute bottom-16 right-32 w-10 h-14 bg-emerald-700 rounded-full"></div>
+            <div className="absolute bottom-14 right-24 w-12 h-16 bg-emerald-800 rounded-full"></div>
+            <div className="absolute bottom-12 right-12 w-8 h-12 bg-emerald-600 rounded-full"></div>
+          </div>
         </div>
       </div>
 
       {/* RIGHT SIDE: Login Form */}
-      <div className="w-full lg:w-1/2 flex flex-col items-center p-4 sm:p-6 lg:p-8 relative lg:h-screen lg:overflow-y-auto custom-scrollbar">
+      <div className="w-full lg:w-1/2 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 relative min-h-screen">
         
         {/* Top Right Controls */}
-        <div className="relative z-50 w-full flex items-center gap-3 justify-between lg:justify-end mb-auto pb-4">
+        <div className="absolute top-6 right-6 lg:top-8 lg:right-8 flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-end px-6 lg:px-0">
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 transition-colors px-4 py-2 rounded-full border border-slate-200 shadow-sm"
@@ -295,7 +162,7 @@ export default function OperatorLogin() {
           </div>
         </div>
 
-        <Card className="w-full max-w-[420px] p-6 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-none rounded-[2rem] bg-white relative my-auto">
+        <Card className="w-full max-w-[420px] p-8 lg:p-10 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border-none rounded-[2rem] bg-white relative">
           <div className="flex flex-col items-center text-center mb-8">
             <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center mb-5 text-blue-600">
                <Building2 className="w-6 h-6" />
@@ -399,7 +266,7 @@ export default function OperatorLogin() {
             </form>
           )}
 
-          <div className="mt-6 pt-5 border-t border-slate-100 text-center relative">
+          <div className="mt-8 pt-6 border-t border-slate-100 text-center relative">
             <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 bg-white px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">OR</div>
             
             <div className="bg-slate-50/80 border border-slate-100 rounded-xl p-5 flex flex-col items-center gap-3 shadow-sm">
@@ -428,7 +295,7 @@ export default function OperatorLogin() {
           </div>
         </Card>
         
-        <div className="mt-4 pb-4 text-center space-y-1">
+        <div className="mt-8 text-center space-y-1">
           <p className="text-[11px] text-slate-500 font-medium">
             Not an operator?{' '}
             <Link to="/roles" className="font-bold text-blue-600 hover:text-blue-800 hover:underline">
@@ -440,3 +307,8 @@ export default function OperatorLogin() {
     </div>
   );
 }
+`;
+
+const newContent = content.substring(0, startIndex) + newReturnBlock;
+fs.writeFileSync(path, newContent);
+console.log("Updated OperatorLogin to new light-themed layout with vector illustration placeholder.");
